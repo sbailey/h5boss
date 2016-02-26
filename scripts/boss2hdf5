@@ -2,6 +2,10 @@
 
 """
 Create an HDF5 file from BOSS data
+
+TODO:
+  - include comments in meta/attrs
+  - platelist quantities
 """
 
 from __future__ import division, print_function
@@ -17,6 +21,7 @@ import optparse
 parser = optparse.OptionParser(usage = "%prog [options]")
 parser.add_option("-i", "--input", type=str,  help="input spPlate file")
 parser.add_option("-o", "--output", type=str,  help="input hdf5 file")
+parser.add_option("--test", action="store_true", help="write subset for faster testing")
 # parser.add_option("-v", "--verbose", action="store_true", help="more verbose output")
 
 opts, args = parser.parse_args()
@@ -39,6 +44,7 @@ zbestfile = platefile.replace('spPlate', '{}/spZbest'.format(run1d))
 zbest = Table.read(zbestfile, 1)
 dataname = '{}/{}/zbest'.format(plate, mjd)
 zbest.write(opts.output, path=dataname, append=True)
+nfiber = len(zbest)
 
 #--- zall (skip) ---
 pass
@@ -52,30 +58,33 @@ zline.write(opts.output, path=dataname, append=True)
 #--- photometric matches ---
 photomatchfile = platefile.replace('spPlate-', 'photoMatchPlate-')
 photomatch = Table.read(photomatchfile, 1)
+photomatch['FIBERID'] = np.arange(1, nfiber+1, dtype=np.int16)
 dataname = '{}/{}/photo/match'.format(plate, mjd)
 photomatch.write(opts.output, path=dataname, append=True)
 
 photoposfile = platefile.replace('spPlate-', 'photoPosPlate-')
 photopos = Table.read(photoposfile, 1)
+photopos['FIBERID'] = np.arange(1, nfiber+1, dtype=np.int16)
 dataname = '{}/{}/photo/matchpos'.format(plate, mjd)
 photopos.write(opts.output, path=dataname, append=True)
 
 photofluxfile = platefile.replace('spPlate-', 'photoPlate-')
 photoflux = Table.read(photofluxfile, 1)
+photoflux['FIBERID'] = np.arange(1, nfiber+1, dtype=np.int16)
 dataname = '{}/{}/photo/matchflux'.format(plate, mjd)
 photoflux.write(opts.output, path=dataname, append=True)
 
-#-------------------------------------------------------------------------
 #--- Coadd ---
 print('loading coadds')
 coadds = h5boss.io.load_coadds(platefile)
 
 print('writing coadds')
 for i, cx in enumerate(coadds):
-    ### if i%100 != 0: continue  #- TESTING            
+    if opts.test and i%100 != 0: continue  #- TESTING            
     dataname = '{}/{}/{}/coadd'.format(plate, mjd, i+1)
     cx.write(opts.output, path=dataname, append=True)
 
+#--- Individual exposures ---
 #- Parse spPlancomb to get exposures that were used
 planfile = platefile.replace('spPlate-', 'spPlancomb-').replace('.fits', '.par')
 framefiles = list()
@@ -98,10 +107,11 @@ for filename in framefiles:
         sys.exit(1)
     
     for i, fx in enumerate(frame):
-        ### if i%100 != 0: continue  #- TESTING            
-        frameid = '{}-{:08d}'.format(fx.meta['CAMERAS'], fx.meta['EXPOSURE'])
+        if opts.test and i%100 != 0: continue
+        br = fx.meta['CAMERAS'][0]
+        expid = fx.meta['EXPOSURE']
         fiber = offset+i+1
-        dataname = '{}/{}/{}/frames/{}'.format(plate, mjd, fiber, frameid)
+        dataname = '{}/{}/{}/exposures/{}/{}'.format(plate, mjd, fiber, expid, br)
         fx.write(opts.output, path=dataname, append=True)
     
 
