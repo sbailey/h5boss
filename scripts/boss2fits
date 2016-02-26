@@ -141,16 +141,16 @@ def process_plate(indir, outdir, plate, mjd):
     #- Loop over fibers on this plate on this MJD
     for fiber in range(1000):
         #- HDU1 : binary table of coadd flux, log(lambda), ivar, etc.
-        flux = FXplate[0].data[fiber-1]
+        flux = FXplate[0].data[fiber]
         c0   = FXplate[0].header['COEFF0']
         c1   = FXplate[0].header['COEFF1']
         loglam = c0 + c1*np.arange(len(flux))
-        ivar     = FXplate[1].data[fiber-1]
-        and_mask = FXplate[2].data[fiber-1]
-        or_mask  = FXplate[3].data[fiber-1]
-        wdisp    = FXplate[4].data[fiber-1]
-        sky      = FXplate[6].data[fiber-1]
-        model    = FXzbest[2].data[fiber-1]
+        ivar     = FXplate[1].data[fiber]
+        and_mask = FXplate[2].data[fiber]
+        or_mask  = FXplate[3].data[fiber]
+        wdisp    = FXplate[4].data[fiber]
+        sky      = FXplate[6].data[fiber]
+        model    = FXzbest[2].data[fiber]
 
         #- trim off leading and trailing ivar=0 bins,
         #- but keep ivar=0 bins in the middle of the spectrum
@@ -201,7 +201,7 @@ def process_plate(indir, outdir, plate, mjd):
             nexp += 1
         
             nfiber = cframes[expid].header['NAXIS2']
-            ifib = (fiber-1) % nfiber
+            ifib = (fiber) % nfiber
             d = cframes[expid]
 
             #- trim off leading and trailing ivar=0 bins,
