@@ -34,11 +34,13 @@ plate = hdr['PLATEID']
 mjd = hdr['MJD']
 
 #--- Plugmap ---
+print('plugmap')
 plugmap = Table.read(platefile, 5)
 dataname = '{}/{}/plugmap'.format(plate, mjd)
 plugmap.write(opts.output, path=dataname, append=True)
 
 #--- zbest ---
+print('zbest')
 run1d = hdr['RUN2D']  #- default run1d == run2d
 zbestfile = platefile.replace('spPlate', '{}/spZbest'.format(run1d))
 zbest = Table.read(zbestfile, 1)
@@ -50,12 +52,14 @@ nfiber = len(zbest)
 pass
 
 #--- zline ---
+print('zline')
 zlinefile = zbestfile.replace('spZbest-', 'spZline-')
 zline = Table.read(zlinefile, 1)
 dataname = '{}/{}/zline'.format(plate, mjd)
 zline.write(opts.output, path=dataname, append=True)
 
 #--- photometric matches ---
+print('photo')
 photomatchfile = platefile.replace('spPlate-', 'photoMatchPlate-')
 photomatch = Table.read(photomatchfile, 1)
 photomatch['FIBERID'] = np.arange(1, nfiber+1, dtype=np.int16)
@@ -86,6 +90,7 @@ for i, cx in enumerate(coadds):
 
 #--- Individual exposures ---
 #- Parse spPlancomb to get exposures that were used
+print('parsing planfile')
 planfile = platefile.replace('spPlate-', 'spPlancomb-').replace('.fits', '.par')
 framefiles = list()
 for line in open(planfile):
@@ -94,7 +99,7 @@ for line in open(planfile):
         tmp = [x+'.gz' for x in tmp[7:-1]]
         framefiles.extend(tmp)
         
-print('processing frames')
+print('individual exposures')
 for filename in framefiles:
     print(filename)
     frame = h5boss.io.load_frame(filedir+'/'+filename)
