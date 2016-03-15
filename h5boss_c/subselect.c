@@ -4,15 +4,15 @@
 *Date: Mar 14 2016
 *Author:
 *Jialin Liu, jalnliu@lbl.gov
-*Input: Filelist and plate/mjd/fiber
+*Input: a list of plate/mjd/fiber
 *Output: One hdf5 file
+*HDF5 version: cray-hdf5/1.8.16
 */
 #include <stdio.h>
 #include <string.h>
 #include <hdf5.h>
 #include <stdlib.h>
 #include <sys/stat.h>
-#include <mpi.h>
 
 const char *pPath=NULL;
 const char * ext=".h5";
@@ -32,18 +32,97 @@ int file_exist (char *filename)
   struct stat   buffer;   
   return (stat (filename, &buffer) == 0);
 }
+
+int [] matching (char * ipmf, char * ihdf){
+
+
+}
+int count(char * in){
+   File * input=fopen(in, "r");
+   int ch, number_of_lines=0;
+   do 
+   {
+    ch = fgetc(input);
+    if(ch == '\n')
+    	number_of_lines++;
+   } while (ch != EOF);
+
+   if(ch != '\n' && number_of_lines != 0) 
+    number_of_lines++;
+   return number_of_lines;
+   input.close();
+}
+
+void toarray(char ** list, char * file){
+     FILE * plist=NULL;
+     int i=0;
+     plist = fopen(file,"r");
+     while(fgets(line[i],BUF, plist)){
+     	line[i][strlen(line[i]-1)]='\0';
+	i++;
+     }
+}
+void print_usage(){
+
+     printf("\n\nWarning:Arguments Incomplete\n\n********Arguments List********\n");
+     printf("* ./subselect\n*");
+     printf("* output\t(e.g., o.h5)\n");
+     printf("* pmf-list\t(e.g., pmf.txt contains a list of plate/mjd/fiber)\n");
+     printf("* hdf-list\t(e.g., hdf.txt contains a list of hdf file list)\n");
+     printf("******************************\n");
+     printf("Sample Command: ./subselect pmf.txt hdf.txt $SCRATCH/o.h5\n\n\n");
+     return 1;
+}
+
 int main(int argc, char ** argv)
 {
+    int mpi_size,mpi_rank;
+    MPI_Comm comm = MPI_COMM_WORLD;
+    MPI_Info info;
+    MPI_Init(&argc, &argv);
+    MPI_Comm_size(comm, &mpi_size);
+    MPI_Comm_rank(comm, &mpi_rank);    
+
     if(argc<6){
-     printf("\n\nWarning:Arguments Incomplete\n\n********Arguments List********\n");
-     printf("* ./h5_combine\n* NumofFiles\t(e.g., 2000)\n* StartFile\t(e.g., 0)\n");
-     printf("* OutputFile\t(e.g., file.h5)\n");
-     printf("* InputPath\t(e.g., input/)\n");
-     printf("* DatasetName\t(e.g., autoencoded)\n");
-     printf("******************************\n");
-     printf("Sample Command: ./h5_combine 2000 0 file.h5 input autoencoded\n\n\n");
+      print_usage();
      return 1;
     }
+    int c;
+    char * plate,mjd,fiber;//we will query all files based on plate/mjd/fiber infor, and then get all spectrum in one file.
+    char * ipmf = NULL;
+    char * ihdf = NULL;
+    char * ohdf = NULL;
+    while ((c = getopt (argc, argv, "i:j:o:")) != -1)
+    switch (c)
+      {
+      case 'i':
+        strncpy(ipmf, optarg, NAME_MAX);
+        break;
+      case 'j':
+        strncpy(ihdf, optarg,NAME_MAX);
+        break;
+      case 'o':
+        strncpy(ohdf, optarg, NAME_MAX);
+      default:
+        break;
+      }
+    if(!file_exist(ipmf)||!file_exist(ihdf)) return 0;
+
+    int line_ipmf=count(ipmf);
+    char ** ipmflist=(char **)malloc(sizeof(char *)*line_ipmf)
+    toarray(ipmflist,ipmf);
+
+    int line_ihdf=count(ihdf);
+    char ** ihdflist=(char **)malloc(sizeof(char *)*line_ihdf);
+
+    int * mt=(int) malloc(line_ipmf*sizeof(int));
+    match(mt, line_ipmf,line_ihdf);
+    // using one rank to read the input: ipmf, ihdf
+    if(mpi_rank==0){
+      
+    
+    }
+    
     hsize_t ndims,ncols,nrows,ex_nrows;
     int total=atoi(argv[1]), startid=atoi(argv[2]);
     char *saveFilePath=NULL;
