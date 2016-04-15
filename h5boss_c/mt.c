@@ -26,22 +26,22 @@ int file_exist (char *filename)
 //}
 #define NAME_MAX 255
 #define BUF 20
+
 int count(char * in){
-   FILE * input=fopen(in, "r");
-   int ch, number_of_lines=0;
-   do 
-   {
-    ch = fgetc(input);
-    if(ch == '\n')
-    	number_of_lines++;
-   } while (ch != EOF);
-
-   if(ch != '\n' && number_of_lines != 0) 
-    number_of_lines++;
-   return number_of_lines;
-   fclose(input);
+  FILE * file=fopen(in,"r");
+  int lines = 0;
+  int c;
+  int last = '\n';
+  while (EOF != (c = fgetc(file))) {
+    if (c == '\n' && last != '\n') {
+      ++lines;
+    }
+    last = c;
+  }
+  rewind(file);
+  fclose(file);
+  return lines;
 }
-
 void toarray(char ** line, char * file){
      FILE * plist=NULL;
      int i=0;
@@ -50,6 +50,7 @@ void toarray(char ** line, char * file){
      	line[i][strlen(line[i]-1)]='\0';
 	i++;
      }
+     rewind(plist);
      fclose(plist);
 }
 
@@ -80,11 +81,11 @@ int main(int argc, char ** argv)
 
     if(argc<3) {printf("input args\n"); return 0;}
     if(!file_exist(ipmf)||!file_exist(ihdf)) {printf("inputs not exist\n");return 0;}
-    toarray(ipmflist,ipmf);
+    //toarray(ipmflist,ipmf);
     int line_ipmf=count(ipmf);
     printf("lines in %s is %d\n",ipmf,line_ipmf);
     char ** ipmflist=(char **)malloc(sizeof(char *)*line_ipmf);
-    //toarray(ipmflist,ipmf);
+    toarray(ipmflist,ipmf);
 
     int line_ihdf=count(ihdf);
     printf("lines in %s is %d\n",ihdf,line_ihdf);
