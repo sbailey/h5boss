@@ -30,8 +30,9 @@ def select(infiles, outfile, plates, mjds, fibers):
                 for fiber in xfibers:
                     id = '{}/{}/{}'.format(plate, mjd, fiber)
                     # hx[id] = fx[id].copy()
-                    hx.create_group(id)
-                    fx.copy(id, hx[id])
+		    parent_id='{}/{}'.format(plate, mjd)
+                    hx.create_group(parent_id)
+                    fx.copy(id, hx[parent_id])
                 
                 for name in ['plugmap', 'zbest', 'zline',
                     'photo/match', 'photo/matchflux', 'photo/matchpos']:
