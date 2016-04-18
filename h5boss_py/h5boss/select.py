@@ -1,6 +1,6 @@
 import numpy as np
 import h5py
-
+import time
 def select(infiles, outfile, plates, mjds, fibers):
     '''
     Select a set of (plates,mjds,fibers) from a set of input files
@@ -20,7 +20,7 @@ def select(infiles, outfile, plates, mjds, fibers):
         infiles = [infiles,]
         
     hx = h5py.File(outfile)
-        
+    tstart=time.time()    
     for infile in infiles:
         fx = h5py.File(infile, mode='r')
         for plate in fx.keys():
@@ -42,3 +42,5 @@ def select(infiles, outfile, plates, mjds, fibers):
                     hx[id] = fx[id][jj].copy()
                     
     hx.close()
+    tend=time.time()-tstart
+    print ('time', tend)
