@@ -46,3 +46,4 @@ def pmj(infile, plates, mjds, fibers):
     print "not in subset, but in pmj:\n"
     print missing_pmj
     print ('time', tend)
+    return (missing_pmj, notin_pmj)
