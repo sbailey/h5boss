@@ -15,7 +15,8 @@ def select(infiles, outfile, plates, mjds, fibers):
     plates = np.asarray(plates)
     mjds = np.asarray(mjds)
     fibers = np.asarray(fibers)
-    
+    meta=['plugmap', 'zbest', 'zline',
+			'photo/match', 'photo/matchflux', 'photo/matchpos']
     if not isinstance(infiles, (list, tuple)):
         infiles = [infiles,]
         
@@ -27,20 +28,17 @@ def select(infiles, outfile, plates, mjds, fibers):
             for mjd in fx[plate].keys():
                 ii = (plates == int(plate)) & (mjds == int(mjd))
                 xfibers = fibers[ii]
+		parent_id='{}/{}'.format(plate, mjd)
+                hx.create_group(parent_id)
                 for fiber in xfibers:
                     id = '{}/{}/{}'.format(plate, mjd, fiber)
-                    # hx[id] = fx[id].copy()
-		    parent_id='{}/{}'.format(plate, mjd)
-                    hx.create_group(parent_id)
-                    fx.copy(id, hx[parent_id])
-                
-                for name in ['plugmap', 'zbest', 'zline',
-                    'photo/match', 'photo/matchflux', 'photo/matchpos']:
+                    fx.copy(id, hx[parent_id])                
+                for name in meta:
                     id = '{}/{}/{}'.format(plate, mjd, name)
                     catalog = fx[id]
                     jj = np.in1d(catalog['FIBERID'], xfibers)
-                    hx[id] = fx[id][jj].copy()
-                    
+	            hx[id] = fx[id][jj].copy()
+        fx.close()           
     hx.close()
     tend=time.time()-tstart
     print ('time', tend)
