@@ -1,0 +1,5 @@
+#!/bin/bash
+export PYTHONPATH=`pwd`/h5boss_py:$PYTHONPATH
+export PATH=`pwd`/h5boss_py/scripts:$PATH
+module load python/2.7-anaconda
+export basedir=/global/projecta/projectdirs/sdss/data/sdss/dr12/boss/spectro/redux/v5_7_0
