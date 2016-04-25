@@ -19,10 +19,7 @@ def select(infiles, outfile, plates, mjds, fibers):
 			'photo/match', 'photo/matchflux', 'photo/matchpos']
     if not isinstance(infiles, (list, tuple)):
         infiles = [infiles,]
-    print plates
-    print mjds
-    print fibers    
-    hx = h5py.File(outfile,'r')
+    hx = h5py.File(outfile,'w')
     tstart=time.time()    
     for infile in infiles:
         fx = h5py.File(infile, mode='r')
@@ -31,17 +28,18 @@ def select(infiles, outfile, plates, mjds, fibers):
                 ii = (plates == int(plate)) & (mjds == int(mjd))
                 xfibers = fibers[ii]
 		parent_id='{}/{}'.format(plate, mjd)
-		print parent_id
-                hx.create_group(parent_id)
-                for fiber in xfibers:
-                    id = '{}/{}/{}'.format(plate, mjd, fiber)
-		    print id
-                    fx.copy(id, hx[parent_id])                
-                for name in meta:
-                    id = '{}/{}/{}'.format(plate, mjd, name)
-                    catalog = fx[id]
-                    jj = np.in1d(catalog['FIBERID'], xfibers)
-	            hx[id] = fx[id][jj].copy()
+		if np.any(xfibers):
+		   print parent_id
+                   hx.create_group(parent_id)
+                   for fiber in xfibers:
+                       id = '{}/{}/{}'.format(plate, mjd, fiber)
+		       print id
+                       fx.copy(id, hx[parent_id])                
+                   for name in meta:
+                       id = '{}/{}/{}'.format(plate, mjd, name)
+                       catalog = fx[id]
+                       jj = np.in1d(catalog['FIBERID'], xfibers)
+	               hx[id] = fx[id][jj].copy()
         fx.close()           
     hx.close()
     tend=time.time()-tstart
