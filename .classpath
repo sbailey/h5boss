@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/Python 2.7.10 (/anaconda/bin/python2.7)"/>
+	<classpathentry exported="true" kind="con" path="org.eclipse.jdt.USER_LIBRARY/h5boss"/>
+	<classpathentry kind="output" path="out/production/h5boss-util"/>
+</classpath>

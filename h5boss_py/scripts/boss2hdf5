@@ -14,7 +14,7 @@ import sys, os
 import numpy as np
 from astropy.io import fits
 from astropy.table import Table
-import h5boss.io
+import io
 import time
 import optparse
 
@@ -22,7 +22,6 @@ parser = optparse.OptionParser(usage = "%prog [options]")
 parser.add_option("-i", "--input", type=str,  help="input spPlate file")
 parser.add_option("-o", "--output", type=str,  help="input hdf5 file")
 parser.add_option("--test", action="store_true", help="write subset for faster testing")
-# parser.add_option("-v", "--verbose", action="store_true", help="more verbose output")
 
 opts, args = parser.parse_args()
 
@@ -80,7 +79,7 @@ photoflux.write(opts.output, path=dataname, append=True)
 
 #--- Coadd ---
 print('loading coadds')
-coadds = h5boss.io.load_coadds(platefile)
+coadds = io.load_coadds(platefile)
 
 print('writing coadds')
 for i, cx in enumerate(coadds):
@@ -102,7 +101,7 @@ for line in open(planfile):
 print('individual exposures')
 for filename in framefiles:
     print(filename)
-    frame = h5boss.io.load_frame(filedir+'/'+filename)
+    frame = io.load_frame(filedir+'/'+filename)
     if ('spFrame-b1' in filename) or ('spFrame-r1' in filename):
         offset = 0
     elif ('spFrame-b2' in filename) or ('spFrame-r2' in filename):
@@ -121,4 +120,4 @@ for filename in framefiles:
     
 
 tend=time.time()-tstart
-print ('time',tend)    
+print ('time:',tend)
