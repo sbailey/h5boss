@@ -11,12 +11,11 @@ TODO:
 from __future__ import division, print_function
 from __future__ import absolute_import
 from select import select
+import sys,os
 import time
 import optparse
 import csv
 import traceback
-
-
 
 parser = optparse.OptionParser(usage = "%prog [options]")
 parser.add_option("-i", "--input", type=str,  help="input subselected file")
@@ -27,21 +26,11 @@ parser.add_option("-f", "--fiber", type=str,  help="fibers csv file")
 
 opts, args = parser.parse_args()
 
-#filedir = os.path.split(os.path.abspath(platefile))[0]
-
-#plates = [4444, 4444, 4080, 4080]
-#mjds = [55538, 55538, 55368, 55471]
-#fibers = [1, 2, 30, 678]
-
-#infiles = ['4080-55368.h5', '4080-55471.h5', '4444-55538.h5']
-#outfile = 'blat.h5'
-
 platefile = opts.plate
 mjdfile = opts.mjd
 fiberfile = opts.fiber
 infiles = opts.input
 outfile = opts.output
-
 tstart=time.time()
 
 try: 
