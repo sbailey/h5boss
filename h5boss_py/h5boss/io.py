@@ -59,11 +59,14 @@ def load_frame(framefile, cframefile=None, flatfile=None):
         cframefile = framefile.replace('spFrame', 'spCFrame')
         if cframefile.endswith('.gz'):
             cframefile = cframefile[:-3]
-
+    import os.path
+    if os.path.exists(framefile)==False:
+       exit()
     #- Load framefile and get original dimensions
     eflux = fits.getdata(framefile, 0)
     nfiber, npix = eflux.shape
-            
+    if os.path.exists(cframefile)==False:
+     exit()        
     #- Load spCFrame file; trim arrays back to original size
     fx = fits.open(cframefile, memmap=False)
     header = fx[0].header
@@ -83,6 +86,8 @@ def load_frame(framefile, cframefile=None, flatfile=None):
         filedir, basename = os.path.split(os.path.abspath(cframefile))
         flatfile = os.path.join(filedir, flatfile)
 
+    if os.path.exists(flatfile)==False:
+      exit()
     fiberflat = fits.getdata(flatfile, 0)
     
     #- Calculate calibration vector: flux = electrons * calib
@@ -112,10 +117,3 @@ def load_frame(framefile, cframefile=None, flatfile=None):
         spectra.append(sp)
         
     return spectra
-    
-    
-    
-    
-    
-    
-    

@@ -1,0 +1,51 @@
+#!/usr/bin/env python
+
+"""
+Create an HDF5 file from BOSS data
+
+TODO:
+  - include comments in meta/attrs
+  - platelist quantities
+"""
+
+from __future__ import division, print_function
+
+import sys, os
+import numpy as np
+from astropy.io import fits
+from astropy.table import Table
+import h5boss.io
+from h5boss.select import select
+import time
+import optparse
+import csv
+parser = optparse.OptionParser(usage = "%prog [options]")
+parser.add_option("-i", "--input", type=str,  help="input spPlate file")
+parser.add_option("-o", "--output", type=str,  help="output hdf5 file")
+parser.add_option("-p", "--plate", type=str,  help="plates csv file")
+parser.add_option("-m", "--mjd", type=str,  help="mjds csv file")
+parser.add_option("-f", "--fiber", type=str,  help="fibers csv file")
+
+opts, args = parser.parse_args()
+
+platefile = opts.input
+filedir = os.path.split(os.path.abspath(platefile))[0]
+
+#plates = [4444, 4444, 4080, 4080]
+#mjds = [55538, 55538, 55368, 55471]
+#fibers = [1, 2, 30, 678]
+
+#infiles = ['4080-55368.h5', '4080-55471.h5', '4444-55538.h5']
+#outfile = 'blat.h5'
+
+platefile = opts.plate
+mjdfile = opts.mjd
+fiberfile = opts.fiber
+
+try: 
+   with open('file.csv', 'rb') as f:
+    reader = csv.reader(f)
+    your_list = list(reader)
+catch: 
+
+select(infiles, outfile, plates, mjds, fibers)
