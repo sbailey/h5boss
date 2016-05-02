@@ -9,18 +9,17 @@ TODO:
 """
 
 from __future__ import division, print_function
-
-import sys, os
-import numpy as np
-from astropy.io import fits
-from astropy.table import Table
-import h5boss.io
-from h5boss.select import select
+from __future__ import absolute_import
+from select import select
 import time
 import optparse
 import csv
+import traceback
+
+
+
 parser = optparse.OptionParser(usage = "%prog [options]")
-parser.add_option("-i", "--input", type=str,  help="input spPlate file")
+parser.add_option("-i", "--input", type=str,  help="input subselected file")
 parser.add_option("-o", "--output", type=str,  help="output hdf5 file")
 parser.add_option("-p", "--plate", type=str,  help="plates csv file")
 parser.add_option("-m", "--mjd", type=str,  help="mjds csv file")
@@ -28,8 +27,7 @@ parser.add_option("-f", "--fiber", type=str,  help="fibers csv file")
 
 opts, args = parser.parse_args()
 
-platefile = opts.input
-filedir = os.path.split(os.path.abspath(platefile))[0]
+#filedir = os.path.split(os.path.abspath(platefile))[0]
 
 #plates = [4444, 4444, 4080, 4080]
 #mjds = [55538, 55538, 55368, 55471]
@@ -41,11 +39,39 @@ filedir = os.path.split(os.path.abspath(platefile))[0]
 platefile = opts.plate
 mjdfile = opts.mjd
 fiberfile = opts.fiber
+infiles = opts.input
+outfile = opts.output
+
+tstart=time.time()
 
 try: 
-   with open('file.csv', 'rb') as f:
-    reader = csv.reader(f)
-    your_list = list(reader)
-catch: 
+   with open(platefile, 'rb') as f:
+       reader = csv.reader(f)
+       plates = list(reader)
+except Exception, e:
+    print ("CSV file open error: %s"%e, platefile)
+    traceback.print_exc()
 
-select(infiles, outfile, plates, mjds, fibers)
+try:
+    with open(mjdfile,'rb') as f:
+        reader = csv.reader(f)
+        mjds = list(reader)
+except Exception, e:
+    print ("CSV file open error: %s"%e,mjdfile)
+    traceback.print_exc()
+
+
+try:
+    with open(fiberfile,'rb') as f:
+        reader = csv.reader(f)
+        fibers = list(reader)
+except Exception, e:
+    print ("CSV file open error: %s"%e,fiberfile)
+    traceback.print_exc()
+try:
+    select(infiles, outfile, plates, mjds, fibers)
+except Exception, e:
+    print ("Error in input:%s\noutput: %s",infiles,outfile)
+
+tend=time.time()-tstart
+print ('time:',tend)
