@@ -12,9 +12,10 @@ def select(infiles, outfile, plates, mjds, fibers):
         mjds : list of plates
         fibers : list of fibers        
     '''
+    #print (plates)
     plates = np.asarray(plates)
     mjds = np.asarray(mjds)
-    fibers = np.asarray(fibers)
+    fibers = np.asarray(fibers) 
     meta=['plugmap', 'zbest', 'zline',
 			'photo/match', 'photo/matchflux', 'photo/matchpos']
     if not isinstance(infiles, (list, tuple)):
@@ -22,13 +23,19 @@ def select(infiles, outfile, plates, mjds, fibers):
     hx = h5py.File(outfile,'w')
     tstart=time.time()    
     for infile in infiles:
-        fx = h5py.File(infile, mode='r')
+        try: 
+         fx = h5py.File(infile, mode='r')
+	except Exception, e:
+         print ("File open error: ",infile)
+         continue
         for plate in fx.keys():
             for mjd in fx[plate].keys():
-                ii = (plates == int(plate)) & (mjds == int(mjd))
-                xfibers = fibers[ii]
+                ii = (plates == plate) & (mjds == mjd)
+                print (ii)
+		xfibers = fibers[ii]
 		parent_id='{}/{}'.format(plate, mjd)
-		if np.any(xfibers):
+		if np.any(ii):
+		   print ("pmf found in input file",infile)
 		   print parent_id
                    hx.create_group(parent_id)
                    for fiber in xfibers:
@@ -40,6 +47,8 @@ def select(infiles, outfile, plates, mjds, fibers):
                        catalog = fx[id]
                        jj = np.in1d(catalog['FIBERID'], xfibers)
 	               hx[id] = fx[id][jj].copy()
+                else: 
+		   print ("pmf not found in input file",infile) 
         fx.close()           
     hx.close()
     tend=time.time()-tstart
