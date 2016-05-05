@@ -1,0 +1,106 @@
+#!/usr/bin/env python
+import sys,os
+import time
+import optparse
+import csv
+import traceback
+import random
+import h5py
+
+import optparse
+import argparse
+parser = argparse.ArgumentParser(prog='random')
+parser.add_argument("n",type=int,  help="plates/mjds/fibers sample size")
+parser.add_argument("i",  help="text file that contains a list of HDF5 files or path to those HDF5 files")
+
+argvalue=parser.parse_args()
+#parser = optparse.OptionParser(usage = "%prog [options]")
+#parser.add_option("-n", "--number", type=str,  help="plates/mjds/fibers sample size: n")
+#parser.add_option("-i", "--input", type=str,  help="text file that contains a list of HDF5 files")
+#parser.add_option("-i", "--path", type=str,  help="path to HDF5 input files")
+#opts, args = parser.parse_args()
+
+tstart = time.time()
+
+testnumber=argvalue.n
+print ("Pick %d  plates/mjds/fibers tuple randomly",testnumber)
+infiles=argvalue.i
+
+def findseed(x):
+     hdf5files = [os.path.join(root, name)
+       for root, dirs, files in os.walk(x)
+       for name in files
+        if name.endswith("h5") or name.endswith(".hdf5")]
+     return hdf5files
+def getname(x): 
+    infile = [ file for file in x
+#infile
+if os.path.isfile(infiles):
+ try:
+  with open(infiles,'rb') as f:
+   reader = csv.reader(f)
+   infiles = list(reader)
+
+ except Exception, e:
+  print ("text file open error: %s"%e,infiles)
+  traceback.print_exc()
+elif os.path.isdir(infiles):
+  infile_dir=infiles
+  try: 
+    infiles=findseed(infile_dir)
+  
+  except Exception, e:
+   print ("couldn't find hdf5 files in %s"%e,infile_dir)
+   traceback.print_exc()
+print ("Number of hdf5 files:",len(infiles))
+#print ("Verify:",len(infile))
+def filter0(x):
+    return x.split('.')[0]
+def filter1(x):
+    return x.split('-')[0]
+def filter2(x):
+    return x.split('-')[1]
+infile=map(filter0,infile)
+plates=map(filter1,infile)
+mjds=map(filter2,infile)
+assert(len(plates)==len(mjds))
+rd=sorted(random.sample(xrange(0, len(infile)), testnumber))
+select_plates=list()
+select_mjds=list()
+select_fibers=list()
+select_files=list()
+for i in rd:
+    select_plates.append(plates[i])
+    select_mjds.append(mjds[i])
+    select_files.append(infiles[i])
+print("Plates/Mjds Selected (default=50)",len(select_plates))
+for i in range(0,testnumber):
+    try:
+     fx = h5py.File(str(select_files[i][0]),mode='r')
+     d_fiber=fx[select_plates[i]][select_mjds[i]].keys()
+     item_fiber='u'
+     while not item_fiber.isdigit():
+            item_fiber=random.choice(d_fiber)
+     select_fibers.append(str(item_fiber))
+     print("Picked a random fiber ",str(item_fiber)," in ",str(select_files[i][0]))
+    except Exception,e:
+      print("Error in Open:",select_files[i])
+      traceback.print_exc()
+print ("selected plates=",len(select_plates))
+print ("selected mjds=",len(select_mjds))
+print ("selected fibers=",len(select_fibers))
+assert (len(select_fibers)==len(select_mjds))
+assert (len(select_fibers)==len(select_plates))
+
+plates_file = 'test_plates'
+mjds_file = 'test_mjds'
+fiber_file = 'test_fibers'
+with open(plates_file, "wb") as f:
+    f.writelines(["%s\n" % item  for item in select_plates])
+with open(mjds_file,"wb") as f:
+    f.writelines(["%s\n" % item  for item in select_mjds])
+with open(fiber_file,"wb") as f:
+    f.writelines(["%s\n" % item  for item in select_fibers])
+print("Saved into CSV files:",plates_file,mjds_file,fiber_file)
+tend=time.time()-tstart
+print ('Time:%.2f seconds',tend)
