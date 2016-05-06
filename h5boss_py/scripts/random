@@ -10,8 +10,8 @@ import h5py
 import optparse
 import argparse
 parser = argparse.ArgumentParser(prog='random')
-parser.add_argument("n",type=int,  help="plates/mjds/fibers sample size")
-parser.add_argument("i",  help="text file that contains a list of HDF5 files or path to those HDF5 files")
+parser.add_argument("number",type=int,  help="plates/mjds/fibers sample size")
+parser.add_argument("input",  help="text file that contains a list of HDF5 files or path to those HDF5 files")
 
 argvalue=parser.parse_args()
 #parser = optparse.OptionParser(usage = "%prog [options]")
@@ -22,9 +22,9 @@ argvalue=parser.parse_args()
 
 tstart = time.time()
 
-testnumber=argvalue.n
-print ("Pick %d  plates/mjds/fibers tuple randomly",testnumber)
-infiles=argvalue.i
+testnumber=argvalue.number
+print ("Pick %d plates/mjds/fibers tuple randomly"%testnumber)
+infiles=argvalue.input
 
 def findseed(x):
      hdf5files = [os.path.join(root, name)
@@ -32,9 +32,12 @@ def findseed(x):
        for name in files
         if name.endswith("h5") or name.endswith(".hdf5")]
      return hdf5files
+def filtername(x):
+    import re
+    return re.split('/|\.|\n',str(x))[-2] 
 def getname(x): 
-    infile = [ file for file in x
-#infile
+    infile = map(filtername,x)
+
 if os.path.isfile(infiles):
  try:
   with open(infiles,'rb') as f:
@@ -52,15 +55,16 @@ elif os.path.isdir(infiles):
   except Exception, e:
    print ("couldn't find hdf5 files in %s"%e,infile_dir)
    traceback.print_exc()
-print ("Number of hdf5 files:",len(infiles))
+print ("Number of hdf5 files: %d"%len(infiles))
 #print ("Verify:",len(infile))
+infile=getname(infiles)
 def filter0(x):
     return x.split('.')[0]
 def filter1(x):
     return x.split('-')[0]
 def filter2(x):
     return x.split('-')[1]
-infile=map(filter0,infile)
+infile=map(filter0,infiles)
 plates=map(filter1,infile)
 mjds=map(filter2,infile)
 assert(len(plates)==len(mjds))
@@ -85,6 +89,8 @@ for i in range(0,testnumber):
      print("Picked a random fiber ",str(item_fiber)," in ",str(select_files[i][0]))
     except Exception,e:
       print("Error in Open:",select_files[i])
+      select_fibers.append('30')
+      print("Picked a random fiber ",str(item_fiber)," in ",str(select_files[i][0]))
       traceback.print_exc()
 print ("selected plates=",len(select_plates))
 print ("selected mjds=",len(select_mjds))
