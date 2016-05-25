@@ -37,13 +37,14 @@ def filtername(x):
     return re.split('/|\.|\n',str(x))[-2] 
 def getname(x): 
     infile = map(filtername,x)
-
+    return infile
 if os.path.isfile(infiles):
  try:
   with open(infiles,'rb') as f:
-   reader = csv.reader(f)
-   infiles = list(reader)
-
+   #reader = csv.reader(f)
+   #infiles = list(reader)
+   content = f.readlines()
+   infiles = [x.strip('\n') for x in content]
  except Exception, e:
   print ("text file open error: %s"%e,infiles)
   traceback.print_exc()
@@ -59,14 +60,28 @@ print ("Number of hdf5 files: %d"%len(infiles))
 #print ("Verify:",len(infile))
 infile=getname(infiles)
 def filter0(x):
-    return x.split('.')[0]
+    return str(x).split('.')[0]
 def filter1(x):
-    return x.split('-')[0]
+    try:
+       fx=h5py.File(x,'r')
+       dk=fx.keys()[0]
+       fx.close()
+       return dk
+    except Exception, e:
+      print('fiter1: file broken:',x)
+     
 def filter2(x):
-    return x.split('-')[1]
+    try: 
+       fx = h5py.File(x,'r')
+       plate = fx.keys()[0]
+       dp = fx[str(plate)].keys()[0]
+       fx.close()
+       return dp
+    except Exception, e:
+      print('filter2:file broken:',x)
 infile=map(filter0,infiles)
-plates=map(filter1,infile)
-mjds=map(filter2,infile)
+plates=map(filter1,infiles)
+mjds=map(filter2,infiles)
 assert(len(plates)==len(mjds))
 rd=sorted(random.sample(xrange(0, len(infile)), testnumber))
 select_plates=list()
@@ -74,39 +89,51 @@ select_mjds=list()
 select_fibers=list()
 select_files=list()
 for i in rd:
-    select_plates.append(plates[i])
-    select_mjds.append(mjds[i])
-    select_files.append(infiles[i])
+    print("plates:",plates[i])
+    select_plates.append(str(plates[i]))
+    select_mjds.append(str(mjds[i]))
+    select_files.append(str(infiles[i]))
 print("Plates/Mjds Selected (default=50)",len(select_plates))
 for i in range(0,testnumber):
     try:
-     fx = h5py.File(str(select_files[i][0]),mode='r')
-     d_fiber=fx[select_plates[i]][select_mjds[i]].keys()
+     print("open:",str(select_files[i]))
+     print("select plates: ",select_plates[i])
+     print("select mjds: ",select_mjds[i])
+     fx = h5py.File(str(select_files[i]),mode='r')
+    except Exception,e:
+     print("Error in Open:",str(select_files[i]))
+    try:
+     d_fiber=fx[str(select_plates[i])][str(select_mjds[i])].keys()
      item_fiber='u'
      while not item_fiber.isdigit():
             item_fiber=random.choice(d_fiber)
+            print('item_fiber:',item_fiber)
      select_fibers.append(str(item_fiber))
-     print("Picked a random fiber ",str(item_fiber)," in ",str(select_files[i][0]))
+     print("Picked a random fiber ",str(item_fiber)," in ",str(select_files[i]))
     except Exception,e:
-      print("Error in Open:",select_files[i])
+      print("Error in fiber selection,d_fiber:",d_fiber)
       select_fibers.append('30')
-      print("Picked a random fiber ",str(item_fiber)," in ",str(select_files[i][0]))
+      print("Picked a random fiber 30 in ",str(select_files[i]))
       traceback.print_exc()
 print ("selected plates=",len(select_plates))
 print ("selected mjds=",len(select_mjds))
 print ("selected fibers=",len(select_fibers))
 assert (len(select_fibers)==len(select_mjds))
 assert (len(select_fibers)==len(select_plates))
-
+tuple_pmf=select_plates+select_mjds+select_fibers
+tuple_file = 'tuple_file'
 plates_file = 'test_plates'
 mjds_file = 'test_mjds'
 fiber_file = 'test_fibers'
 with open(plates_file, "wb") as f:
+     #print(["%s\n" % item  for item in select_plates])
     f.writelines(["%s\n" % item  for item in select_plates])
 with open(mjds_file,"wb") as f:
     f.writelines(["%s\n" % item  for item in select_mjds])
 with open(fiber_file,"wb") as f:
     f.writelines(["%s\n" % item  for item in select_fibers])
+with open(tuple_file,"wb") as f:
+    f.writelines(["%s\n" % item  for item in tuple_pmf])
 print("Saved into CSV files:",plates_file,mjds_file,fiber_file)
 tend=time.time()-tstart
-print ('Time:%.2f seconds',tend)
+print ('Time:%.2f seconds'%tend)

@@ -36,7 +36,7 @@ try:
   plates = list(reader)
 
 except Exception, e:
-  print ("CSV file open error: %s "%e,plates)
+  print ("CSV file open error: %s "%e,platefile)
   traceback.print_exc()
 
 try:
@@ -75,9 +75,9 @@ mjds = [x for sublist in mjds for x in sublist]
 print ("Plates: ",plates)
 print ("MJDs: ",mjds)
 print ("Fibers: ", fibers)
-print ("Input: ",infile)
+print ("Input: %d files:"%len(infile),infile[0],"...",infile[-1])
 print ("Output: ", outfile)
-print ("Run selecting...")
+print ("Running selection...")
 
 try:
  select(infile, outfile, plates, mjds, fibers)

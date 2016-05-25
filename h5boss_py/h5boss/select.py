@@ -21,7 +21,9 @@ def select(infiles, outfile, plates, mjds, fibers):
     if not isinstance(infiles, (list, tuple)):
         infiles = [infiles,]
     hx = h5py.File(outfile,'w')
-    tstart=time.time()    
+    tstart=time.time() 
+    select_files=list() 
+    print("plates/mjds/fiber found in: ") 
     for infile in infiles:
         try: 
          fx = h5py.File(infile, mode='r')
@@ -31,25 +33,32 @@ def select(infiles, outfile, plates, mjds, fibers):
         for plate in fx.keys():
             for mjd in fx[plate].keys():
                 ii = (plates == plate) & (mjds == mjd)
-                print (ii)
+                #print (ii)
 		xfibers = fibers[ii]
 		parent_id='{}/{}'.format(plate, mjd)
 		if np.any(ii):
-		   print ("pmf found in input file",infile)
-		   print parent_id
+		   print (infile)
+                   select_files.append(infile)
+		   #print parent_id
                    hx.create_group(parent_id)
                    for fiber in xfibers:
                        id = '{}/{}/{}'.format(plate, mjd, fiber)
-		       print id
+		       #print id
                        fx.copy(id, hx[parent_id])                
                    for name in meta:
                        id = '{}/{}/{}'.format(plate, mjd, name)
                        catalog = fx[id]
                        jj = np.in1d(catalog['FIBERID'], xfibers)
 	               hx[id] = fx[id][jj].copy()
-                else: 
-		   print ("pmf not found in input file",infile) 
+                #else: 
+		#   print ("pmf not found in input file",infile) 
         fx.close()           
     hx.close()
+    print("Selected %d files"%len(select_files))
+    if(len(select_files)>0):
+     selected_f="selected_files_"+str(len(select_files))+".out"
+     print("Saved selected file path in %s"%str(selected_f))
+     with open(selected_f,"wb") as f:
+      f.writelines(["%s\n" % item  for item in select_files])
     tend=time.time()-tstart
-    print ('time', tend)
+    print ('time %.2f seconds'%tend)

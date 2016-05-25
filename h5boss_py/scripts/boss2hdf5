@@ -103,7 +103,7 @@ for line in open(planfile):
         
 print('individual exposures')
 for filename in framefiles:
-    print(filename)
+    #print(filename)
     frame = io.load_frame(filedir+'/'+filename)
     if ('spFrame-b1' in filename) or ('spFrame-r1' in filename):
         offset = 0
