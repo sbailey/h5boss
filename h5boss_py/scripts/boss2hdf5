@@ -24,6 +24,9 @@ parser.add_option("-o", "--output", type=str,  help="input hdf5 file")
 parser.add_option("--test", action="store_true", help="write subset for faster testing")
 
 opts, args = parser.parse_args()
+if len(sys.argv)<=1:
+   print ("boss2hdf5 -help")
+   exit(1)
 
 platefile = opts.input
 filedir = os.path.split(os.path.abspath(platefile))[0]
@@ -100,7 +103,7 @@ for line in open(planfile):
         
 print('individual exposures')
 for filename in framefiles:
-    print(filename)
+    #print(filename)
     frame = io.load_frame(filedir+'/'+filename)
     if ('spFrame-b1' in filename) or ('spFrame-r1' in filename):
         offset = 0
