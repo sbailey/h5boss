@@ -120,7 +120,7 @@ print ("selected mjds=",len(select_mjds))
 print ("selected fibers=",len(select_fibers))
 assert (len(select_fibers)==len(select_mjds))
 assert (len(select_fibers)==len(select_plates))
-tuple_pmf=select_plates+select_mjds+select_fibers
+tuple_pmf=zip(select_plates,select_mjds,select_fibers)
 tuple_file = 'tuple_file'
 plates_file = 'test_plates'
 mjds_file = 'test_mjds'

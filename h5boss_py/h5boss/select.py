@@ -40,16 +40,26 @@ def select(infiles, outfile, plates, mjds, fibers):
 		   print (infile)
                    select_files.append(infile)
 		   #print parent_id
-                   hx.create_group(parent_id)
+		   #exist_group = parent_id in hx
+		   if parent_id not in hx:
+	           #print parent_id
+                    hx.create_group(parent_id)
+		   
                    for fiber in xfibers:
                        id = '{}/{}/{}'.format(plate, mjd, fiber)
 		       #print id
-                       fx.copy(id, hx[parent_id])                
+		       if id not in hx:
+                        fx.copy(id, hx[parent_id])                
                    for name in meta:
                        id = '{}/{}/{}'.format(plate, mjd, name)
                        catalog = fx[id]
-                       jj = np.in1d(catalog['FIBERID'], xfibers)
-	               hx[id] = fx[id][jj].copy()
+                       #print(type(xfibers[0]))
+                       yfib=xfibers.astype(np.int32)
+	               #print(type(yfib[0]))
+		       #print(type(catalog['FIBERID'][0]))
+                       jj = np.in1d(catalog['FIBERID'], yfib)
+		       if id not in hx:
+	                hx[id] = fx[id][jj].copy()
                 #else: 
 		#   print ("pmf not found in input file",infile) 
         fx.close()           

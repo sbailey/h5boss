@@ -21,23 +21,36 @@ parser.add_option("-o", "--output", type=str,  help="output hdf5 file")
 parser.add_option("-p", "--plate", type=str,  help="plates csv file")
 parser.add_option("-m", "--mjd", type=str,  help="mjds csv file")
 parser.add_option("-f", "--fiber", type=str,  help="fibers csv file")
-
+parser.add_option("-x", "--xls", type=str,help="plate/mjd/fiber excel file")
 opts, args = parser.parse_args()
 
 platefile = opts.plate
 mjdfile = opts.mjd
 fiberfile = opts.fiber
+xlsfile = opts.xls
 infiles = opts.input
 outfile = opts.output
 tstart=time.time()
+import pandas as pd
+try: 
+ df = pd.ExcelFile(xlsfile).parse('Sheet1')
+ plates = map(str,df['plates'].values.tolist())
+ mjds = map(str,df['mjds'].values.tolist())
+ fibers = map(str,df['fibers'].values.tolist())
+
+except Exception, e:
+ print("excel read error or not exist:%s"%e,xlsfile)
+ #traceback.print_exc()
+
+
 try: 
  with open(platefile, 'rb') as f:
   reader = csv.reader(f)
   plates = list(reader)
 
 except Exception, e:
-  print ("CSV file open error: %s "%e,platefile)
-  traceback.print_exc()
+  print ("CSV file open error or not exist: %s "%e,platefile)
+  #traceback.print_exc()
 
 try:
  with open(mjdfile,'rb') as f:
@@ -45,8 +58,8 @@ try:
   mjds = list(reader)
 
 except Exception, e:
- print ("CSV file open error: %s"%e,mjdfile)
- traceback.print_exc()
+ print ("CSV file open error or not exist: %s"%e,mjdfile)
+ #traceback.print_exc()
 
 try:
  with open(fiberfile,'rb') as f:
@@ -54,8 +67,8 @@ try:
   fibers = list(reader)
 
 except Exception, e:
- print ("CSV file open error: %s"%e,fiberfile)
- traceback.print_exc()
+ print ("CSV file open error or not exist: %s"%e,fiberfile)
+ #traceback.print_exc()
 
 
 try:
@@ -64,13 +77,13 @@ try:
   infile = list(reader)
 
 except Exception, e:
- print ("CSV file open error: %s"%e,infiles)
- traceback.print_exc()
+ print ("CSV file open error or not exist: %s"%e,infiles)
+ #traceback.print_exc()
 
 infile = [x for sublist in infile for x in sublist]
-fibers = [x for sublist in fibers for x in sublist]
-plates = [x for sublist in plates for x in sublist]
-mjds = [x for sublist in mjds for x in sublist]
+#fibers = [x for sublist in fibers for x in sublist]
+#plates = [x for sublist in plates for x in sublist]
+#mjds = [x for sublist in mjds for x in sublist]
 
 print ("Plates: ",plates)
 print ("MJDs: ",mjds)
