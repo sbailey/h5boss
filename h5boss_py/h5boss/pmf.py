@@ -1,7 +1,7 @@
 import numpy as np
 import h5py
 import time
-def pmj(infile, plates, mjds, fibers):
+def pmf(infile, plates, mjds, fibers):
     '''
     check (plates,mjds,fibers) against the input file
     
@@ -24,10 +24,13 @@ def pmj(infile, plates, mjds, fibers):
 	for mid in inx[pid].keys():
 		for fid in inx[pid+'/'+mid].keys():
 			if fid.isdigit():
-			 a=[int(pid),int(mid),int(fid)]
+			 a=[str(pid),str(mid),str(fid)]
+			 print a
 		         if a in pmj.tolist():
+			    print ('in')
 			    in_pmj.append(a)
 			 else:
+			    print ('not in')
 			    notin_pmj.append(a)	
 			
     #notin_pmj contains pmj that is in in pre-existing subset but not in new list
@@ -35,15 +38,16 @@ def pmj(infile, plates, mjds, fibers):
     notin_pmj=np.asarray(notin_pmj) 
     #print in_pmj
     #print pmj
-    in_pmj1d=np.core.records.fromarrays(in_pmj.transpose(),names='col1, col2, col3',formats='i8,i8,i8')    
-    pmj1d=np.core.records.fromarrays(pmj.transpose(),names='col1, col2, col3',formats='i8,i8,i8')
+    #print notin_pmj
+    in_pmj1d=np.core.records.fromarrays(in_pmj.transpose(),names='col1, col2, col3',formats='a25,a25,a25')    
+    pmj1d=np.core.records.fromarrays(pmj.transpose(),names='col1, col2, col3',formats='a25,a25,a25')
     missing_pmj=np.setdiff1d(pmj1d,in_pmj1d)
     missing_pmj=missing_pmj.reshape(len(missing_pmj),1)
     tend=time.time()-tstart
-    print "in subset, but new in pmj:\n"
+    print "in pre_subset, but not in pmf list:%d\n"%len(notin_pmj)
     print notin_pmj
     print "\n"
-    print "not in subset, but in pmj:\n"
+    print "not in pre_subset, but in pmf list:%d\n"%len(missing_pmj)
     print missing_pmj
     print ('time', tend)
     return (missing_pmj, notin_pmj)
