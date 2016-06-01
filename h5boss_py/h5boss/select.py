@@ -33,30 +33,22 @@ def select(infiles, outfile, plates, mjds, fibers):
         for plate in fx.keys():
             for mjd in fx[plate].keys():
                 ii = (plates == plate) & (mjds == mjd)
-                #print (ii)
 		xfibers = fibers[ii]
 		parent_id='{}/{}'.format(plate, mjd)
 		if np.any(ii):
 		   print (infile)
                    select_files.append(infile)
-		   #print parent_id
-		   #exist_group = parent_id in hx
 		   if parent_id not in hx:
-	           #print parent_id
                     hx.create_group(parent_id)
 		   
                    for fiber in xfibers:
                        id = '{}/{}/{}'.format(plate, mjd, fiber)
-		       #print id
 		       if id not in hx:
                         fx.copy(id, hx[parent_id])                
                    for name in meta:
                        id = '{}/{}/{}'.format(plate, mjd, name)
                        catalog = fx[id]
-                       #print(type(xfibers[0]))
                        yfib=xfibers.astype(np.int32)
-	               #print(type(yfib[0]))
-		       #print(type(catalog['FIBERID'][0]))
                        jj = np.in1d(catalog['FIBERID'], yfib)
 		       if id not in hx:
 	                hx[id] = fx[id][jj].copy()
@@ -71,4 +63,4 @@ def select(infiles, outfile, plates, mjds, fibers):
      with open(selected_f,"wb") as f:
       f.writelines(["%s\n" % item  for item in select_files])
     tend=time.time()-tstart
-    print ('time %.2f seconds'%tend)
+    print ('Selection time: %.2f seconds'%tend)
