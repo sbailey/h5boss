@@ -13,6 +13,8 @@ def remove(infile, plates, mjds, fibers):
         mjds : list of plates
         fibers : list of fibers        
     '''
+    meta=['plugmap', 'zbest', 'zline',
+                        'photo/match', 'photo/matchflux', 'photo/matchpos']
     try: 
       fx=h5py.File(infile,'a')
     except Exception, e:
@@ -31,6 +33,9 @@ def remove(infile, plates, mjds, fibers):
         k+=1
       else:
        j+=1
+      # meta=['plugmap', 'zbest', 'zline',
+      #                  'photo/match', 'photo/matchflux', 'photo/matchpos']
+      #remove entries in photo, plugmap, etc
      print ('Removed %d pmf,Skipped %d'%k%j)
      fx.close()
     except Exception, e:
