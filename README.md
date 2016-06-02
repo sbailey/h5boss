@@ -1,4 +1,4 @@
-# h5boss
+# H5Boss
 Exploratory tools for reformatting BOSS spectra as hdf5 files
 
 #Demo
@@ -7,6 +7,6 @@ Exploratory tools for reformatting BOSS spectra as hdf5 files
 3. add -h
 4. update -h
 
-#TDD
+#Tdd
 1. cd h5boss_py/test
 2. nosetests subset
