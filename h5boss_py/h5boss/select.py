@@ -59,7 +59,7 @@ def select(infiles, outfile, plates, mjds, fibers):
     print("Selected %d files"%len(select_files))
     if(len(select_files)>0):
      selected_f="selected_files_"+str(len(select_files))+".out"
-     print("Saved selected file path in %s"%str(selected_f))
+     print("Selected file info saved in %s"%str(selected_f))
      with open(selected_f,"wb") as f:
       f.writelines(["%s\n" % item  for item in select_files])
     tend=time.time()-tstart

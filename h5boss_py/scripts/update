@@ -50,12 +50,14 @@ except Exception, e:
  #traceback.print_exc()
 
 infile = [x for sublist in infile for x in sublist]
-print ("Plates: ",plates)
-print ("MJDs: ",mjds)
-print ("Fibers: ", fibers)
-print ("Input: %d files:"%len(infile),infile[0],"...",infile[-1])
+#print ("Plates: ",plates)
+#print ("MJDs: ",mjds)
+#print ("Fibers: ", fibers)
+print ("Plates/Mjds/Fibers: %d tuples"%len(plates))
+#print ("Input: %d files:"%len(infile),infile[0],"...",infile[-1])
+print ("Input: %d files"%len(infile))
 print ("Output: ", outfile)
-print ("Running selection...")
+print ("Running selection:")
 
 try:
  select_update(infile, outfile, plates, mjds, fibers)
