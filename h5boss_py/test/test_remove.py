@@ -7,7 +7,6 @@ import pandas as pd
 class Testremove(unittest.TestCase):
  def test_remove(self):
   xlsfile = 'pmf.xlsx'
-  infiles = 'input'
   outfile = 'output.h5'
   try: 
    df = pd.ExcelFile(xlsfile).parse('Sheet1')
@@ -18,11 +17,11 @@ class Testremove(unittest.TestCase):
   except Exception, e:
    print("excel read error or not exist:%s"%e,xlsfile)
 
-  try:
-   remove(infile, outfile, plates, mjds, fibers)
+  #try:
+  remove(outfile, plates, mjds, fibers)
 
-  except Exception, e:
-   print ("Error in select:")
+  #except Exception, e:
+  # print ("Error in select:")
 
 if __name__ == '__main__':
    unittest.main()

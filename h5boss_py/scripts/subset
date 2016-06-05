@@ -15,61 +15,48 @@ import optparse
 import csv
 import traceback
 
-parser = optparse.OptionParser(usage = "%prog [options]")
-parser.add_option("-i", "--input", type=str,  help="input subselected file")
-parser.add_option("-o", "--output", type=str,  help="output hdf5 file")
-parser.add_option("-p", "--plate", type=str,  help="plates csv file")
-parser.add_option("-m", "--mjd", type=str,  help="mjds csv file")
-parser.add_option("-f", "--fiber", type=str,  help="fibers csv file")
-parser.add_option("-x", "--xls", type=str,help="plate/mjd/fiber excel file")
-opts, args = parser.parse_args()
 
-platefile = opts.plate
-mjdfile = opts.mjd
-fiberfile = opts.fiber
-xlsfile = opts.xls
+import optparse
+import argparse
+parser = argparse.ArgumentParser(prog='subset')
+parser.add_argument("input",  help="HDF5 input list")
+parser.add_argument("output", help="HDF5 output")
+parser.add_argument("pmf",    help="Plate/mjd/fiber list in csv")
+
+opts=parser.parse_args()
+
+
+#parser = optparse.OptionParser(usage = "%prog [options]")
+#parser.add_option("-i", "--input", type=str,  help="input file list")
+#parser.add_option("-o", "--output", type=str,  help="output hdf5")
+#parser.add_option("-x", "--xls", type=str,help="pmf excel")
+#parser.add_option("-l", "--pmf",type=str,help="pmf csv")
+#opts, args = parser.parse_args()
+
+#xlsfile = opts.xls
+pmflist = opts.pmf
 infiles = opts.input
 outfile = opts.output
 tstart=time.time()
-import pandas as pd
-try: 
- df = pd.ExcelFile(xlsfile).parse('Sheet1')
+#import pandas as pd
+#try: 
+# df = pd.ExcelFile(xlsfile).parse('Sheet1')
+# plates = map(str,df['plates'].values.tolist())
+# mjds = map(str,df['mjds'].values.tolist())
+# fibers = map(str,df['fibers'].values.tolist())
+
+#except Exception, e:
+# print("excel read error or not exist:%s"%e,xlsfile)
+ #traceback.print_exc()
+
+try:
+ df = pd.read_csv(pmflist,delimiter=' ',names=["plates","mjds","fibers"],index_col=None,dtype=str)
  plates = map(str,df['plates'].values.tolist())
  mjds = map(str,df['mjds'].values.tolist())
  fibers = map(str,df['fibers'].values.tolist())
-
 except Exception, e:
- print("excel read error or not exist:%s"%e,xlsfile)
- #traceback.print_exc()
-
-
-try: 
- with open(platefile, 'rb') as f:
-  reader = csv.reader(f)
-  plates = list(reader)
-
-except Exception, e:
-  print ("CSV file open error or not exist: %s "%e,platefile)
-  #traceback.print_exc()
-
-try:
- with open(mjdfile,'rb') as f:
-  reader = csv.reader(f)
-  mjds = list(reader)
-
-except Exception, e:
- print ("CSV file open error or not exist: %s"%e,mjdfile)
- #traceback.print_exc()
-
-try:
- with open(fiberfile,'rb') as f:
-  reader = csv.reader(f)
-  fibers = list(reader)
-
-except Exception, e:
- print ("CSV file open error or not exist: %s"%e,fiberfile)
- #traceback.print_exc()
-
+ print("pmf csv read error or not exist:%s"%e,pmflist)
+ print("e.g., 1st row of csv should be 'plates mjds fibers'")
 
 try:
  with open(infiles,'rb') as f:
@@ -77,21 +64,19 @@ try:
   infile = list(reader)
 
 except Exception, e:
- print ("CSV file open error or not exist: %s"%e,infiles)
+ print ("input csv read error or not exist: %s"%e,infiles)
  #traceback.print_exc()
 
 infile = [x for sublist in infile for x in sublist]
-#fibers = [x for sublist in fibers for x in sublist]
-#plates = [x for sublist in plates for x in sublist]
-#mjds = [x for sublist in mjds for x in sublist]
-
-print ("Plates: ",plates)
-print ("MJDs: ",mjds)
-print ("Fibers: ", fibers)
+#print ("Plates: ",plates)
+#print ("MJDs: ",mjds)
+#print ("Fibers: ", fibers)
 print ("Input: %d files:"%len(infile),infile[0],"...",infile[-1])
 print ("Output: ", outfile)
 print ("Running selection...")
-
+if(len(plates)==0):
+  print("pmf is empty")
+  sys.exit(0)
 try:
  select(infile, outfile, plates, mjds, fibers)
 
