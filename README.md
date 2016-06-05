@@ -6,7 +6,7 @@ Boss is originally maintained as millions of fits file in thousands of different
 1. Reformatting: Preserve the fits file structure and specture hierarchicy using HDF5
 2. Object I/O: Design object interface for accessing the files as pmf indexed object
 3. Query Caching: Develop transparent cache for restoring analysis workflow and reducing metadata overhead
-4. Data mover: Design API for moving data between storage tiers. 
+4. Data mover: Design API for moving data through various storage tiers. 
 
 #Demo
 1. source cori-setup
