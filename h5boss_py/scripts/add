@@ -17,27 +17,35 @@ import optparse
 import csv
 import traceback
 
-parser = optparse.OptionParser(usage = "%prog [options]")
-parser.add_option("-b", "--base", type=str,  help="base file")
-parser.add_option("-i", "--input", type=str,  help="files to be quried")
-parser.add_option("-x", "--xls", type=str,help="plate/mjd/fiber excel file")
-opts, args = parser.parse_args()
+import argparse
+parser = argparse.ArgumentParser(prog='add',description='Compare base with pmf, add the new plates/mjds/fibers founded in both (pmf,input) into the pre-selected HDF5 base file.')
+parser.add_argument("base", help="Pre-selected HDF5 file")
+parser.add_argument("input",  help="HDF5 input list")
+parser.add_argument("pmf",    help="Plate/mjd/fiber list in csv")
 
-xlsfile = opts.xls
+opts=parser.parse_args()
+
+
+
+#parser = optparse.OptionParser(usage = "%prog [options]")
+#parser.add_option("-b", "--base", type=str,  help="base file")
+#parser.add_option("-i", "--input", type=str,  help="files to be quried")
+#parser.add_option("-x", "--xls", type=str,help="plate/mjd/fiber excel file")
+#opts, args = parser.parse_args()
+
+xlsfile = opts.pmf
 infiles = opts.input
 outfile = opts.base
 tstart=time.time()
 import pandas as pd
 try: 
- df = pd.ExcelFile(xlsfile).parse('Sheet1')
+ df = pd.read_csv(pmflist,delimiter=' ',names=["plates","mjds","fibers"],index_col=None,dtype=str)
  plates = map(str,df['plates'].values.tolist())
  mjds = map(str,df['mjds'].values.tolist())
  fibers = map(str,df['fibers'].values.tolist())
-
 except Exception, e:
- print("excel read error or not exist:%s"%e,xlsfile)
- #traceback.print_exc()
-
+ print("pmf csv read error or not exist:%s"%e,pmflist)
+ print("e.g., 1st row of csv should be 'plates mjds fibers'")
 
 try:
  with open(infiles,'rb') as f:
@@ -49,9 +57,13 @@ except Exception, e:
  #traceback.print_exc()
 
 infile = [x for sublist in infile for x in sublist]
-print ("Plates: ",plates)
-print ("MJDs: ",mjds)
-print ("Fibers: ", fibers)
+#print ("Plates: ",plates)
+#print ("MJDs: ",mjds)
+#print ("Fibers: ", fibers)
+if(len(plates)==0 or len(infile)==0):
+  print("pmf or input is empty")
+  sys.exit(0)
+
 print ("Input: %d files:"%len(infile),infile[0],"...",infile[-1])
 print ("Output: ", outfile)
 print ("Running selection...")

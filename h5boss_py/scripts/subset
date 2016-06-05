@@ -71,12 +71,13 @@ infile = [x for sublist in infile for x in sublist]
 #print ("Plates: ",plates)
 #print ("MJDs: ",mjds)
 #print ("Fibers: ", fibers)
+if(len(plates)==0 or len(infile)==0):
+  print("pmf or input is empty")
+  sys.exit(0)
+
 print ("Input: %d files:"%len(infile),infile[0],"...",infile[-1])
 print ("Output: ", outfile)
 print ("Running selection...")
-if(len(plates)==0):
-  print("pmf is empty")
-  sys.exit(0)
 try:
  select(infile, outfile, plates, mjds, fibers)
 
