@@ -1,5 +1,5 @@
 # H5Boss
-Exploratory tools for reformatting BOSS spectra as hdf5 files
+Exploratory tools for managing BOSS spectra
 
 #Demo
 1. cd h5boss_py/demo
