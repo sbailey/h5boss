@@ -44,14 +44,22 @@ def select(infiles, outfile, plates, mjds, fibers):
                    for fiber in xfibers:
                        id = '{}/{}/{}'.format(plate, mjd, fiber)
 		       if id not in hx:
-                        fx.copy(id, hx[parent_id])                
+                        try:
+                         fx.copy(id, hx[parent_id])
+                        except Exception,e:
+                         print("fiber %s not found"%id)
+                         pass                
                    for name in meta:
                        id = '{}/{}/{}'.format(plate, mjd, name)
-                       catalog = fx[id]
-                       yfib=xfibers.astype(np.int32)
-                       jj = np.in1d(catalog['FIBERID'], yfib)
-		       if id not in hx:
-	                hx[id] = fx[id][jj].copy()
+                       try:
+                        catalog = fx[id]
+                        yfib=xfibers.astype(np.int32)
+                        jj = np.in1d(catalog['FIBERID'], yfib)
+		        if id not in hx:
+	                 hx[id] = fx[id][jj].copy()
+                       except Exception,e:
+			print("catalog %s not found"%id)
+                        pass
                 #else: 
 		#   print ("pmf not found in input file",infile) 
         fx.close()           

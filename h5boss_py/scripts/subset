@@ -14,7 +14,7 @@ import time
 import optparse
 import csv
 import traceback
-
+import pandas as pd
 
 import optparse
 import argparse
@@ -48,9 +48,12 @@ tstart=time.time()
 #except Exception, e:
 # print("excel read error or not exist:%s"%e,xlsfile)
  #traceback.print_exc()
-
+plates=[]
+mjds=[]
+fibers=[]
 try:
  df = pd.read_csv(pmflist,delimiter=' ',names=["plates","mjds","fibers"],index_col=None,dtype=str)
+ df = df.sort(['plates'],ascending=[1])
  plates = map(str,df['plates'].values.tolist())
  mjds = map(str,df['mjds'].values.tolist())
  fibers = map(str,df['fibers'].values.tolist())
