@@ -1,9 +1,11 @@
 import numpy as np
 import h5py
 import time
+import sys,os
 from h5boss.pmf import pmf
+import commands
 from h5boss.select import select
-def remove(infile, plates, mjds, fibers):
+def remove(infile, plates, mjds, fibers,repack=None):
     '''
     remove the additional (plates, mjds, fibers) from the pre-existing file
 
@@ -39,4 +41,14 @@ def remove(infile, plates, mjds, fibers):
      print ('Removed %d pmf,Skipped %d'%k%j)
      fx.close()
     except Exception, e:
-     print ('Error in removing')  
+     print ('Error in removing')
+    if repack!=None: 
+      #run hdf5 repack utility from 
+      cmd_moduleload = "module load cray-hdf5 >/dev/null"
+      oufile=infile.split('.')[0]+"_repack"+".h5"
+      cmd_repack = "h5repack %s %s 2>/dev/null"%(infile,oufile)
+      try: 
+	commands.getstatusoutput(cmd_moduleload)
+	commands.getstatusoutput(cmd_repack)
+      except Exception,e:
+        print ('Repack error')
