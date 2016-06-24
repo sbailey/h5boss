@@ -3,6 +3,8 @@ import h5py
 import time
 import traceback 
 from multiprocessing import Pool
+from mpi4py import MPI
+
 plates=[]
 mjds=[]
 fibers=[]
@@ -86,7 +88,7 @@ def subselect(infile):
 	#print ('Metadata operation time: %.2f seconds'%(tend-dwtime-dmwtime))
 
 	return
-def select(infiles, outfiles, platess, mjdss, fiberss, nproc=None):
+def select(infiles, outfiles, platess, mjdss, fiberss, nproc=None,mpi=None):
     '''
     Select a set of (plates,mjds,fibers) from a set of input files
     
@@ -113,21 +115,36 @@ def select(infiles, outfiles, platess, mjdss, fiberss, nproc=None):
     # print ("create final file error:%s"%outfile)
     tstart=time.time()
     print ("total hdf5 files %d"%len(infiles))
-    if nproc != None and nproc>1:
-     print ("Using %d processes"%nproc)
+    ######################  MPI ########################
+    if mpi != None: 
+     print ("Using mpi4py")
+     comm =MPI.COMM_WORLD
+     nproc = comm.Get_size()
+     rank = comm.Get_rank()
+     if (rank==0):
+     	print ("starting mpi routine with %d processes"%nproc)  
+     #each rank gets a subset of the filelist
+     total_files=len(infiles)
+     #distribute the workload evenly to each process
+     step=total_files / nproc
+     rank_start = rank * step
+     rank_end = rank_start+step
+     if(rank==nproc-1):
+        rank_end=total_files
+     range_files=infiles[rank_start:rank_end]
+     #each rank starts the subselect procedure
+     for i in range(0,len(range_files)):
+      subselect(range_files[i])
+    ##################### MultiProcessing ##############
+    else if nproc != None and nproc>1:
+     print ("Using %d processes with multiprocessing python on single node"%nproc)
      p=Pool(nproc)
      p.map(subselect, infiles)
      #p.join
+    ##################### Serial Version ##############    
     else:
      print ("Using 1 process")
      map(subselect,infiles)  
-     #subselect(infiles)
-    print ("finally ",hx)
-    #try: 
-    #  hx.close()
-    #except Exception,e:
-    # print ("final close error")
-    # pass
     print("Selected %d files"%len(select_files))
     if(len(select_files)>0):
      selected_f="selected_files_"+str(len(select_files))+".out"
