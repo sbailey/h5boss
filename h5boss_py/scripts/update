@@ -21,15 +21,18 @@ import traceback
 
 import argparse
 
-parser = argparse.ArgumentParser(prog='add',description='Compare base with pmf, add the new plates/mjds/fibers founded in both (pmf,input) into the pre-selected HDF5 base file, then remove the plates/mjds/fibers in pre-selected HDF5 base file that are not found in pmf')
+parser = argparse.ArgumentParser(prog='update',description='Compare base with pmf, add the new plates/mjds/fibers founded in both (pmf,input) into the pre-selected HDF5 base file, then remove the plates/mjds/fibers in pre-selected HDF5 base file that are not found in pmf')
 parser.add_argument("base", help="Pre-selected HDF5 file")
 parser.add_argument("input",  help="HDF5 input list")
 parser.add_argument("pmf",    help="Plate/mjd/fiber list in csv")
+parser.add_argument("--repack",	help="repack after changing the file")
 opts=parser.parse_args()
 
 pmflist = opts.pmf
 infiles = opts.input
 outfile = opts.base
+if opts.repack:
+   print ("repacking")
 tstart=time.time()
 import pandas as pd
 try: 
@@ -40,7 +43,7 @@ try:
 except Exception, e:
  print("pmf csv read error or not exist:%s"%e,pmflist)
  print("e.g., 1st row of csv should be 'plates mjds fibers'")
-
+ sys.exit(0)
 try:
  with open(infiles,'rb') as f:
   reader = csv.reader(f)
@@ -48,6 +51,7 @@ try:
 
 except Exception, e:
  print ("CSV file open error or not exist: %s"%e,infiles)
+ sys.exit(0)
  #traceback.print_exc()
 
 infile = [x for sublist in infile for x in sublist]

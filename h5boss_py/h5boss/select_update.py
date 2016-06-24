@@ -49,13 +49,9 @@ def select_update(infiles, infile, plates, mjds, fibers):
      left2=left.view(left.dtype[0]).reshape(left.shape+(-1,))
      try:
       print ('plates/mjds/fibers to be removed in %s'%infile)
-      #print (left2)
       dplate = left2[:,0]
       dmjd = left2[:,1]
       dfiber = left2[:,2]
-      #print dplate
-      #print dmjd
-      #print dfiber
       remove(infile, dplate,dmjd,dfiber) 
      except Exception, e:
       print ('Error in removing pmf in the file')

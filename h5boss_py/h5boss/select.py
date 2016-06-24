@@ -23,6 +23,7 @@ def select(infiles, outfile, plates, mjds, fibers):
     hx = h5py.File(outfile,'w')
     tstart=time.time() 
     select_files=list() 
+    dwtime=0.0
     print("plates/mjds/fiber found in: ") 
     for infile in infiles:
         try: 
@@ -40,7 +41,7 @@ def select(infiles, outfile, plates, mjds, fibers):
                    select_files.append(infile)
 		   if parent_id not in hx:
                     hx.create_group(parent_id)
-		   
+		   dataw_start=time.time() 
                    for fiber in xfibers:
                        id = '{}/{}/{}'.format(plate, mjd, fiber)
 		       if id not in hx:
@@ -60,6 +61,8 @@ def select(infiles, outfile, plates, mjds, fibers):
                        except Exception,e:
 			print("catalog %s not found"%id)
                         pass
+                   dataw_end=time.time()
+                   dwtime+=dataw_end-dataw_start
                 #else: 
 		#   print ("pmf not found in input file",infile) 
         fx.close()           
@@ -72,3 +75,5 @@ def select(infiles, outfile, plates, mjds, fibers):
       f.writelines(["%s\n" % item  for item in select_files])
     tend=time.time()-tstart
     print ('Selection time: %.2f seconds'%tend)
+    print ('Data write time: %.2f seconds'%dwtime)
+    print ('Metadata operation time: %.2f seconds'%(tend-dwtime))

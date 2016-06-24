@@ -33,7 +33,7 @@ opts=parser.parse_args()
 #parser.add_option("-x", "--xls", type=str,help="plate/mjd/fiber excel file")
 #opts, args = parser.parse_args()
 
-xlsfile = opts.pmf
+pmflist = opts.pmf
 infiles = opts.input
 outfile = opts.base
 tstart=time.time()

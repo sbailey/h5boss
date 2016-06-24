@@ -1,12 +1,12 @@
 import os
-import boss2hdf5
+from h5boss import boss2hdf5
 import traceback
-import optparse
+import argparse
 from mpi4py import MPI
 
 datapath = "/global/projecta/projectdirs/sdss/data/sdss/dr12/boss/spectro/redux/v5_7_0/"
-outputpath= "/global/cscratch1/sd/jialin/h5boss-bp/"
-
+#outputpath= "/global/cscratch1/sd/jialin/h5boss-bp/"
+outputpath= "/scratch1/scratchdirs/jialin/h5boss/"
 
 def listfiles():
      ldir=os.listdir(datapath)
@@ -21,15 +21,17 @@ def findseed(x):
      return fitsfiles
 
 def parallel_convert():
-    parser = optparse.OptionParser(usage = "%prog [options]")
-    parser.add_option("-i", "--input", type=str,  help="input fits directory")
-    parser.add_option("-o", "--output", type=str,  help="input hdf5 directory")
+    parser = argparse.ArgumentParser(prog='convert')
+    parser.add_argument("--input", type=str,  help="input fits directory")
+    parser.add_argument("--output", type=str,  help="input hdf5 directory")
 
-    opts, args = parser.parse_args()
+    opts = parser.parse_args()
     global datapath
     global outputpath
-    datapath = opts.input
-    outputpath = opts.output
+    if opts.input:
+    	datapath = opts.input
+    if opts.output:
+    	outputpath = opts.output
 
     rank = MPI.COMM_WORLD.Get_rank()
     nproc = MPI.COMM_WORLD.Get_size()

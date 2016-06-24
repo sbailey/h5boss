@@ -15,19 +15,17 @@ def select_add(infiles, infile, plates, mjds, fibers):
         fibers : list of fibers        
     '''
 
-
     miss, left = pmf(infile,plates,mjds,fibers)
-    #add the missing one
-    #print ('add the missing one')
-    #print (type(miss[0]))
-    miss2=miss.view(miss.dtype[0]).reshape(miss.shape+(-1,))[:,0]
-    
-    print ('miss2')
-    print miss2
-    plate = miss2[:,0]
-    mjd = miss2[:,1]
-    fiber = miss2[:,2]
-    print plate
-    print mjd
-    print fiber
-    select(infiles,infile,plate,mjd,fiber)
+    miss_array=[]
+    try: 
+     miss_array=miss.view(miss.dtype[0]).reshape(miss.shape+(-1,))[:,0]
+    except Exception,e:
+     print ("empty list detected in miss_pmf")
+    plate=[]
+    mjd=[]
+    fiber=[]
+    if(len(miss_array)>0):
+     plate = miss_array[:,0]
+     mjd = miss_array[:,1]
+     fiber = miss_array[:,2]
+     select(infiles,infile,plate,mjd,fiber)

@@ -8,7 +8,7 @@ TODO:
 """
 from __future__ import division, print_function
 #from __future__ import absolute_import
-from h5boss.select import select
+from h5boss.selectp import select
 import sys,os
 import time
 import optparse
@@ -22,7 +22,7 @@ parser = argparse.ArgumentParser(prog='subset')
 parser.add_argument("input",  help="HDF5 input list")
 parser.add_argument("output", help="HDF5 output")
 parser.add_argument("pmf",    help="Plate/mjd/fiber list in csv")
-
+parser.add_argument("--nproc", help="number of processes",type=int)
 opts=parser.parse_args()
 
 
@@ -37,6 +37,9 @@ opts=parser.parse_args()
 pmflist = opts.pmf
 infiles = opts.input
 outfile = opts.output
+nproc=0
+if opts.nproc:
+ nproc = opts.nproc
 tstart=time.time()
 #import pandas as pd
 #try: 
@@ -55,6 +58,7 @@ try:
  df = pd.read_csv(pmflist,delimiter=' ',names=["plates","mjds","fibers"],index_col=None,dtype=str)
  df = df.sort(['plates'],ascending=[1])
  plates = map(str,df['plates'].values.tolist())
+# print (plates)
  mjds = map(str,df['mjds'].values.tolist())
  fibers = map(str,df['fibers'].values.tolist())
 except Exception, e:
@@ -82,8 +86,7 @@ print ("Input: %d files:"%len(infile),infile[0],"...",infile[-1])
 print ("Output: ", outfile)
 print ("Running selection...")
 try:
- select(infile, outfile, plates, mjds, fibers)
-
+ select(infile, outfile, plates, mjds, fibers,nproc)
 except Exception, e:
  print ("Error in select:")
  traceback.print_exc()
