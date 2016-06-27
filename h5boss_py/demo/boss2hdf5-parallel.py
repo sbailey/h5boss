@@ -47,9 +47,9 @@ def parallel_convert():
         fitspath_name_for_current_rank = findseed(platepath_for_current_rank)
         if(len(fitspath_name_for_current_rank)>0):
             hdf5file=fitspath_name_for_current_rank[0].split('/')[-1].replace('spPlate-','',1).replace('fits','hdf5',1)
-        try:
+         try:
             boss2hdf5.serial_convert(fitspath_name_for_current_rank,outputpath+hdf5file)
-        except Exception, e:
+         except Exception, e:
             print "Error:%s"%e, fitspath_name_for_current_rank
             traceback.print_exc()
 if __name__ == '__main__':
