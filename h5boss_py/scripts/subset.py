@@ -8,21 +8,23 @@ TODO:
 """
 from __future__ import division, print_function
 #from __future__ import absolute_import
-from h5boss.selectp import select
+from h5boss.selectmpi import select
 import sys,os
 import time
 import optparse
 import csv
 import traceback
 import pandas as pd
-
+import numpy as np
 import optparse
 import argparse
+from mpi4py import MPI
 parser = argparse.ArgumentParser(prog='subset')
 parser.add_argument("input",  help="HDF5 input list")
 parser.add_argument("output", help="HDF5 output")
 parser.add_argument("pmf",    help="Plate/mjd/fiber list in csv")
 parser.add_argument("--nproc", help="number of processes",type=int)
+parser.add_argument("--mpi", help="using mpi yes/no")
 opts=parser.parse_args()
 
 
@@ -37,9 +39,12 @@ opts=parser.parse_args()
 pmflist = opts.pmf
 infiles = opts.input
 outfile = opts.output
-nproc=0
+nproc=1
 if opts.nproc:
  nproc = opts.nproc
+mpiop="no"
+if opts.mpi:
+ mpiop="yes"
 tstart=time.time()
 #import pandas as pd
 #try: 
@@ -57,27 +62,35 @@ fibers=[]
 try:
  df = pd.read_csv(pmflist,delimiter=' ',names=["plates","mjds","fibers"],index_col=None,dtype=str)
  df = df.sort(['plates'],ascending=[1])
- plates = map(str,df['plates'].values.tolist())
+ #plates = map(str,df['plates'].values.tolist())
+ plates = list(map(str,df['plates'].values))
+ plates_array = np.asarray(plates)
+ plates_uni_array = np.unique(plates_array)
+ print ("number of unique plates is %d"%plates_uni_array.size)
 # print (plates)
- mjds = map(str,df['mjds'].values.tolist())
- fibers = map(str,df['fibers'].values.tolist())
-except Exception, e:
+ #mjds = map(str,df['mjds'].values.tolist())
+ #fibers = map(str,df['fibers'].values.tolist())
+ mjds = list(map(str,df['mjds'].values))
+ fibers = list(map(str,df['fibers'].values))
+except Exception as e:
  print("pmf csv read error or not exist:%s"%e,pmflist)
  print("e.g., 1st row of csv should be 'plates mjds fibers'")
-
+infile=[]
 try:
- with open(infiles,'rb') as f:
+ with open(infiles,'rt') as f:
   reader = csv.reader(f)
   infile = list(reader)
-
-except Exception, e:
- print ("input csv read error or not exist: %s"%e,infiles)
+  infile = [x for sublist in infile for x in sublist]
+except Exception as e:
+ print ("input filelist csv read error or not exist: %s"%e,infiles)
  #traceback.print_exc()
 
-infile = [x for sublist in infile for x in sublist]
+#infile = [x for sublist in infile for x in sublist]
 #print ("Plates: ",plates)
 #print ("MJDs: ",mjds)
 #print ("Fibers: ", fibers)
+#print ("plates:",plates)
+#print ("infile:",infile)
 if(len(plates)==0 or len(infile)==0):
   print("pmf or input is empty")
   sys.exit(0)
@@ -86,8 +99,8 @@ print ("Input: %d files:"%len(infile),infile[0],"...",infile[-1])
 print ("Output: ", outfile)
 print ("Running selection...")
 try:
- select(infile, outfile, plates, mjds, fibers,nproc)
-except Exception, e:
+ select(infile, outfile, plates, mjds, fibers,nproc,mpiop)
+except Exception as e:
  print ("Error in select:")
  traceback.print_exc()
 print ("Done selection")

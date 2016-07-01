@@ -1,7 +1,7 @@
 import numpy as np
 import h5py
 import time
-def select(infiles, outfile, plates, mjds, fibers):
+def select(infiles, outfile, plates, mjds, fibers,nproc):
     '''
     Select a set of (plates,mjds,fibers) from a set of input files
     
@@ -16,8 +16,7 @@ def select(infiles, outfile, plates, mjds, fibers):
     plates = np.asarray(plates)
     mjds = np.asarray(mjds)
     fibers = np.asarray(fibers) 
-    meta=['plugmap', 'zbest', 'zline',
-			'photo/match', 'photo/matchflux', 'photo/matchpos']
+    meta=['plugmap', 'zbest', 'zline', 'photo/match', 'photo/matchflux', 'photo/matchpos']
     if not isinstance(infiles, (list, tuple)):
         infiles = [infiles,]
     hx = h5py.File(outfile,'w')
@@ -28,26 +27,26 @@ def select(infiles, outfile, plates, mjds, fibers):
     for infile in infiles:
         try: 
          fx = h5py.File(infile, mode='r')
-	except Exception, e:
+        except Exception as e:
          print ("File open error: ",infile)
          continue
         for plate in fx.keys():
             for mjd in fx[plate].keys():
                 ii = (plates == plate) & (mjds == mjd)
-		xfibers = fibers[ii]
-		parent_id='{}/{}'.format(plate, mjd)
-		if np.any(ii):
-		   print (infile)
+                xfibers = fibers[ii]
+                parent_id='{}/{}'.format(plate, mjd)
+                if np.any(ii):
+                   print (infile)
                    select_files.append(infile)
-		   if parent_id not in hx:
+                   if parent_id not in hx:
                     hx.create_group(parent_id)
-		   dataw_start=time.time() 
+                   dataw_start=time.time() 
                    for fiber in xfibers:
                        id = '{}/{}/{}'.format(plate, mjd, fiber)
-		       if id not in hx:
+                       if id not in hx:
                         try:
                          fx.copy(id, hx[parent_id])
-                        except Exception,e:
+                        except Exception as e:
                          print("fiber %s not found"%id)
                          pass                
                    for name in meta:
@@ -56,10 +55,10 @@ def select(infiles, outfile, plates, mjds, fibers):
                         catalog = fx[id]
                         yfib=xfibers.astype(np.int32)
                         jj = np.in1d(catalog['FIBERID'], yfib)
-		        if id not in hx:
-	                 hx[id] = fx[id][jj].copy()
-                       except Exception,e:
-			print("catalog %s not found"%id)
+                        if id not in hx:
+                         hx[id] = fx[id][jj].copy()
+                       except Exception as e:
+                        print("catalog %s not found"%id)
                         pass
                    dataw_end=time.time()
                    dwtime+=dataw_end-dataw_start

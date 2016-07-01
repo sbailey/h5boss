@@ -1,14 +1,12 @@
 #!/bin/bash
 #SBATCH -p regular
-#SBATCH -N 103
-#SBATCH -t 01:00:00
-#SBATCH -J fits2hdf-parallel
+#SBATCH -N 102
+#SBATCH -t 01:30:00
+#SBATCH -J boss2hdf5-parallel
 #SBATCH -e %j.err
 #SBATCH -o %j.out
 #SBATCH --mail-user=jalnliu@lbl.gov
 #SBATCH --mail-type=ALL
 
 cd $SLURM_SUBMIT_DIR
-#module load python/2.7-anaconda
-#module list
-srun -n 2464 python-mpi boss2hdf5-parallel.py 
+srun -n 2448 python-mpi boss2hdf5-parallel.py 

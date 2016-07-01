@@ -6,7 +6,7 @@ from mpi4py import MPI
 
 datapath = "/global/projecta/projectdirs/sdss/data/sdss/dr12/boss/spectro/redux/v5_7_0/"
 #outputpath= "/global/cscratch1/sd/jialin/h5boss-bp/"
-outputpath= "/scratch1/scratchdirs/jialin/h5boss/"
+outputpath= "/scratch1/scratchdirs/jialin/h5boss-full/"
 
 def listfiles():
      ldir=os.listdir(datapath)
@@ -47,10 +47,10 @@ def parallel_convert():
         fitspath_name_for_current_rank = findseed(platepath_for_current_rank)
         if(len(fitspath_name_for_current_rank)>0):
             hdf5file=fitspath_name_for_current_rank[0].split('/')[-1].replace('spPlate-','',1).replace('fits','hdf5',1)
-         try:
-            boss2hdf5.serial_convert(fitspath_name_for_current_rank,outputpath+hdf5file)
-         except Exception, e:
-            print "Error:%s"%e, fitspath_name_for_current_rank
-            traceback.print_exc()
+            try:
+             boss2hdf5.serial_convert(fitspath_name_for_current_rank,outputpath+hdf5file)
+            except Exception, e:
+             print "Error:%s"%e, fitspath_name_for_current_rank
+             traceback.print_exc()
 if __name__ == '__main__':
     parallel_convert()
