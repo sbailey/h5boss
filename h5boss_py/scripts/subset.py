@@ -42,9 +42,6 @@ outfile = opts.output
 nproc=1
 if opts.nproc:
  nproc = opts.nproc
-mpiop="no"
-if opts.mpi:
- mpiop="yes"
 tstart=time.time()
 #import pandas as pd
 #try: 
@@ -98,6 +95,10 @@ if(len(plates)==0 or len(infile)==0):
 print ("Input: %d files:"%len(infile),infile[0],"...",infile[-1])
 print ("Output: ", outfile)
 print ("Running selection...")
+comm =MPI.COMM_WORLD
+mpiop= None
+if opts.mpi and opts.mpi=="yes":
+ mpiop=comm
 try:
  select(infile, outfile, plates, mjds, fibers,nproc,mpiop)
 except Exception as e:

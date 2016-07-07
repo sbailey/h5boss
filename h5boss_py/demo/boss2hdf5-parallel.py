@@ -23,13 +23,14 @@ def findseed(x):
 def parallel_convert():
     parser = argparse.ArgumentParser(prog='convert')
     parser.add_argument("--input", type=str,  help="input fits directory")
-    parser.add_argument("--output", type=str,  help="input hdf5 directory")
+    parser.add_argument("--output", type=str,  help="output hdf5")
 
     opts = parser.parse_args()
     global datapath
     global outputpath
     if opts.input:
     	datapath = opts.input
+
     if opts.output:
     	outputpath = opts.output
 

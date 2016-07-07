@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH -p regular
 #SBATCH -N 102
-#SBATCH -t 01:30:00
+#SBATCH -t 01:50:00
 #SBATCH -J boss2hdf5-parallel
 #SBATCH -e %j.err
 #SBATCH -o %j.out
