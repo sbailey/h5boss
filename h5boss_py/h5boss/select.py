@@ -1,7 +1,9 @@
 import numpy as np
 import h5py
 import time
-def select(infiles, outfile, plates, mjds, fibers,nproc):
+import traceback
+#def select(infiles, outfile, plates, mjds, fibers,nproc):
+def select(infiles, outfile, plates, mjds,fibers):
     '''
     Select a set of (plates,mjds,fibers) from a set of input files
     
@@ -45,6 +47,7 @@ def select(infiles, outfile, plates, mjds, fibers,nproc):
                        id = '{}/{}/{}'.format(plate, mjd, fiber)
                        if id not in hx:
                         try:
+			 #this is the object copy
                          fx.copy(id, hx[parent_id])
                         except Exception as e:
                          print("fiber %s not found"%id)
@@ -56,9 +59,19 @@ def select(infiles, outfile, plates, mjds, fibers,nproc):
                         yfib=xfibers.astype(np.int32)
                         jj = np.in1d(catalog['FIBERID'], yfib)
                         if id not in hx:
-                         hx[id] = fx[id][jj].copy()
+                         dset=hx.create_dataset(id,maxshape=(None,),dtype=fx[id][jj].dtype,data=fx[id][jj])
+			 #this is the dataset slice copy,i.e., only copy the row that has the queried fiberid
+                         #hx[id] = fx[id][jj].copy()
+                        else:
+                         if fx[id][jj]['FIBERID'] not in hx[id]['FIBERID']:
+                          dset=hx[id]
+                          dset.resize(len(dset)+1)
+                          dset[len(dset)-1]=fx[id][jj]
+                          dset.close()
+			#exist_id=hx[id] # catalog table is existed, need to update
                        except Exception as e:
-                        print("catalog %s not found"%id)
+                        print("catalog %s add error"%id)
+                        traceback_print_exc()
                         pass
                    dataw_end=time.time()
                    dwtime+=dataw_end-dataw_start
@@ -70,7 +83,7 @@ def select(infiles, outfile, plates, mjds, fibers,nproc):
     if(len(select_files)>0):
      selected_f="selected_files_"+str(len(select_files))+".out"
      print("Selected file info saved in %s"%str(selected_f))
-     with open(selected_f,"wb") as f:
+     with open(selected_f,"wt") as f:
       f.writelines(["%s\n" % item  for item in select_files])
     tend=time.time()-tstart
     print ('Selection time: %.2f seconds'%tend)
