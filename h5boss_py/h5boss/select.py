@@ -21,11 +21,11 @@ def select(infiles, outfile, plates, mjds,fibers):
     meta=['plugmap', 'zbest', 'zline', 'photo/match', 'photo/matchflux', 'photo/matchpos']
     if not isinstance(infiles, (list, tuple)):
         infiles = [infiles,]
-    hx = h5py.File(outfile,'w')
+    #hx = h5py.File(outfile,'w')
     tstart=time.time() 
     select_files=list() 
     dwtime=0.0
-    print("plates/mjds/fiber found in: ") 
+    #print("plates/mjds/fiber found in: ") 
     for infile in infiles:
         try: 
          fx = h5py.File(infile, mode='r')
@@ -38,8 +38,12 @@ def select(infiles, outfile, plates, mjds,fibers):
                 xfibers = fibers[ii]
                 parent_id='{}/{}'.format(plate, mjd)
                 if np.any(ii):
-                   print (infile)
+                   #print (infile)
                    select_files.append(infile)
+                   try:
+                    hx = h5py.File(outfile,'w')
+                   except:
+                    pass
                    if parent_id not in hx:
                     hx.create_group(parent_id)
                    dataw_start=time.time() 
@@ -71,21 +75,24 @@ def select(infiles, outfile, plates, mjds,fibers):
 			#exist_id=hx[id] # catalog table is existed, need to update
                        except Exception as e:
                         print("catalog %s add error"%id)
-                        traceback_print_exc()
+                        traceback.print_exc()
                         pass
                    dataw_end=time.time()
                    dwtime+=dataw_end-dataw_start
                 #else: 
 		#   print ("pmf not found in input file",infile) 
         fx.close()           
-    hx.close()
-    print("Selected %d files"%len(select_files))
+    try:
+     hx.close()
+    except:
+     pass
+    #print("Selected %d files"%len(select_files))
     if(len(select_files)>0):
      selected_f="selected_files_"+str(len(select_files))+".out"
-     print("Selected file info saved in %s"%str(selected_f))
+     #print("Selected file info saved in %s"%str(selected_f))
      with open(selected_f,"wt") as f:
       f.writelines(["%s\n" % item  for item in select_files])
     tend=time.time()-tstart
-    print ('Selection time: %.2f seconds'%tend)
-    print ('Data write time: %.2f seconds'%dwtime)
-    print ('Metadata operation time: %.2f seconds'%(tend-dwtime))
+    #print ('Selection time: %.2f seconds'%tend)
+    #print ('Data write time: %.2f seconds'%dwtime)
+    #print ('Metadata operation time: %.2f seconds'%(tend-dwtime))

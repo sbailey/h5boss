@@ -1,9 +1,9 @@
 import numpy as np
 import h5py
-import time
+import time,os
 import traceback 
 from h5boss.pmf import pmf 
-
+from h5boss.select import select
 fx=""
 fiberdatalink={}
 pid=""
@@ -42,4 +42,12 @@ def pmf_3(infile,plates,mjds,fibers):
          print (pid,infile)
          pass
         return (fiberdatalink)
-#def select()
+def create_slavefile(infile,plates,mjds,fibers,masterfile,rank,id):
+    master_dir=os.path.dirname(os.path.realpath(masterfile))+'/'+os.path.basename(masterfile).split('.')[0]
+     
+    slavefile=master_dir+'/'+str(rank)+'_'+str(id)+'.h5'
+    try:
+      select(infile, slavefile, plates, mjds, fibers)
+    except Exception as e:
+      print ("Error in slave file:%s")
+      traceback.print_exc()   
