@@ -10,8 +10,8 @@ from __future__ import division, print_function
 #from __future__ import absolute_import
 #from h5boss.selectmpi import select
 #from h5boss.select_c import select
-from h5boss.select import select
-#from h5boss.select_idx import select
+#from h5boss.select import select
+from h5boss.select_idx import select
 import sys,os
 import time
 import optparse
