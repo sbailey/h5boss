@@ -65,16 +65,7 @@ def parse_pmf(input,output,pmflist,rank):
     fibers=[]
     try:
         df = list_csv(pmflist)
-        #df = pd.read_csv(pmflist,delimiter=' ',names=["plates","mjds","fibers"],index_col=None,dtype=str)
-        #df = df.sort(['plates'],ascending=[1])
-        #df = df.sort_values(['plates'],ascending=[1])
-        #plates = list(map(str,df['plates'].values))
-        #plates_uni_array = np.unique(np.asarray(plates))
-        #mjds = list(map(str,df['mjds'].values))
-        #fibers = list(map(str,df['fibers'].values))
         plates = df['plates']
-        #print (plates)
-        #plates_uni_array = np.unique(np.asarray(plates))
         mjds = df['mjds']
         fibers = df['fibers']
     except Exception as e:
@@ -132,7 +123,6 @@ def parallel_select():
     parser.add_argument("input",  help="HDF5 input list")
     parser.add_argument("output", help="HDF5 output")
     parser.add_argument("pmf",    help="Plate/mjd/fiber list")
-    #parser.add_argument("--nproc", help="number of processes",type=int)
     parser.add_argument("--mpi", help="using mpi yes/no")
     opts=parser.parse_args()
 
@@ -192,11 +182,6 @@ def parallel_select():
         counterop = MPI.Op.Create(adddic, commute=True)
         global_dict={}
         global_dict= comm.allreduce(fiber_dict, op=counterop)
-        #hx.create_group()
-        #if rank==0: 
-	#   print ("Rank %d: Length of global dict: %d"%(rank,len(global_dict)))
-        #if rank==1: print ("Rank %d:"%rank,global_dict)
-        #if rank==1: print ("Rank: %d Length of global dict: %d"%(rank,len(global_dict)))
         try:
 	 for key,value in global_dict.items():
 	   #print (key)
@@ -205,12 +190,6 @@ def parallel_select():
 	except Exception as e:
          traceback.print_exc() 
 	 
-        #print("Selected %d files"%len(select_files))
-        #if(len(select_files)>0):
-        # selected_f="selected_files_"+str(len(select_files))+".out"
-        #  print("Selected file info saved in %s"%str(selected_f))
-        # with open(selected_f,"wb") as f:
-        #  f.writelines(["%s\n" % item  for item in select_files])
         comm.Barrier()
         try:
              hx.close()

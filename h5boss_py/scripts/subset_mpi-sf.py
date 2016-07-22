@@ -10,8 +10,7 @@ from __future__ import division, print_function
 #from __future__ import absolute_import
 from mpi4py import MPI
 import h5py
-from h5boss.selectmpi import pmf_3
-from h5boss.selectmpi import create_slavefile
+from h5boss.select import * 
 import sys,os
 import time
 import optparse
@@ -142,7 +141,7 @@ def parallel_select():
         try:
              hx = h5py.File(masterfile,'w',driver='mpio', comm=MPI.COMM_WORLD)
         except Exception as e:
-             print ("Output file creat error:%s"%outfile)
+             print ("Output file creat error:%s"%masterfile)
 	     traceback.print_exc()
         comm.Barrier()
         tstart=time.time()
@@ -159,7 +158,7 @@ def parallel_select():
         range_files=hdfsource[rank_start:rank_end]
  
         for i in range(0,len(range_files)):
-            create_slavefile(range_files[i],plates,mjds,fibers,masterfile,rank,i)
+            sub_select(range_files[i],plates,mjds,fibers,masterfile,rank,i)
         comm.Barrier() 
         try:
              hx.close()
