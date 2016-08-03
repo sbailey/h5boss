@@ -10,7 +10,7 @@ from __future__ import division, print_function
 #from __future__ import absolute_import
 from mpi4py import MPI
 import h5py
-from h5boss.selectmpi import pmf_3
+from h5boss.selectmpi import node_type
 import sys,os
 import time
 import optparse
@@ -119,7 +119,7 @@ def parallel_select():
         pmf: Plates/mjds/fibers numbers to be quried, [csv file]
        
     '''
-    parser = argparse.ArgumentParser(prog='subset')
+    parser = argparse.ArgumentParser(prog='subset_mpi')
     parser.add_argument("input",  help="HDF5 input list")
     parser.add_argument("output", help="HDF5 output")
     parser.add_argument("pmf",    help="Plate/mjd/fiber list")
@@ -153,8 +153,8 @@ def parallel_select():
         except Exception as e:
              print ("Output file creat error:%s"%outfile)
 	     traceback.print_exc()
-        comm.Barrier()
-        tstart=time.time()
+        #comm.Barrier()
+        tstart=MPI.Wtime()
         if rank==0: print ("Number of processes %d"%nproc)
 
         #each rank gets a subset of the filelist
@@ -173,31 +173,64 @@ def parallel_select():
         fiber_dict={}
         
         for i in range(0,len(range_files)):
-            fiber_item = pmf_3(range_files[i],plates,mjds,fibers)
+            fiber_item = node_type(range_files[i],plates,mjds,fibers)
             if len(fiber_item)>0:
              fiber_dict.update(fiber_item)
-        comm.Barrier()
-        print ("rank %d, number of fiber nodes %d"%(rank,len(fiber_dict))) 
+        #comm.Barrier()
+        tend=MPI.Wtime()
+        if rank==0: 
+         print ("Get all nodes metadata (dataset, (type,filename)) time: %.2f"%(tend-tstart))
         #if rank==0: print ("fiber_dict: ",fiber_dict)
+        #TODO: rank0 create all, then close an reopen. h5py force filling value
         counterop = MPI.Op.Create(adddic, commute=True)
         global_dict={}
         global_dict= comm.allreduce(fiber_dict, op=counterop)
+        #comm.Barrier()
+        treduce=MPI.Wtime()
+        if rank==0:
+          print ("Allreduce %d kv(dataset, type) time: %.2f"%(len(global_dict),(treduce-tend)))
         try:
 	 for key,value in global_dict.items():
-	   #print (key)
-           
-	   hx.create_dataset(key,dtype=value,maxshape=(None,),shape=(1,))
+	   hx.create_dataset(key,dtype=value[0],maxshape=(None,),shape=(1,))
 	except Exception as e:
          traceback.print_exc() 
 	 
-        comm.Barrier()
+        #comm.Barrier()
+        tcreated=MPI.Wtime()
+        if rank==0:
+         print ("Dataset creation time: %.2f"%(tcreated-treduce))
+        #Read/Write all dataset into final file, each rank handles one fiber_dict, which contains multiple fiber_item
+        try: 
+         for key, value in fiber_dict.items():
+            # get the dataset from original file value[1]
+              print ("rank %d is working"%rank)
+              try: 
+                subfx=h5py.File(value[1],'r')
+                subdx=subfx[key].value
+              except Exception as e:
+                traceback.print_exc()
+                print ("read subfile %s error"%value[1])
+                pass
+              dx=hx[key]
+              #dx.resize(subdx.shape)
+              dx[:]=subdx
+        except Exception as e:
+         traceback.print_exc()
+         print ("Data read/write error %s file:%s"%(key,value[1]))       
+         pass 
+        t_copy=MPI.Wtime()             
+        if rank==0:
+            print ("Data copy time: %.2f"%(tcopy-tcreated))
         try:
              hx.close()
         except Exception as e:
              print ("Output file close error:%s"%outfile)
              traceback.print_exc()
+        #comm.Barrier()
+        tclose=MPI.Wtime()
         if rank==0:
-            print ('Total Cost: %.2f'%(time.time()-tstart))
+            print ("File close time: %.2f"%(tclose-tcopy))
+            print ('Total Cost: %.2f'%(tclose-tstart))
 
 if __name__=='__main__': 
     parallel_select()

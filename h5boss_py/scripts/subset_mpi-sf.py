@@ -166,7 +166,7 @@ def parallel_select():
              print ("Master file closing error:%s"%outfile)
              traceback.print_exc()
         if rank==0:
-            print ('Total Cost: %.2f'%(time.time()-tstart))
+            print ('Cost: %.2f'%(time.time()-tstart))
 
 if __name__=='__main__': 
     parallel_select()
