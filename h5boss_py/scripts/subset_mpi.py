@@ -20,6 +20,7 @@ import traceback
 import numpy as np
 import optparse
 import argparse
+import datetime
 from collections import defaultdict
 
 meta=['plugmap', 'zbest', 'zline',
@@ -104,10 +105,8 @@ def parse_pmf(input,output,pmflist,rank):
     return (plates,mjds,fibers,hdfsource)
 def adddic(dict1,dict2,datatype):
     for item in dict2:
-      if item in dict1:
-        dict1[item] += dict2[item]
-      else:
-        dict1[item] =  dict2[item]
+      if item not in dict1:
+        dict1[item] = dict2[item]
     return dict1
 def parallel_select():
     '''
@@ -142,29 +141,31 @@ def parallel_select():
         nproc = comm.Get_size()
         rank = comm.Get_rank()
         (plates,mjds,fibers,hdfsource) = parse_pmf(infiles, outfile, pmflist,rank)
-    	if rank==0:
-     	 print ("HDF5 source: %d files:"%len(hdfsource))
-     	 print ("Output to %s "%outfile)
-	 plates_uni_array = np.unique(np.asarray(plates))
-     	 print ("Number of plates to be quired: %d; and %d uniquely"%(plates.size,plates_uni_array.size))        
+#    	if rank==0:
+#     	 print ("HDF5 source: %d files:"%len(hdfsource))
+#     	 print ("Output to %s "%outfile)
+#	 plates_uni_array = np.unique(np.asarray(plates))
+#     	 print ("Number of plates to be quired: %d; and %d uniquely"%(plates.size,plates_uni_array.size))        
         #collectively open the output file
-        try:
-             hx = h5py.File(outfile,'w',driver='mpio', comm=MPI.COMM_WORLD)
-        except Exception as e:
-             print ("Output file creat error:%s"%outfile)
-	     traceback.print_exc()
+        #try:
+        #     hx = h5py.File(outfile,'w',driver='mpio', comm=MPI.COMM_WORLD)
+        #except Exception as e:
+        #     print ("Output file creat error:%s"%outfile)
+	#     traceback.print_exc()
         #comm.Barrier()
         tstart=MPI.Wtime()
-        if rank==0: print ("Number of processes %d"%nproc)
+#        if rank==0: print ("Number of processes %d"%nproc)
 
         #each rank gets a subset of the filelist
         total_files=len(hdfsource)
         #distribute the workload evenly to each process
-        step=total_files / nproc
+        step=int(total_files / nproc)+1
         rank_start =int( rank * step)
         rank_end = int(rank_start + step)
         if(rank==nproc-1):
             rank_end=total_files # adjust the last rank's range
+            if rank_start>total_files:
+             rank_start=total_files
         #print ("rank start: %d, end: %d"%(rank_start,rank_end))
         range_files=hdfsource[rank_start:rank_end]
 
@@ -178,54 +179,109 @@ def parallel_select():
              fiber_dict.update(fiber_item)
         #comm.Barrier()
         tend=MPI.Wtime()
-        if rank==0: 
-         print ("Get all nodes metadata (dataset, (type,filename)) time: %.2f"%(tend-tstart))
+#        if rank==0: 
+#         print ("Get all nodes metadata (dataset, (type,filename)) time: %.2f"%(tend-tstart))
         #if rank==0: print ("fiber_dict: ",fiber_dict)
         #TODO: rank0 create all, then close an reopen. h5py force filling value
         counterop = MPI.Op.Create(adddic, commute=True)
         global_dict={}
+        fiber_item_length=len(fiber_dict)
+        #np.__version__         
+        #print ("rank:%d,file:%d,fiber_length:%d,rank_start:%d,rank_end:%d"%(rank,len(range_files),fiber_item_length,rank_start,rank_end))
+#        global_dict_length=comm.allreduce(fiber_item_length,op=MPI.SUM)
         global_dict= comm.allreduce(fiber_dict, op=counterop)
-        #comm.Barrier()
+#        comm.reduce(fiber_dict,global_dict,op=counterop,root=0)
+        
         treduce=MPI.Wtime()
         if rank==0:
-          print ("Allreduce %d kv(dataset, type) time: %.2f"%(len(global_dict),(treduce-tend)))
-        try:
-	 for key,value in global_dict.items():
-	   hx.create_dataset(key,dtype=value[0],maxshape=(None,),shape=(1,))
-	except Exception as e:
-         traceback.print_exc() 
-	 
-        #comm.Barrier()
+           print ("Allreduce %d kv(dataset, type) time: %.2f"%(len(global_dict),(treduce-tend)))
+        ## use rank0 to create all datasets
+        if rank==-2:
+         try:
+             hx = h5py.File(outfile,'a')
+         except Exception as e:
+             print ("Output file creat error:%s"%outfile)
+             traceback.print_exc()
+         try:
+	  for key,value in global_dict.items():
+           hx.create_dataset(key,dtype=value[0],shape=value[1])
+         except Exception as e:
+           traceback.print_exc()
+         try:
+          hx.flush()
+          hx.close()
+	 except Exception as e:
+          print("hx close error in rank0")
+          traceback.print_exc() 
+ 
         tcreated=MPI.Wtime()
         if rank==0:
          print ("Dataset creation time: %.2f"%(tcreated-treduce))
-        #Read/Write all dataset into final file, each rank handles one fiber_dict, which contains multiple fiber_item
-        try: 
-         for key, value in fiber_dict.items():
-            # get the dataset from original file value[1]
-              print ("rank %d is working"%rank)
-              try: 
-                subfx=h5py.File(value[1],'r')
-                subdx=subfx[key].value
-              except Exception as e:
-                traceback.print_exc()
-                print ("read subfile %s error"%value[1])
-                pass
-              dx=hx[key]
-              #dx.resize(subdx.shape)
-              dx[:]=subdx
-        except Exception as e:
-         traceback.print_exc()
-         print ("Data read/write error %s file:%s"%(key,value[1]))       
-         pass 
-        t_copy=MPI.Wtime()             
         if rank==0:
-            print ("Data copy time: %.2f"%(tcopy-tcreated))
+          #write the dict into a csv file
+          with open('nodes.txt', 'a') as f:
+           f.writelines('{}:{}'.format(k,v) for k, v in pair.items())
+           f.write('\n')
+        ## collectively open file 
+        if rank !=-1:
+         try: 
+          hx = h5py.File(outfile,'a',driver='mpio', comm=MPI.COMM_WORLD)
+          hx.atomic=False 
+         except Exception as e:
+          print ("Output file creat error:%s"%outfile)
+          traceback.print_exc()
+          pass
+         comm.Barrier()
+        topen=MPI.Wtime()
+        #print (hx[str(key)])
+        if rank ==-1:
+         #Read/Write all dataset into final file, 
+         #each rank handles one fiber_dict, which contains multiple fiber_item
+         try: 
+          rankid=0
+          for key, value in fiber_dict.items():
+               rankid+=1
+               try: 
+                 subfx=h5py.File(value[2],'r')
+                 subdx=subfx[key].value
+                 subfx.close()
+               except Exception as e:
+                 traceback.print_exc()
+                 print ("read subfile %s error"%value[2])
+                 pass
+               #print (hx['3665/55247/390/coadd'])
+               #dx=hx[str(key)]
+               #print (key)
+               #print(hx)
+               
+               #print (hx[str(key)])
+               if rankid==1:
+                print (dx)
+                print (dx.value)
+                print (subdx)
+                print ("rank: %d start: %d :%d:%d at: %s"%(rank,rankid,len(fiber_dict),fiber_item_length,datetime.datetime.now().time()))
+               #dx[:]=subdx
+               #if rankid==1:
+               # print (dx.value)
+               #del dx
+               if rankid==-1:
+                print ("rank: %d copied: %d at: %s"%(rank,rankid,datetime.datetime.now().time()))
+         except Exception as e:
+          print ("Data read/write error key:%s file:%s"%(key,value[2]))
+          traceback.print_exc()
+          pass 
+        tcopy=MPI.Wtime()             
+        if rank==0:
+            print ("File open time: %.2f"%(topen-tcreated))
+            print ("Data copy time: %.2f"%(tcopy-topen))
+        comm.Barrier()
         try:
+             hx.flush()
              hx.close()
         except Exception as e:
              print ("Output file close error:%s"%outfile)
              traceback.print_exc()
+             pass
         #comm.Barrier()
         tclose=MPI.Wtime()
         if rank==0:

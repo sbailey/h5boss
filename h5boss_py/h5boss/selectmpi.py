@@ -11,7 +11,7 @@ fx=""
 pid=""
 inputfile=""
 fiberdatalink={} 
-## Data structure of fiberdatalink: {key, value_pair()} --->  {path_dataset, (datatype,filename)}
+## Data structure of fiberdatalink: {key, value_pair()} --->  {path_dataset, (datatype,datashape,filename)}
 ## For example fiberdatalink['3665/52273/360/coadd']= (V32, $SCRATCH/h5boss/3665-52273.h5)
 ## Aug 3 2016
 ## Jialin Liu, jalnliu@lbl.gov
@@ -30,7 +30,8 @@ def traverse_node(name):
      node_t=str(type(fx[node]))
      if 'dataset' in node_t:
         node_t=fx[node].dtype
-        fiberdatalink[node]=(node_t,inputfile)
+        node_sp=fx[node].shape
+        fiberdatalink[node]=(node_t,node_sp,inputfile)
     except Exception as e:
      traceback.print_exc()
      pass      
