@@ -1,4 +1,3 @@
-#define _GNU_SOURCE
 #include "parse_node.h"
 #include<stdio.h>
 #include<stdlib.h>
@@ -69,9 +68,9 @@ char ** path_split(char* path) {
     return token;
 }
 char ** parse_nodes(char * file){
-  char ** buf=(char **)malloc(sizeof(char *));
+  char ** buf=(char **)malloc(sizeof(char *)*10000);
   FILE * fp;
-  char * line = NULL;
+  char * line = (char *)malloc(sizeof(char)*100);
   size_t len = 0;
   size_t read;
   fp = fopen(file,"r");
@@ -82,12 +81,13 @@ char ** parse_nodes(char * file){
     //printf("%s",line);
     if('\n'!=line[0]){
      buf[bufi] = (char *)malloc(strlen(line)+1);
+     line[strcspn(line,"\n")]=0;
      strcpy(buf[bufi],line);
      bufi++;
     }
   }
   fclose(fp);
-  if (line)
+  if (line!=NULL)
     free(line);
   return buf;
 }
@@ -96,8 +96,8 @@ struct Nodes_pair * dataset_list (char * file,const char sep){
     char ** lines=parse_nodes(file);
     char ** dl_keys;
     char ** dl_values;
-    dl_keys=(char **)malloc(sizeof(char *));
-    dl_values=(char **)malloc(sizeof(char *));
+    dl_keys=(char **)malloc(sizeof(char *)*10000);
+    dl_values=(char **)malloc(sizeof(char *)*10000);
     dl->count=bufi;
     int i;
     for (i=0;i<bufi;i++){

@@ -220,7 +220,7 @@ def parallel_select():
         if rank==0:
           #write the dict into a csv file
           with open('nodes.txt', 'a') as f:
-           f.writelines('{}:{}'.format(k,v) for k, v in pair.items())
+           f.writelines('{}:{}\n'.format(k,v[2]) for k, v in global_dict.items())
            f.write('\n')
         ## collectively open file 
         if rank !=-1:
