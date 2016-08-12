@@ -11,6 +11,9 @@ fx=""
 pid=""
 inputfile=""
 fiberdatalink={} 
+cataloglink={}
+meta=['plugmap', 'zbest', 'zline',
+                        'photo/match', 'photo/matchflux', 'photo/matchpos']
 ## Data structure of fiberdatalink: {key, value_pair()} --->  {path_dataset, (datatype,datashape,filename)}
 ## For example fiberdatalink['3665/52273/360/coadd']= (V32, $SCRATCH/h5boss/3665-52273.h5)
 ## Aug 3 2016
@@ -21,7 +24,7 @@ def traverse_node(name):
     '''
        para   : node name in a hdf5 group
        purpose: Find a dataset node, which should be an endpoint in its group hierarchy
-       return : (key,value)->(path_to_dataset, dataset type) 
+       return : (key,value)->(path_to_dataset, (dataset type, shape, filename)) 
     '''
     global fx,pid,fiberdatalink,inputfile
     try:
@@ -36,27 +39,32 @@ def traverse_node(name):
      traceback.print_exc()
      pass      
 
-#node_type is used in ../script/subset_mpi.py, which creates single shared large file 
+#node_type is used in ../script/subset_mpi.py, which is to create single shared file 
 def node_type(infile,plates,mjds,fibers):       
         '''
            para  : filename, plate, mjd, fiber
-           return: (key, value)->(plates/mjd/fiber/../dataset, filename)
+           return: (key, value)->(plates/mjd/fiber/../dataset, (type,shape,filename))
            python dict's updating can ensure that the key is unique, i.e., plate/mjd/fiber/../dataset is unique
         '''
-        global pid,fiberdatalink,fx,inputfile
+        global pid,fiberdatalink, cataloglink, fx, inputfile
         inputfile=infile
         try: 
          fx = h5py.File(infile, mode='r')
-         fiberlink={}
          for plate in fx.keys():
             for mjd in fx[plate].keys():
                 ii = (plates == plate) & (mjds == mjd)
+                spid= '{}/{}'.format(plate, mjd)
                 xfibers = fibers[ii]
                 if np.any(ii): # fiber is found
 	          for fiber in xfibers:#for each fiber node, recursively visit its members and record the 
                       #fiberlink={id:infile}
                       pid = '{}/{}/{}'.format(plate, mjd, fiber)                      
-                      fx[pid].visit(traverse_node)  
+                      fx[pid].visit(traverse_node) 
+                for im in meta:
+                  mnode=spid+'/'+im
+                  mnode_t=fx[mnode].dtype
+                  mnode_sp=fx[mnode].shape
+                  fiberdatalink[mnode]=(mnode_t,mnode_sp,infile)  
          fx.close()          
         except Exception as e:
          print (pid)

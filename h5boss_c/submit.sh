@@ -1,8 +1,12 @@
 #!/bin/bash
 #SBATCH -p debug 
-#SBATCH -N 4
-#SBATCH -t 00:05:00
-#SBATCH -J h5boss
-#SBATCH -e h5boss%j.err
-#SBATCH -o h5boss%j.out
-srun -n 100 ./subset.exe -f $SCRATCH/bosslover/scaling-test/1k_h5boss.h5 -m nodes1k.txt
+#SBATCH -N 3 
+#SBATCH -t 00:10:00
+#SBATCH -J ch5boss
+#SBATCH -e %j.err
+#SBATCH -o %j.out
+template=$SCRATCH/bosslover/scaling-test/1k_template.h5
+output=$SCRATCH/bosslover/scaling-test/test.h5
+cori_output=/global/cscratch1/sd/jialin/bosslover/scaling-test/10k_template_early.h5
+cori_ost72_output=/global/cscratch1/sd/jialin/bosslover/scaling-test/ost72/10k_template_early.h5
+srun -n 96 ./subset.exe -f $cori_output -m nodes10k.txt

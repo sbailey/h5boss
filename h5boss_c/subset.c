@@ -22,7 +22,7 @@ int main(int argc, char **argv){
   MPI_Init(&argc, &argv);
   MPI_Comm_size(comm, &mpi_size);
   MPI_Comm_rank(comm, &mpi_rank);
-  printf("argc:%d\n",argc);
+  //printf("argc:%d\n",argc);
   if (argc != 5){
     printf("usage: %s -f output -m csv\n",argv[0]);
     return 0;
@@ -47,10 +47,23 @@ int main(int argc, char **argv){
 
   MPI_Info_create(&info); 
   //Open file/dataset
+ 
   hid_t fapl,file;
+  file=-1;
   fapl = H5Pcreate(H5P_FILE_ACCESS);
   H5Pset_fapl_mpio(fapl, comm, info);
+//  hbool_t is_collective=true;
+//  H5Pset_all_coll_metadata_ops(fapl, is_collective);
   file= H5Fopen(filename, H5F_ACC_RDWR, fapl);
+  if(mpi_rank==0) printf("output file hanlde= %lld / %0llx\n", (long long)file, (unsigned long long)file);
+  if(file<0) printf("filename '%s' open error in rank %d\n",filename,mpi_rank);
+  //else printf("filename '%s' open correctly rank %d\n",filename, mpi_rank);
+//H5Fclose(file);
+//MPI_Finalize();
+//exit(0);
+  
+  //file = H5Fopen(filename, H5F_ACC_RDWR, H5P_DEFAULT);
+  
   H5Pclose(fapl);
   if(mpi_rank==0) {
 	if(file<0){
@@ -61,6 +74,7 @@ int main(int argc, char **argv){
 	  printf("File %s open ok\n",filename);
 	}
   }
+  
   const char sep=':';
   struct Nodes_pair * dl=dataset_list(csvfile,sep);
   int total_nodes=dl->count;
@@ -75,16 +89,25 @@ int main(int argc, char **argv){
   }
   int i;
   double t0=MPI_Wtime();
+  //char **path_node=NULL;
   for(i=rank_start;i<rank_end;i++){
-   compound_read(dl->values[i],file, dl->keys[i], true);
+  // path_node=path_split(dl->keys[i]);
+   //open the group
+   compound_read(dl->values[i],file, dl->keys[i],1,mpi_rank);
+   //compound_read(dl->values[i],filename, dl->keys[i], true);
   }
   MPI_Barrier(comm);
-  double t1 = MPI_Wtime()-t0;
+  printf("rank:%d:%d",mpi_rank,rank_end-rank_start);
+  double t1 = MPI_Wtime();
   if(mpi_rank==0||mpi_rank==mpi_size-1){ 
-  printf("\nRank %d, read time %.2fs\n",mpi_rank,t1);
+  printf("\nRank %d, read time %.2fs\n",mpi_rank,t1-t0);
   }
   H5Fclose(file);
-  
+  MPI_Barrier(comm);
+  double t2=MPI_Wtime();
+  if(mpi_rank==0||mpi_rank==mpi_size-1){
+  printf("\nRank %d, close time %.2fs\n",mpi_rank,t2-t1);
+  }
   MPI_Finalize();
   return 0;
 }

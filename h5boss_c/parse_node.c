@@ -55,20 +55,22 @@ char** str_split(char* a_str, const char a_delim)
     return result;
 }
 char ** path_split(char* path) {
-    char **token=(char **)malloc(sizeof(char *));
+    char **token=(char **)malloc(2*sizeof(char *));
     char * dict=strdup(path);
     char * basec=strdup(path);
     char * d=strdup(dirname(dict));
     char * b=strdup(basename(basec));
     token[0]=d;
     token[1]=b;
+    free(dict);
+    free(basec);
     //printf("ori:%s\n",path);
     //printf("dir:%s\n",dirname(dict));
     //printf("base:%s\n",basename(basec));
     return token;
 }
 char ** parse_nodes(char * file){
-  char ** buf=(char **)malloc(sizeof(char *)*10000);
+  char ** buf=(char **)malloc(sizeof(char *)*100000);
   FILE * fp;
   char * line = (char *)malloc(sizeof(char)*100);
   size_t len = 0;
@@ -96,8 +98,8 @@ struct Nodes_pair * dataset_list (char * file,const char sep){
     char ** lines=parse_nodes(file);
     char ** dl_keys;
     char ** dl_values;
-    dl_keys=(char **)malloc(sizeof(char *)*10000);
-    dl_values=(char **)malloc(sizeof(char *)*10000);
+    dl_keys=(char **)malloc(sizeof(char *)*100000);
+    dl_values=(char **)malloc(sizeof(char *)*100000);
     dl->count=bufi;
     int i;
     for (i=0;i<bufi;i++){

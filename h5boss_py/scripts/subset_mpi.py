@@ -23,6 +23,8 @@ import argparse
 import datetime
 from collections import defaultdict
 
+catalog_meta=['plugmap', 'zbest', 'zline',
+                        'match', 'matchflux', 'matchpos']
 meta=['plugmap', 'zbest', 'zline',
                         'photo/match', 'photo/matchflux', 'photo/matchpos']
 def list_csv(x):
@@ -108,6 +110,78 @@ def adddic(dict1,dict2,datatype):
       if item not in dict1:
         dict1[item] = dict2[item]
     return dict1
+
+def create_template(outfile,global_dict):
+ try:
+     hx = h5py.File(outfile,'a')
+ except Exception as e:
+     print ("Output file creat error:%s"%outfile)
+     traceback.print_exc()
+ try:#Set the allocate time as early. --Quincey Koziol 
+  for key,value in global_dict.items():
+   space=h5py.h5s.create_simple(value[1])
+   plist=h5py.h5p.create(h5py.h5p.DATASET_CREATE)
+   plist.set_alloc_time(h5py.h5d.ALLOC_TIME_EARLY)
+   tid=h5py.h5t.py_create(value[0], False)
+   try:#create intermediate groups
+      hx.create_group(os.path.dirname(key))
+   except Exception as e:
+      pass #groups existed, so pass it
+   try:
+    h5py.h5d.create(hx.id,key,tid,space,plist)#create dataset with property list:early allocate
+   except Exception as e:
+    print("dataset create error: %s"%key)
+    traceback.print_exc()
+    pass
+ except Exception as e:
+   traceback.print_exc()
+   pass
+ try:
+  hx.flush()
+  hx.close()
+ except Exception as e:
+  print("hx close error in rank0")
+  traceback.print_exc()
+  pass
+
+def copy_fiber(hx, fiber_dict):
+ #Read/Write all dataset into final file, 
+ #each rank handles one fiber_dict, which contains multiple fiber_item
+ try:
+  for key, value in fiber_dict.items():
+       if key.split('/')[-1] not in catalog_meta:
+        copy_catalog(hx,key,value) 
+        try:
+	 subfx=h5py.File(value[2],'r')
+	 subdx=subfx[key].value
+	 subfx.close()
+        except Exception as e:
+	 traceback.print_exc()
+	 print ("read subfile %s error"%value[2])
+	 pass
+        try:
+         dx=hx[str(key)]
+         dx[:]=subdx   #overwrite the existing template data
+        except Exception as e:
+         traceback.print_exc()
+         print ("overwrite error")
+ except Exception as e:
+  print ("Data read/write error key:%s file:%s"%(key,value[2]))
+  traceback.print_exc()
+  pass
+
+def copy_catalog(hx,key,value):
+   try:
+    fx=h5py.File(value[2],'r')
+    fiber=key.split('/')[-2]
+    plate=key.split('/')[0]
+    mjd=key.split('/')[1]
+    for name in meta: 
+     id = '{}/{}/{}'.format(plate,mjd,name)
+     hx[id][int(fiber)-1]=fx[id][int(fiber)-1]
+   except Exception as e:
+    traceback.print_exc()
+    print ("catacopy error")
 def parallel_select():
     '''
     Select a set of (plates,mjds,fibers) from the realesed BOSS data in HDF5 formats.
@@ -122,16 +196,19 @@ def parallel_select():
     parser.add_argument("input",  help="HDF5 input list")
     parser.add_argument("output", help="HDF5 output")
     parser.add_argument("pmf",    help="Plate/mjd/fiber list")
+    parser.add_argument("--template", help="Create template only,yes/no")
     parser.add_argument("--mpi", help="using mpi yes/no")
     opts=parser.parse_args()
 
     infiles = opts.input
     outfile = opts.output
     pmflist = opts.pmf
-  
-    #(plates,mjds,fibers,hdfsource) = parse_pmf(infiles, outfile, pmflist)
+    
     global meta
-
+    if opts.template is None or opts.template=="no":
+       template=0
+    elif opts.template and opts.template=="yes":
+       template=1
     if opts.mpi is None or opts.mpi=="no": 
         #starts seirial processing
         print ("Try the subset.py or subset command")
@@ -141,21 +218,8 @@ def parallel_select():
         nproc = comm.Get_size()
         rank = comm.Get_rank()
         (plates,mjds,fibers,hdfsource) = parse_pmf(infiles, outfile, pmflist,rank)
-#    	if rank==0:
-#     	 print ("HDF5 source: %d files:"%len(hdfsource))
-#     	 print ("Output to %s "%outfile)
-#	 plates_uni_array = np.unique(np.asarray(plates))
-#     	 print ("Number of plates to be quired: %d; and %d uniquely"%(plates.size,plates_uni_array.size))        
-        #collectively open the output file
-        #try:
-        #     hx = h5py.File(outfile,'w',driver='mpio', comm=MPI.COMM_WORLD)
-        #except Exception as e:
-        #     print ("Output file creat error:%s"%outfile)
-	#     traceback.print_exc()
-        #comm.Barrier()
         tstart=MPI.Wtime()
-#        if rank==0: print ("Number of processes %d"%nproc)
-
+        if rank==0: print ("Number of processes %d"%nproc)
         #each rank gets a subset of the filelist
         total_files=len(hdfsource)
         #distribute the workload evenly to each process
@@ -166,127 +230,66 @@ def parallel_select():
             rank_end=total_files # adjust the last rank's range
             if rank_start>total_files:
              rank_start=total_files
-        #print ("rank start: %d, end: %d"%(rank_start,rank_end))
         range_files=hdfsource[rank_start:rank_end]
-
-        #each rank starts the subselect procedure
-        #option 1: 1. Query nodes-> 2. Create nodes in Output -> (3 Read object, 4 Write Object, in parallel) 
         fiber_dict={}
-        
         for i in range(0,len(range_files)):
             fiber_item = node_type(range_files[i],plates,mjds,fibers)
             if len(fiber_item)>0:
              fiber_dict.update(fiber_item)
         #comm.Barrier()
         tend=MPI.Wtime()
-#        if rank==0: 
-#         print ("Get all nodes metadata (dataset, (type,filename)) time: %.2f"%(tend-tstart))
-        #if rank==0: print ("fiber_dict: ",fiber_dict)
-        #TODO: rank0 create all, then close an reopen. h5py force filling value
-        counterop = MPI.Op.Create(adddic, commute=True)
+        if rank==0: 
+         print ("Get all nodes metadata (dataset, (type,filename)) time: %.2f"%(tend-tstart))
+        #TODO: rank0 create all, then close an reopen.-Quincey Koziol 
+        counterop = MPI.Op.Create(adddic, commute=True) #define reduce operation
         global_dict={}
         fiber_item_length=len(fiber_dict)
-        #np.__version__         
-        #print ("rank:%d,file:%d,fiber_length:%d,rank_start:%d,rank_end:%d"%(rank,len(range_files),fiber_item_length,rank_start,rank_end))
-#        global_dict_length=comm.allreduce(fiber_item_length,op=MPI.SUM)
-        global_dict= comm.allreduce(fiber_dict, op=counterop)
-#        comm.reduce(fiber_dict,global_dict,op=counterop,root=0)
-        
+        #        global_dict_length=comm.allreduce(fiber_item_length,op=MPI.SUM)
+        fiber_dict1=fiber_dict
+        global_dict= comm.allreduce(fiber_dict1, op=counterop)
+        #        comm.reduce(fiber_dict,global_dict,op=counterop,root=0)        
         treduce=MPI.Wtime()
         if rank==0:
-           print ("Allreduce %d kv(dataset, type) time: %.2f"%(len(global_dict),(treduce-tend)))
-        ## use rank0 to create all datasets
-        if rank==-2:
-         try:
-             hx = h5py.File(outfile,'a')
-         except Exception as e:
-             print ("Output file creat error:%s"%outfile)
-             traceback.print_exc()
-         try:
-	  for key,value in global_dict.items():
-           hx.create_dataset(key,dtype=value[0],shape=value[1])
-         except Exception as e:
-           traceback.print_exc()
-         try:
-          hx.flush()
-          hx.close()
-	 except Exception as e:
-          print("hx close error in rank0")
-          traceback.print_exc() 
- 
+           print ("Allreduce %d kv(dataset, type) time: %.2f"%(len(global_dict),(treduce-tend)))      
+        if rank==0:
+           try:
+            create_template(outfile,global_dict)
+           except Exception as e:
+            print ('template create error:%s'%outfile)
         tcreated=MPI.Wtime()
         if rank==0:
-         print ("Dataset creation time: %.2f"%(tcreated-treduce))
-        if rank==0:
-          #write the dict into a csv file
-          with open('nodes.txt', 'a') as f:
+         print ("Template creation time: %.2f"%(tcreated-treduce))
+        if rank==0:    #write the dict into a csv file
+          with open('nodes10k.txt', 'a') as f:
            f.writelines('{}:{}\n'.format(k,v[2]) for k, v in global_dict.items())
            f.write('\n')
-        ## collectively open file 
-        if rank !=-1:
+        if template ==0:  # in case to turn off actual data write
          try: 
-          hx = h5py.File(outfile,'a',driver='mpio', comm=MPI.COMM_WORLD)
+          hx = h5py.File(outfile,'a',driver='mpio', comm=MPI.COMM_WORLD) ## collectively open file 
           hx.atomic=False 
          except Exception as e:
-          print ("Output file creat error:%s"%outfile)
+          if rank==0: print ("Output file collectively creat error:%s"%outfile)
           traceback.print_exc()
-          pass
-         comm.Barrier()
+          
         topen=MPI.Wtime()
-        #print (hx[str(key)])
-        if rank ==-1:
-         #Read/Write all dataset into final file, 
-         #each rank handles one fiber_dict, which contains multiple fiber_item
-         try: 
-          rankid=0
-          for key, value in fiber_dict.items():
-               rankid+=1
-               try: 
-                 subfx=h5py.File(value[2],'r')
-                 subdx=subfx[key].value
-                 subfx.close()
-               except Exception as e:
-                 traceback.print_exc()
-                 print ("read subfile %s error"%value[2])
-                 pass
-               #print (hx['3665/55247/390/coadd'])
-               #dx=hx[str(key)]
-               #print (key)
-               #print(hx)
-               
-               #print (hx[str(key)])
-               if rankid==1:
-                print (dx)
-                print (dx.value)
-                print (subdx)
-                print ("rank: %d start: %d :%d:%d at: %s"%(rank,rankid,len(fiber_dict),fiber_item_length,datetime.datetime.now().time()))
-               #dx[:]=subdx
-               #if rankid==1:
-               # print (dx.value)
-               #del dx
-               if rankid==-1:
-                print ("rank: %d copied: %d at: %s"%(rank,rankid,datetime.datetime.now().time()))
-         except Exception as e:
-          print ("Data read/write error key:%s file:%s"%(key,value[2]))
-          traceback.print_exc()
-          pass 
+        if template==0:
+           copy_fiber(hx,fiber_dict)
+           #copy_catalog(hx)
         tcopy=MPI.Wtime()             
-        if rank==0:
-            print ("File open time: %.2f"%(topen-tcreated))
-            print ("Data copy time: %.2f"%(tcopy-topen))
         comm.Barrier()
         try:
-             hx.flush()
-             hx.close()
+           if template==0:
+            hx.close()
         except Exception as e:
-             print ("Output file close error:%s"%outfile)
-             traceback.print_exc()
-             pass
-        #comm.Barrier()
+           print ("Output file collectively close error:%s"%outfile)
+           traceback.print_exc()
+           pass
         tclose=MPI.Wtime()
         if rank==0:
-            print ("File close time: %.2f"%(tclose-tcopy))
-            print ('Total Cost: %.2f'%(tclose-tstart))
+           print ("File open time: %.2f"%(topen-tcreated))
+           print ("Data copy time: %.2f"%(tcopy-topen))
+           print ("File close time: %.2f"%(tclose-tcopy))
+           print ('Total Cost: %.2f'%(tclose-tstart))
 
 if __name__=='__main__': 
     parallel_select()
