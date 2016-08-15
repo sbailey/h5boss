@@ -22,13 +22,14 @@ def create_slavefile(infile,plates,mjds,fibers,masterfile,rank,id):
       print ("Error in slave file:%s")
       traceback.print_exc()
       pass 
-def _adddic(dict1,dict2,datatype):
+def add_dic(dict1,dict2,datatype):
     for item in dict2:
       if item not in dict1:
         dict1[item] = dict2[item]
     return dict1
 
 def create_template(outfile,global_dict):
+#use one process to create the template
  try:
      hx = h5py.File(outfile,'a')
  except Exception as e:
@@ -68,7 +69,7 @@ def _fiber_template(hx,key,value):
 def _catalog_template(hx,key,value):
    space=h5py.h5s.create_simple(value[1])
    plist=h5py.h5p.create(h5py.h5p.DATASET_CREATE)
-   plist.set_alloc_time(h5py.h5d.ALLOC_TIME_EARLY)
+   plist.set_alloc_time(h5py.h5d.ALLOC_TIME_LATE)
    tid=h5py.h5t.py_create(value[0], False)
    try:#create intermediate groups
       hx.create_group(os.path.dirname(key))
@@ -81,16 +82,18 @@ def _catalog_template(hx,key,value):
     traceback.print_exc()
     pass
 
-def copy_all(hx, fiber_dict):
+def overwrite_template(hx, data_dict,choice=None):
  #Read/Write all dataset into final file, 
  #each rank handles one fiber_dict, which contains multiple fiber_item
  try:
-  for key, value in fiber_dict.items():
+  for key, value in data_dict.items():
     if key.split('/')[-1] not in catalog_meta:
-     _copy_fiber(hx,key,value)
+     if choice=='all' or choice=='fiber' or choice==None:
+      _copy_fiber(hx,key,value)
      if key.split('/')[-1]=='coadd':
-      fiber_id=key.split('/')[-2]
-      _copy_catalog(hx,key,value,fiber_id)
+      if choice=='all' or choice=='catalog' or choice==None:
+       fiber_id=key.split('/')[-2]
+       _copy_catalog(hx,key,value,fiber_id)
  except Exception as e:
   print ("Data read/write error key:%s file:%s"%(key,value[2]))
   traceback.print_exc()
@@ -114,16 +117,12 @@ def _copy_fiber(hx,key,value):
   pass
 def _copy_catalog(hx,key,value,fiber_id):
    try:
-    #print ("open catalog now")
     fx=h5py.File(value[2],'r')
-    #fiber=key.split('/')[-2]
     plate=key.split('/')[0]
     mjd=key.split('/')[1]
     for name in meta:
      id = '{}/{}/{}'.format(plate,mjd,name)
      hx[id][int(fiber_id)-1]=fx[id][int(fiber_id)-1]
-     print ("catalog:%s row id:%d"%(id,int(fiber_id)-1))
-     #print ("src catalog:",fx[id][int(fiber)-1])
    except Exception as e:
     traceback.print_exc()
     print ("catacopy:%s error:%d"%(key,int(fiber_id)-1))  

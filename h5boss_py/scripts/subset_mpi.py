@@ -10,10 +10,11 @@ from __future__ import division, print_function
 #from __future__ import absolute_import
 from mpi4py import MPI
 import h5py
-from h5boss.selectmpi import node_type
-from h5boss.pmf import parse_pmf
-from h5boss.pmf import list_csv
-from h5boss.pmf import node_type
+from h5boss.pmf import parse_csv
+from h5boss.pmf import get_fiberlink
+from h5boss.selectmpi import add_dic
+from h5boss.selectmpi import create_template
+from h5boss.selectmpi import overwrite_template
 import sys,os
 import time
 import optparse
@@ -85,7 +86,7 @@ def parallel_select():
         if rank==0: 
          print ("Get all nodes metadata (dataset, (type,filename)) time: %.2f"%(tend-tstart))
         #rank0 create all, then close an reopen.-Quincey Koziol 
-        counterop = MPI.Op.Create(adddic, commute=True) #define reduce operation
+        counterop = MPI.Op.Create(add_dic, commute=True) #define reduce operation
         global_dict={}
         fiber_item_length=len(fiber_dict)
         fiber_dict_tmp=fiber_dict
