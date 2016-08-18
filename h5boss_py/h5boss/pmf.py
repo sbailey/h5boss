@@ -187,11 +187,11 @@ def get_fiberlink(infile,plates,mjds,fibers):
                       #fiberlink={id:infile}
                       pid = '{}/{}/{}'.format(plate, mjd, fiber)
                       fx[pid].visit(_traverse_fibernode)
-                for im in meta:
-                  mnode=spid+'/'+im
-                  mnode_t=fx[mnode].dtype
-                  mnode_sp=fx[mnode].shape
-                  fiberdatalink[mnode]=(mnode_t,mnode_sp,infile)
+                #for im in meta:
+                #  mnode=spid+'/'+im
+                #  mnode_t=fx[mnode].dtype
+                #  mnode_sp=fx[mnode].shape
+                #  fiberdatalink[mnode]=(mnode_t,mnode_sp,infile)
          fx.close()
         except Exception as e:
          print (pid)
@@ -199,3 +199,36 @@ def get_fiberlink(infile,plates,mjds,fibers):
          print (pid,infile)
          pass
         return (fiberdatalink)
+def get_catalogtype(infile):
+    catalog_types={}
+    try:
+      fx = h5py.File(infile, mode='r')
+      plate=fx.keys[0]
+      mjd=fx[plate].keys[0]
+      for im in meta:
+       mnode=spid+'/'+im
+       mnode_t=fx[mnode].dtype
+       mnode_sp=fx[mnode].shape
+       catalog_types[mnode]=(mnode_t,mnode_sp)
+    except Exception as e:
+       traceback.print_exc()
+       pass
+    return catalog_types
+def count_unique(global_dict):
+     '''
+      para: dict: (plates/mjd/fiber/../dataset, (type,shape,filename))
+      return: dict: (plates/mjd, num_fibers)
+     '''
+     count_fiber={}
+     for key, value in global_dict.items():
+         dname=key.split('/')[-1]
+         if dname=='coadd':
+          plate=key.split('/')[0]
+          mjd=key.split('/')[1]
+          temp_key=plate+'/'+mjd
+          if temp_key in count_fiber: 
+             pre_count=int(count_fiber[temp_key])
+             count_fiber[temp_key]=pre_count+1
+          else: 
+             count_fiber[temp_key]=int(1)
+     return count_fiber

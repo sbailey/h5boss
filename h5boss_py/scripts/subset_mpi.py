@@ -12,9 +12,13 @@ from mpi4py import MPI
 import h5py
 from h5boss.pmf import parse_csv
 from h5boss.pmf import get_fiberlink
+from h5boss.pmf import get_catalogtype
+from h5boss.pmf import count_unique
+
 from h5boss.selectmpi import add_dic
 from h5boss.selectmpi import create_template
 from h5boss.selectmpi import overwrite_template
+
 import sys,os
 import time
 import optparse
@@ -87,18 +91,25 @@ def parallel_select():
          print ("Get all nodes metadata (dataset, (type,filename)) time: %.2f"%(tend-tstart))
         #rank0 create all, then close an reopen.-Quincey Koziol 
         counterop = MPI.Op.Create(add_dic, commute=True) #define reduce operation
-        global_dict={}
+        global_dict={}#(key, value)->(plates/mjd/fiber/../dataset, (type,shape,filename)
         fiber_item_length=len(fiber_dict)
         fiber_dict_tmp=fiber_dict
-        global_dict= comm.allreduce(fiber_dict_tmp, op=counterop)       
+        global_fiber= comm.allreduce(fiber_dict_tmp, op=counterop)       
         treduce=MPI.Wtime()
-        if rank==0:
+        
+        if rank==0 and template==1:
            try:
-            create_template(outfile,global_dict)
+            ##can not parallel create metadata is really painful. 
+            create_template(outfile,global_fiber,'fiber')
+            catalog_number=count_unique(global_dict)
+            sample_file=range_files[0]
+            catalog_types=get_catalogtypes(sample_file)
+            global_catalog=(catalog_dict,catalog_types)
+            create_template(outfile,global_catalog,'catalog')
            except Exception as e:
             traceback.print_exc()
         tcreated=MPI.Wtime()
-        if rank==0:
+        if rank==0 and template==1:
          print ("Template creation time: %.2f"%(tcreated-treduce))
          with open('nodes10k.txt', 'a') as f:
            f.writelines('{}:{}\n'.format(k,v[2]) for k, v in global_dict.items())
@@ -111,18 +122,24 @@ def parallel_select():
          except Exception as e:
           traceback.print_exc()        
         topen=MPI.Wtime()
+        tclose=0.0
+        tcopy=0.0
         if template==0:
-           overwrite_template(hx,fiber_dict)
+           overwrite_template(hx,fiber_dict,'fiber')
+           hx.close()
+           tclose=MPI.Wtime()
+           if rank==0: 
+              overwrite_template(outfile,global_dict,'catalog')
         tcopy=MPI.Wtime()
-        try:
-           if template==0:
-            hx.close()
-        except Exception as e:
-           traceback.print_exc()
-           pass
-        tclose=MPI.Wtime()
-        if rank==0:
-           print ("Allreduce %d kv(dataset, type): %.2f"%(len(global_dict),(treduce-tend)))
-           print ("File open: %.2f\nData copy: %.2f\nFile close: %.2f\nTotal Cost: %.2f"%(topen-tcreated,tcopy-topen,tclose-tcopy,tclose-tstart))
+#        try:
+#           if template==0:
+#            hx.close()
+#        except Exception as e:
+#           traceback.print_exc()
+#           pass
+#        tclose=MPI.Wtime()
+#        if rank==0:
+#           print ("Allreduce %d kv(dataset, type): %.2f"%(len(global_dict),(treduce-tend)))
+#           print ("File open: %.2f\nData copy: %.2f\nFile close: %.2f\nTotal Cost: %.2f"%(topen-tcreated,tcopy-topen,tclose-tcopy,tclose-tstart))
 if __name__=='__main__': 
     parallel_select()
