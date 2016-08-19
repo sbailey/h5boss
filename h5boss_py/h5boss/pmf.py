@@ -4,6 +4,7 @@ import time
 import sys
 import os
 import csv
+import traceback
 from collections import defaultdict
 fx=""
 pid=""
@@ -199,18 +200,19 @@ def get_fiberlink(infile,plates,mjds,fibers):
          print (pid,infile)
          pass
         return (fiberdatalink)
-def get_catalogtype(infile):
+def get_catalogtypes(infile):
     catalog_types={}
     try:
       fx = h5py.File(infile, mode='r')
-      plate=fx.keys[0]
-      mjd=fx[plate].keys[0]
+      plate=fx.keys()[0]
+      mjd=fx[plate].keys()[0]
       for im in meta:
-       mnode=spid+'/'+im
+       mnode=plate+'/'+mjd+'/'+im
        mnode_t=fx[mnode].dtype
        mnode_sp=fx[mnode].shape
        catalog_types[mnode]=(mnode_t,mnode_sp)
     except Exception as e:
+       print ("file:",infile)
        traceback.print_exc()
        pass
     return catalog_types

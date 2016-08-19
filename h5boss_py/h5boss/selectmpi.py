@@ -97,8 +97,8 @@ def _fiber_template(hx,key,value):
    try:
     h5py.h5d.create(hx.id,key,tid,space,plist)#create dataset with property list:early allocate
    except Exception as e:
-    print("dataset create error: %s"%key)
-    traceback.print_exc()
+    #print("dataset create error: %s"%key)
+    #traceback.print_exc()
     pass
 def _catalog_template(hx,key,value,catalog_types):
    item_shape=(value,1)
@@ -118,6 +118,7 @@ def _catalog_template(hx,key,value,catalog_types):
     try:#create intermediate groups
        hx.create_group(os.path.dirname(key))
     except Exception as e:
+       traceback.print_exc()
        pass #groups existed, so pass it
     try:
      h5py.h5d.create(hx.id,key,tid,space,plist)#create dataset with property list:early allocate
@@ -139,13 +140,13 @@ def overwrite_template(hx, data_dict,choice):
    traceback.print_exc()
    pass
  elif choice=='catalog':
-  try: 
-   hx=h5py.File(hx,'a')
-  except Exception as e:
-   traceback.print_exc()
+  #try: 
+  # hx=h5py.File(hx,'a')
+  #except Exception as e:
+  # traceback.print_exc()
   try:
    for key, value in data_dict.items():
-    if key.split('/')[-1] not in catalog_meta:
+    if key.split('/')[-1] =='coadd': # number of coadd: number of fiber =1:1
      fiber_id=key.split('/')[2]
      _copy_catalog(hx,key,value,fiber_id)
   except Exception as e:
@@ -153,13 +154,13 @@ def overwrite_template(hx, data_dict,choice):
    traceback.print_exc()
    pass
 
-  try:
-   hx.flush()
-   hx.close()
-  except Exception as e:
-   print("hx close error in rank0")
-   traceback.print_exc()
-   pass
+  #try:
+  # hx.flush()
+  # hx.close()
+  #except Exception as e:
+  # print("hx close error in rank0")
+  # traceback.print_exc()
+  # pass
 
 def _copy_fiber(hx,key,value):
  try:
@@ -188,12 +189,15 @@ def _copy_catalog(hx,key,value,fiber_id):
      id = '{}/{}/{}'.format(plate,mjd,name)
      if kk==1:
        print("hx node:%s,rowid:%d"%(id,int(fiber_id)-1))
-       print("hx value:",hx[id][int(fiber_id)-1])
+       print("hx value:",hx[id][0])
        print("fx value:",fx[id][int(fiber_id)-1])
-     hx[id][int(fiber_id)-1]=fx[id][int(fiber_id)-1]
+     #hx[id][int(fiber_id)-1]=fx[id][int(fiber_id)-1]
+     #TODO: how to determind the offset to avoid overwrite? 
+     offset=0
+     hx[id][offset]=fx[id][int(fiber_id)-1]
      if kk==1:
        print("hx node:%s,rowid:%d"%(id,int(fiber_id)-1))
-       print("hx value:",hx[id][int(fiber_id)-1])
+       print("hx value:",hx[id][0])
        print("fx value:",fx[id][int(fiber_id)-1])
        kk=0
    except Exception as e:

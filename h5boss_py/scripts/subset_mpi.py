@@ -12,7 +12,7 @@ from mpi4py import MPI
 import h5py
 from h5boss.pmf import parse_csv
 from h5boss.pmf import get_fiberlink
-from h5boss.pmf import get_catalogtype
+from h5boss.pmf import get_catalogtypes
 from h5boss.pmf import count_unique
 
 from h5boss.selectmpi import add_dic
@@ -104,7 +104,7 @@ def parallel_select():
             catalog_number=count_unique(global_dict)
             sample_file=range_files[0]
             catalog_types=get_catalogtypes(sample_file)
-            global_catalog=(catalog_dict,catalog_types)
+            global_catalog=(catalog_number,catalog_types)
             create_template(outfile,global_catalog,'catalog')
            except Exception as e:
             traceback.print_exc()
@@ -126,10 +126,12 @@ def parallel_select():
         tcopy=0.0
         if template==0:
            overwrite_template(hx,fiber_dict,'fiber')
+           #for each fiber, find the catalog, then copy it
+           overwrite_template(hx,fiber_dict,'catalog')
            hx.close()
            tclose=MPI.Wtime()
-           if rank==0: 
-              overwrite_template(outfile,global_dict,'catalog')
+           #if rank==0: 
+           #   overwrite_template(outfile,global_dict,'catalog')
         tcopy=MPI.Wtime()
 #        try:
 #           if template==0:
