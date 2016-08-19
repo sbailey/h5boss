@@ -67,8 +67,8 @@ def create_catlog_template(outfile,global_dict):
      print ("Output file creat error:%s"%outfile)
      traceback.print_exc()
  try:#Set the allocate time as early. --Quincey Koziol 
-  catalog_dict=global_dict[0]
-  catalog_types=global_dict[1]
+  catalog_dict=global_dict[0] #dict: plate/mjd, number of fiber
+  catalog_types=global_dict[1] #dict: meta, (type, shape) 
   for key,value in catalog_dict.items():
       # key=plate/mjd
       # value= number of fibers
@@ -101,6 +101,7 @@ def _fiber_template(hx,key,value):
     #traceback.print_exc()
     pass
 def _catalog_template(hx,key,value,catalog_types):
+   value=int(value)
    item_shape=(value,1)
    space=h5py.h5s.create_simple(item_shape)
    plist=h5py.h5p.create(h5py.h5p.DATASET_CREATE)
@@ -111,19 +112,21 @@ def _catalog_template(hx,key,value,catalog_types):
                           # for controling the btree for indexing chunked datasets
    plist.set_chunk(chunk_shape)
    #catalog_types: [plate/mjd/im],( dtype,dshape)
-   for itype in catalog_types:
-    tid=h5py.h5t.py_create(itype[0], False)
-    max_shape=itype[1][0]
-    assert(value>max_shape) # number of fibers is larger than the maximum catalog size
+   for ktype, vtype in catalog_types.items():
+    ikey=key+'/'+ktype
+    tid=h5py.h5t.py_create(vtype[0], False)
+    max_shape=int(vtype[1][0])
+    #print(value,vtype)
+    assert(value<=max_shape),"value:%d,maxshape:%d"%(value,max_shape) # number of fibers is larger than the maximum catalog size
     try:#create intermediate groups
-       hx.create_group(os.path.dirname(key))
+       hx.create_group(os.path.dirname(ikey))
     except Exception as e:
-       traceback.print_exc()
+       #traceback.print_exc()
        pass #groups existed, so pass it
     try:
-     h5py.h5d.create(hx.id,key,tid,space,plist)#create dataset with property list:early allocate
+     h5py.h5d.create(hx.id,ikey,tid,space,plist)#create dataset with property list:early allocate
     except Exception as e:
-     print("dataset create error: %s"%key)
+     print("dataset create error: %s\n"%ikey)
      traceback.print_exc()
      pass
 
@@ -192,7 +195,7 @@ def _copy_catalog(hx,key,value,fiber_id):
        print("hx value:",hx[id][0])
        print("fx value:",fx[id][int(fiber_id)-1])
      #hx[id][int(fiber_id)-1]=fx[id][int(fiber_id)-1]
-     #TODO: how to determind the offset to avoid overwrite? 
+     #TODO: how to determind the offset to avoid overwrite?
      offset=0
      hx[id][offset]=fx[id][int(fiber_id)-1]
      if kk==1:

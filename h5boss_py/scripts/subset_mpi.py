@@ -91,7 +91,11 @@ def parallel_select():
          print ("Get all nodes metadata (dataset, (type,filename)) time: %.2f"%(tend-tstart))
         #rank0 create all, then close an reopen.-Quincey Koziol 
         counterop = MPI.Op.Create(add_dic, commute=True) #define reduce operation
-        global_dict={}#(key, value)->(plates/mjd/fiber/../dataset, (type,shape,filename)
+        global_fiber={}#(key, value)->(plates/mjd/fiber/../dataset, (type,shape,filename), unordered
+        #TODO: SCAN ALL FILES, GET THE (PMF, FILE) LIST, SAVE AS PICKLE, THEN EACH TIME, READIN THIS FILE. 
+        #TODO: Given PMF Query, check the PICKLE, return (PMF, FILE)
+        #TODO: even though we can sort input query list, but for load balance, each rank probably still have overlapped access at file level
+        #TODO: after get the metadata, may need to allreduce and then convert the dictionary into ordered list, and sort again
         fiber_item_length=len(fiber_dict)
         fiber_dict_tmp=fiber_dict
         global_fiber= comm.allreduce(fiber_dict_tmp, op=counterop)       
@@ -101,9 +105,13 @@ def parallel_select():
            try:
             ##can not parallel create metadata is really painful. 
             create_template(outfile,global_fiber,'fiber')
-            catalog_number=count_unique(global_dict)
+            catalog_number=count_unique(global_fiber) #(plates/mjd, num_fibers)
+            print ('number of unique fibers:%d '%len(catalog_number))
+            for fk,vk in catalog_number.items():
+               print ("%s:%d"%(fk,vk))
             sample_file=range_files[0]
-            catalog_types=get_catalogtypes(sample_file)
+            catalog_types=get_catalogtypes(sample_file) # dict: meta, (type, shape) 
+           
             global_catalog=(catalog_number,catalog_types)
             create_template(outfile,global_catalog,'catalog')
            except Exception as e:
@@ -112,7 +120,7 @@ def parallel_select():
         if rank==0 and template==1:
          print ("Template creation time: %.2f"%(tcreated-treduce))
          with open('nodes10k.txt', 'a') as f:
-           f.writelines('{}:{}\n'.format(k,v[2]) for k, v in global_dict.items())
+           f.writelines('{}:{}\n'.format(k,v[2]) for k, v in global_fiber.items())
            f.write('\n')
 ############# OVERWRITE THE TEMPLATE WITH ACTUAL DATA ############
         if template ==0: 

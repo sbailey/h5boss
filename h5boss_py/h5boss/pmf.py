@@ -201,6 +201,10 @@ def get_fiberlink(infile,plates,mjds,fibers):
          pass
         return (fiberdatalink)
 def get_catalogtypes(infile):
+    '''
+     para:hdf5 file
+     return: dict: meta, (type, shape) 
+    '''
     catalog_types={}
     try:
       fx = h5py.File(infile, mode='r')
@@ -208,9 +212,11 @@ def get_catalogtypes(infile):
       mjd=fx[plate].keys()[0]
       for im in meta:
        mnode=plate+'/'+mjd+'/'+im
+       #print (mnode)
        mnode_t=fx[mnode].dtype
        mnode_sp=fx[mnode].shape
-       catalog_types[mnode]=(mnode_t,mnode_sp)
+       #print (mnode_t)
+       catalog_types[im]=(mnode_t,mnode_sp)
     except Exception as e:
        print ("file:",infile)
        traceback.print_exc()
@@ -228,6 +234,7 @@ def count_unique(global_dict):
           plate=key.split('/')[0]
           mjd=key.split('/')[1]
           temp_key=plate+'/'+mjd
+          #print (temp_key)
           if temp_key in count_fiber: 
              pre_count=int(count_fiber[temp_key])
              count_fiber[temp_key]=pre_count+1
