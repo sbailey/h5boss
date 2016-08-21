@@ -14,8 +14,8 @@ cd $SLURM_SUBMIT_DIR
 #option 2: single shared file
 output=$SCRATCH/bosslover/scaling-test/1k_py_p2.1.h5
 #rm $output
-template=$SCRATCH/bosslover/scaling-test/10k_pyh5boss_fiber_early_catalog_early_template.h5 
+template=$SCRATCH/bosslover/scaling-test/1k_pyh5boss_early_template.h5 
 #cp $template $output
-rm $template >/dev/null
-srun -n 32 python-mpi ../scripts/subset_mpi.py input-full-cori $template pmf-list/pmf10k --mpi="yes" --template="yes"
-srun -n 32 python-mpi ../scripts/subset_mpi.py input-full-cori $template pmf-list/pmf10k --mpi="yes" --template="no"
+#rm $template >/dev/null
+#srun -n 32 python-mpi ../scripts/subset_mpi.py input-full-cori $template pmf-list/pmf1k --mpi="yes" --template="yes"
+srun -n 32 python-mpi ../scripts/subset_mpi.py input-full-cori $template pmf-list/pmf1k --mpi="yes" --template="no"

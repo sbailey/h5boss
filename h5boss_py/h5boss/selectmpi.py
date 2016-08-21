@@ -143,27 +143,17 @@ def overwrite_template(hx, data_dict,choice):
    traceback.print_exc()
    pass
  elif choice=='catalog':
-  #try: 
-  # hx=h5py.File(hx,'a')
-  #except Exception as e:
-  # traceback.print_exc()
   try:
-   for key, value in data_dict.items():
-    if key.split('/')[-1] =='coadd': # number of coadd: number of fiber =1:1
-     fiber_id=key.split('/')[2]
-     _copy_catalog(hx,key,value,fiber_id)
+   for i in range(0,len(data_dict)):
+    pm=data_dict[i][0]
+    # key: pm, value: (fiberid, global_offset, infile)    
+    values_off=data_dict[i][1]
+    for i in range(0,len(values_off)): 
+      _copy_catalog(hx,pm,values_off[i])
   except Exception as e:
    print ("Data read/write error key:%s file:%s"%(key,value[2]))
    traceback.print_exc()
    pass
-
-  #try:
-  # hx.flush()
-  # hx.close()
-  #except Exception as e:
-  # print("hx close error in rank0")
-  # traceback.print_exc()
-  # pass
 
 def _copy_fiber(hx,key,value):
  try:
@@ -182,27 +172,20 @@ def _copy_fiber(hx,key,value):
   print ("overwrite error")
   pass
 
-def _copy_catalog(hx,key,value,fiber_id):
+def _copy_catalog(hx,key,values_off):
    try:
-    global kk
-    fx=h5py.File(value[2],'r')
+    fx=h5py.File(values_off[1],'r')
     plate=key.split('/')[0]
     mjd=key.split('/')[1]
+    fiber_id=values_off[0]
+    global_offset=values_off[2]
     for name in meta:
      id = '{}/{}/{}'.format(plate,mjd,name)
-     if kk==1:
-       print("hx node:%s,rowid:%d"%(id,int(fiber_id)-1))
-       print("hx value:",hx[id][0])
-       print("fx value:",fx[id][int(fiber_id)-1])
-     #hx[id][int(fiber_id)-1]=fx[id][int(fiber_id)-1]
-     #TODO: how to determind the offset to avoid overwrite?
-     offset=0
+     offset=int(global_offset)
+     maxoff=hx[id].shape[0]-1
+     if offset>maxoff:
+       offset=maxoff
      hx[id][offset]=fx[id][int(fiber_id)-1]
-     if kk==1:
-       print("hx node:%s,rowid:%d"%(id,int(fiber_id)-1))
-       print("hx value:",hx[id][0])
-       print("fx value:",fx[id][int(fiber_id)-1])
-       kk=0
    except Exception as e:
     traceback.print_exc()
-    print ("catacopy:%s error:%d"%(key,int(fiber_id)-1))  
+    print ("catacopy:%s error:%d"%(id,int(fiber_id)-1))  

@@ -241,3 +241,20 @@ def count_unique(global_dict):
           else: 
              count_fiber[temp_key]=int(1)
      return count_fiber
+
+def locate_fiber_in_catalog(global_dict):
+    revised_dict={}# key: pm, value: (fiberid, global_offset, infile)
+    for key,value in global_dict.items():
+        if key.split('/')[-1]=='coadd':
+            pm=key.split('/')[0]+'/'+key.split('/')[1]
+            if pm in revised_dict.keys():
+                latest=len(revised_dict[pm])
+                new_value=(key.split('/')[2],value[2],latest)
+                revised_dict[pm].append(new_value)
+            else:
+                latest=0
+                new_value=(key.split('/')[2],value[2],latest)
+                revised_dict.setdefault(pm, [])
+                revised_dict[pm].append(new_value)
+    return revised_dict
+

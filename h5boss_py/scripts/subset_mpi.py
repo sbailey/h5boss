@@ -14,7 +14,7 @@ from h5boss.pmf import parse_csv
 from h5boss.pmf import get_fiberlink
 from h5boss.pmf import get_catalogtypes
 from h5boss.pmf import count_unique
-
+from h5boss.pmf import locate_fiber_in_catalog
 from h5boss.selectmpi import add_dic
 from h5boss.selectmpi import create_template
 from h5boss.selectmpi import overwrite_template
@@ -132,24 +132,35 @@ def parallel_select():
         topen=MPI.Wtime()
         tclose=0.0
         tcopy=0.0
+        fiber_copyte=0.0
+        fiber_copyts=0.0
+        catalog_copyte=0.0
+        catalog_copyts=0.0
         if template==0:
+           fiber_copyts=MPI.Wtime()
            overwrite_template(hx,fiber_dict,'fiber')
+           fiber_copyte=MPI.Wtime()
            #for each fiber, find the catalog, then copy it
-           overwrite_template(hx,fiber_dict,'catalog')
+           copy_global_catalog=global_fiber
+           revised_dict=locate_fiber_in_catalog(copy_global_catalog)
+           revised_dict=revised_dict.items()
+           total_fiber_dict=len(revised_dict)
+           #distribute the workload evenly to each process
+           step=int(total_fiber_dict / nproc)+1
+           rank_start =int( rank * step)
+           rank_end = int(rank_start + step)
+           if(rank==nproc-1):
+             rank_end=total_fiber_dict # adjust the last rank's range
+             if rank_start>total_fiber_dict:
+                rank_start=total_fiber_dict
+           catalog_dict=revised_dict[rank_start:rank_end]
+           catalog_copyts=MPI.Wtime()
+           overwrite_template(hx,catalog_dict,'catalog')
+           catalog_copyte=MPI.Wtime()
            hx.close()
            tclose=MPI.Wtime()
-           #if rank==0: 
-           #   overwrite_template(outfile,global_dict,'catalog')
-        tcopy=MPI.Wtime()
-#        try:
-#           if template==0:
-#            hx.close()
-#        except Exception as e:
-#           traceback.print_exc()
-#           pass
-#        tclose=MPI.Wtime()
-#        if rank==0:
-#           print ("Allreduce %d kv(dataset, type): %.2f"%(len(global_dict),(treduce-tend)))
-#           print ("File open: %.2f\nData copy: %.2f\nFile close: %.2f\nTotal Cost: %.2f"%(topen-tcreated,tcopy-topen,tclose-tcopy,tclose-tstart))
+        if rank==0:
+           print ("Allreduce %d kv(dataset, type): %.2f"%(len(global_fiber),(treduce-tend)))
+           print ("File open: %.2f\nFiber copy: %.2f\nCatalog copy: %.2f\nFile close: %.2f\nTotal Cost: %.2f"%(topen-tcreated,fiber_copyte-fiber_copyts,catalog_copyte-catalog_copyts,tclose-catalog_copyte,tclose-tstart))
 if __name__=='__main__': 
     parallel_select()
