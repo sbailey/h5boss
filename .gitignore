@@ -8,7 +8,21 @@ __pycache__/
 *.h5
 # C extensions
 *.so
-
+h5boss_c/nodes10k.txt
+h5boss_c/nodes10k_fiber.txt
+h5boss_c/testh5g
+h5boss_c/*.exe
+h5boss_c/*.o
+h5boss_py/demo/drop_file_from_page_cache
+h5boss_py/demo/input-full-cori-output
+h5boss_py/demo/is_file_in_page_cache
+h5boss_py/demo/nodes.txt
+h5boss_py/demo/nodes10k.txt
+h5boss_py/demo/nodes10k_fiber.txt
+h5boss_py/demo/nodes1k.txt
+h5boss_py/demo/pagesize
+h5boss_py/demo/test1.sh
+h5boss_py/demo/pmf-list/*
 # Distribution / packaging
 .Python
 env/
