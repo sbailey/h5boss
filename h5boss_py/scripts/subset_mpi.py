@@ -151,8 +151,10 @@ def parallel_select():
            f.writelines('{}:{}\n'.format(k,v[2]) for k, v in global_fiber.items())
            f.write('\n')
          with open('nodes10k_catalog.txt', 'a') as f:
-           f.writelines('{}:{}:{}:{}\n'.format(k,v[0],v[1],v[2]) for k, v in revised_dict.items())
-           f.write('\n')
+           for k,v in revised_dict.items():
+            for iv in v:
+             f.writelines('{}:{}:{}:{}\n'.format(k,iv[0],iv[1],iv[2]))
+             #f.write('\n')
         twritecsv_end=MPI.Wtime()
         if rank==0:
          print ("count unique fiber and global offset time:%.2f"%(twritecsv_start-tcreated))

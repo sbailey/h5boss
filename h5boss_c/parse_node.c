@@ -69,8 +69,8 @@ char ** path_split(char* path) {
     //printf("base:%s\n",basename(basec));
     return token;
 }
-char ** parse_nodes(char * file){
-  char ** buf=(char **)malloc(sizeof(char *)*100000);
+char ** parse_nodes(char * file,int numline){
+  char ** buf=(char **)malloc(sizeof(char *)*(numline+1));
   FILE * fp;
   char * line = (char *)malloc(sizeof(char)*100);
   size_t len = 0;
@@ -93,13 +93,23 @@ char ** parse_nodes(char * file){
     free(line);
   return buf;
 }
-struct Nodes_pair * dataset_list (char * file,const char sep){
+struct Nodes_pair * dataset_list (char * file,const char sep,int numline){
     struct Nodes_pair * dl= malloc(sizeof(struct Nodes_pair));
-    char ** lines=parse_nodes(file);
+    
+    char ** lines=parse_nodes(file,numline);
+    if(lines==NULL){
+     printf("lines parsing error\n");
+    }
     char ** dl_keys;
     char ** dl_values;
-    dl_keys=(char **)malloc(sizeof(char *)*100000);
-    dl_values=(char **)malloc(sizeof(char *)*100000);
+    dl_keys=(char **)malloc(sizeof(char *)*numline);
+    if (dl_keys==NULL)  {
+     printf("dl_keys allocation error\n");
+    }
+    dl_values=(char **)malloc(sizeof(char *)*numline);
+    if (dl_values==NULL)  {
+     printf("dl_values allocation error\n");
+    }
     dl->count=bufi;
     int i;
     for (i=0;i<bufi;i++){

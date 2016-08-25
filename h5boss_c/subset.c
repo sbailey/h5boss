@@ -23,17 +23,20 @@ int main(int argc, char **argv){
   MPI_Comm_size(comm, &mpi_size);
   MPI_Comm_rank(comm, &mpi_rank);
   //printf("argc:%d\n",argc);
-  if (argc != 5){
-    printf("usage: %s -f output -m csv\n",argv[0]);
-    return 0;
-  }
+  //if (argc != 7){
+  if (mpi_rank==0)  
+    printf("usage: %s -f output -m csv -l number_lines\n",argv[0]);
+   // printf("only got %d\n",argc);
+  //  return 0;
+  //}
   int c;
+  int numline;
   opterr = 0;
   strncpy(filename, "fiber.h5", NAME_MAX);
   strncpy(csvfile, "fiberlist.txt",NAME_MAX);
   /***input arguments****/ 
   //f: output, m:csv   
-  while ((c = getopt (argc, argv, "f:m:")) != -1)
+  while ((c = getopt (argc, argv, "f:m:l:")) != -1)
     switch (c)
       {
       case 'f':
@@ -41,13 +44,19 @@ int main(int argc, char **argv){
 	break;
       case 'm':
 	strncpy(csvfile, optarg, NAME_MAX);
+      case 'l':
+       numline=strtol(optarg, NULL, 10); 
       default:
 	break;
       }
-
+  //numline=200000;
   MPI_Info_create(&info); 
   //Open file/dataset
- 
+  if (mpi_rank==0){
+  printf("number of lines:%d\n",numline);
+  printf("input:%s\n",filename);
+  printf("csv:%s\n",csvfile); 
+  }
   hid_t fapl,file;
   file=-1;
   fapl = H5Pcreate(H5P_FILE_ACCESS);
@@ -76,7 +85,13 @@ int main(int argc, char **argv){
   }
   
   const char sep=':';
-  struct Nodes_pair * dl=dataset_list(csvfile,sep);
+  struct Nodes_pair * dl=NULL;
+  dl=dataset_list(csvfile,sep,numline);
+  if(dl==NULL) {
+    printf("memorry allocation error\n");
+    exit(0);
+
+  }
   int total_nodes=dl->count;
   int step = total_nodes /mpi_size +1;
   int rank_start=mpi_rank*step;
