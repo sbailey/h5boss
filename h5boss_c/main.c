@@ -17,7 +17,7 @@ int main(int argc, char ** argv){
    bool write=false;
    long x = strtol(argv[3], NULL, 10);
    if(x==1) write=true;
-   struct Nodes_pair * dl=dataset_list(argv[1],sep);
+   struct Fiber * dl=dataset_list(argv[1],sep);
    end= time(NULL);
    for(j=0;j<dl->count;j++){
     printf("%d: %s, %s\n",j,dl->keys[j],dl->values[j]);

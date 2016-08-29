@@ -9,10 +9,10 @@ int bufi=0;
 //split a string by delimiter, return a char **
 char** str_split(char* a_str, const char a_delim)
 {
-    char** result    = 0;
+    char** result    = NULL;
     size_t count     = 0;
     char* tmp        = a_str;
-    char* last_comma = 0;
+    char* last_comma = NULL;
     char delim[2];
     delim[0] = a_delim;
     delim[1] = 0;
@@ -70,9 +70,18 @@ char ** path_split(char* path) {
     return token;
 }
 char ** parse_nodes(char * file,int numline){
-  char ** buf=(char **)malloc(sizeof(char *)*(numline+1));
+  char ** buf=NULL;
+  buf=(char **)malloc(sizeof(char *)*(numline+1));
+  if(buf==NULL){
+   printf("buf allocate error\n");
+   exit(0); 
+  }
   FILE * fp;
-  char * line = (char *)malloc(sizeof(char)*100);
+  char * line = (char *)malloc(sizeof(char)*200);
+  if(line==NULL){
+   printf("line allocate error\n");
+   exit(0); 
+  }
   size_t len = 0;
   size_t read;
   fp = fopen(file,"r");
@@ -93,34 +102,120 @@ char ** parse_nodes(char * file,int numline){
     free(line);
   return buf;
 }
-struct Nodes_pair * dataset_list (char * file,const char sep,int numline){
-    struct Nodes_pair * dl= malloc(sizeof(struct Nodes_pair));
+struct Fiber * dataset_list (char * file,const char sep,int numline){
+    struct Fiber * dl= malloc(sizeof(struct Fiber));
     
-    char ** lines=parse_nodes(file,numline);
+    char ** lines=NULL;
+    lines=parse_nodes(file,numline);
     if(lines==NULL){
      printf("lines parsing error\n");
+     exit(0);
     }
-    char ** dl_keys;
-    char ** dl_values;
+    char ** dl_keys=NULL;
+    char ** dl_values=NULL;
     dl_keys=(char **)malloc(sizeof(char *)*numline);
     if (dl_keys==NULL)  {
      printf("dl_keys allocation error\n");
+     exit(0);
     }
     dl_values=(char **)malloc(sizeof(char *)*numline);
     if (dl_values==NULL)  {
      printf("dl_values allocation error\n");
+     exit(0);
     }
     dl->count=bufi;
     int i;
     for (i=0;i<bufi;i++){
-      char ** tokens=str_split(lines[i],sep);
+      char ** tokens=NULL;
+      tokens=str_split(lines[i],sep);
+      if(tokens==NULL) {
+       printf("tokens memory error\n");
+       exit(0);
+      }
       dl_keys[i]=(char *)malloc(strlen(tokens[0])+1);
       dl_values[i]=(char *)malloc(strlen(tokens[1])+1);
+      if(dl_keys[i]==NULL || dl_values[i]==NULL){
+       printf("dl keys element allocate error\n");
+      }
       strcpy(dl_keys[i],tokens[0]);
       strcpy(dl_values[i],tokens[1]);
     }
     dl->keys=dl_keys;
     dl->values=dl_values;
+    bufi=0;
+    if(lines!=NULL) free(lines);
+    return dl;
+}
+struct Catalog * catalog_list (char * file,const char sep,int numline){
+    struct Catalog * dl= malloc(sizeof(struct Catalog));
+    if(dl==NULL){
+      printf("catalog dl mem err\n");
+      exit(0); 
+    }
+    char ** lines=parse_nodes(file,numline);
+    if(lines==NULL){
+     printf("lines parsing error\n");
+     exit(0);
+    }
+    char ** dl_plate_mjd=NULL;
+    char ** dl_fiber_id=NULL;
+    char ** dl_filepath=NULL;
+    char ** dl_fiber_offset=NULL;
+    dl_plate_mjd=(char **)malloc(sizeof(char *)*(numline+1));
+    if (dl_plate_mjd==NULL)  {
+     printf("dl_platemjd allocation error\n");
+     exit(0);
+    }
+    dl_fiber_id=(char **)malloc(sizeof(char *)*(numline+1));
+    if (dl_fiber_id==NULL)  {
+     printf("dl_fiber_id allocation error\n");
+     exit(0);
+    }
+    dl_filepath=(char **)malloc(sizeof(char *)*(numline+1));
+    if (dl_filepath==NULL)  {
+     printf("dl_filepath allocation error\n");
+     exit(0);
+    }
+    dl_fiber_offset=(char **)malloc(sizeof(char *)*(numline+1));
+    if (dl_fiber_offset==NULL)  {
+     printf("dl_fiber_offset allocation error\n");
+     exit(0);
+    }    
+    dl->count=bufi;
+    int i;
+    for (i=0;i<bufi;i++){
+      char ** tokens=str_split(lines[i],sep);
+      dl_plate_mjd[i]=(char *)malloc(strlen(tokens[0])+1);
+      if(dl_plate_mjd[i]==NULL){
+        printf("dl_plate_mjd mem err\n");
+        exit(0);
+       }
+      dl_fiber_id[i]=(char *)malloc(strlen(tokens[1])+1);
+      if(dl_fiber_id[i]==NULL){
+        printf("dl_fiber_id mem err\n");
+        exit(0);
+       }
+      dl_filepath[i]=(char *)malloc(strlen(tokens[2])+1);
+      if(dl_filepath[i]==NULL){
+        printf("dl_filepath mem err\n");
+        exit(0);
+       }
+      dl_fiber_offset[i]=(char *)malloc(strlen(tokens[3])+1);
+      if(dl_fiber_offset[i]==NULL){
+        printf("dl_fiber_offset mem err\n");
+        exit(0);
+       }
+      strcpy(dl_plate_mjd[i],tokens[0]);
+      strcpy(dl_fiber_id[i],tokens[1]);
+      strcpy(dl_filepath[i],tokens[2]);
+      strcpy(dl_fiber_offset[i],tokens[3]);
+    }
+    if(lines!=NULL) free(lines);
+    dl->plate_mjd=dl_plate_mjd;
+    dl->fiber_id=dl_fiber_id;
+    dl->filepath=dl_filepath;
+    dl->fiber_offset=dl_fiber_offset;
+    bufi=0;
     return dl;
 }
 /*
@@ -131,7 +226,7 @@ void main(int argc, char ** argv){
    }
    int j;
    const char sep=':';
-   struct Nodes_pair * dl=dataset_list(argv[1],sep);
+   struct Fiber * dl=dataset_list(argv[1],sep);
    //parse_nodes(argv[1]);
    for(j=0;j<dl->count;j++){
     printf("parsed line %d: %s, %s",j,dl->keys[j],dl->values[j]);

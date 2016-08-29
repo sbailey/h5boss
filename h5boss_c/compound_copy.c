@@ -4,7 +4,7 @@
 #include<hdf5.h>
 #include<stdlib.h>
 #include<string.h>
-#include<hdf5_hl.h>
+#include<hdf5_hl.h>//this is needed for using the hdf5 table api
 size_t COADD_REC_SIZE=sizeof(struct COADD);
 size_t EXPOSURE_REC_SIZE=sizeof(struct EXPOSURE);
 #define NFIELDS   (hsize_t) 8

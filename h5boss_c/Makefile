@@ -1,5 +1,5 @@
 CC=cc
-CFLAGS=-c -Wall
+CFLAGS=-g -c -Wall
 LDFLAGS=
 SOURCES=subset.c parse_node.c compound_copy.c
 OBJECTS=$(SOURCES:.c=.o)
