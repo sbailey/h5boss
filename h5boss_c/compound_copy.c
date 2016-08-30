@@ -7,7 +7,7 @@
 #include<hdf5_hl.h>//this is needed for using the hdf5 table api
 size_t COADD_REC_SIZE=sizeof(struct COADD);
 size_t EXPOSURE_REC_SIZE=sizeof(struct EXPOSURE);
-size_t CATALOG_REC_SIZE={sizeof(struct PLUGMAP),sizeof(struct ZBEST), sizeof(struct zline),
+size_t CATALOG_REC_SIZE[]={sizeof(struct PLUGMAP),sizeof(struct ZBEST), sizeof(struct ZLINE),
                           sizeof(struct MATCH), sizeof(struct MATCHFLUX), sizeof(struct MATCHPOS)};
 #define NFIELDS   (hsize_t) 8
 #define NFIELDS_PLUGMAP (hsize_t) 35
@@ -1120,8 +1120,8 @@ void compound_read_catalog(struct Catalog * cl, hid_t dst_file, int it, int writ
       igroup = H5Gopen(ifile,cl->plate_mjd[it],H5P_DEFAULT);
       if(igroup<0) printf("group '%s' open error rank: %d\n",cl->plate_mjd[it],rank);
       //read record at cl->fiber_loffset in ifile, write record at cl->fiber_goffset in dst_file
-      H5TBread_records (igroup, catalog_array[icat], cl->fiber_loffset, 1, record_size,
-        field_offsets, field_sizes, data_catalog)
+      H5TBread_records (igroup, catalog_array[icat], cl->fiber_loffset[it], 1, record_size,
+        field_offsets, field_sizes, data_catalog);
       /*if(write){
         compound_write_catalog(dst_file,cl->plate_mjd[it],catalog_array[icat], 1, record_size, field_offsets, field_sizes,data_catalog);
       }
@@ -1131,8 +1131,8 @@ void compound_read_catalog(struct Catalog * cl, hid_t dst_file, int it, int writ
       igroup = H5Gopen(ifile,photo_gp,H5P_DEFAULT);
       if(igroup<0) printf("group '%s' open error rank: %d\n",photo_gp,rank);
       //read record at cl->fiber_loffset in ifile, write record at cl->fiber_goffset in dst_file
-      H5TBread_records (igroup, catalog_array[icat], cl->fiber_loffset, 1, record_size,
-        field_offsets, field_sizes, data_catalog)
+      H5TBread_records (igroup, catalog_array[icat], cl->fiber_loffset[it], 1, record_size,
+        field_offsets, field_sizes, data_catalog);
       /*if(write){
         compound_write_catalog(dst_file,photo_gp,catalog_array[icat], 1, record_size, field_offsets, field_sizes,data_catalog);
       }*/

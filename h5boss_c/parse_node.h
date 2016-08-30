@@ -9,9 +9,9 @@ struct Fiber{
 struct Catalog{
     int count;       // number of catalog rows, e.g., 19800
     char ** plate_mjd;// a list of plate/mjd pair, e.g., 3690/55182
-    char ** fiber_loffset; // a list of fiber original offset, e.g., 0
+    long long * fiber_loffset; // a list of fiber original offset, e.g., 0
     char ** filepath; // a list of file path, e.g., global/cscratch1/sd/jialin/h5boss/3690-55182.hdf5
-    char ** fiber_goffset; // a list of fiber new offsets, e.g., 1
+    long long * fiber_goffset; // a list of fiber new offsets, e.g., 1
 };
 //split a string by delimiter, return a char **
 char ** str_split(char* a_str, const char a_delim);

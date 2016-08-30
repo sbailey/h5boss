@@ -158,15 +158,15 @@ struct Catalog * catalog_list (char * file,const char sep,int numline){
      exit(0);
     }
     char ** dl_plate_mjd=NULL;
-    char ** dl_fiber_id=NULL;
+    long long * dl_fiber_id=NULL;
     char ** dl_filepath=NULL;
-    char ** dl_fiber_offset=NULL;
+    long long* dl_fiber_offset=NULL;
     dl_plate_mjd=(char **)malloc(sizeof(char *)*(numline+1));
     if (dl_plate_mjd==NULL)  {
      printf("dl_platemjd allocation error\n");
      exit(0);
     }
-    dl_fiber_id=(char **)malloc(sizeof(char *)*(numline+1));
+    dl_fiber_id=(long long *)malloc(sizeof(long long)*(numline+1));
     if (dl_fiber_id==NULL)  {
      printf("dl_fiber_id allocation error\n");
      exit(0);
@@ -176,7 +176,7 @@ struct Catalog * catalog_list (char * file,const char sep,int numline){
      printf("dl_filepath allocation error\n");
      exit(0);
     }
-    dl_fiber_offset=(char **)malloc(sizeof(char *)*(numline+1));
+    dl_fiber_offset=(long long *)malloc(sizeof(long long)*(numline+1));
     if (dl_fiber_offset==NULL)  {
      printf("dl_fiber_offset allocation error\n");
      exit(0);
@@ -190,31 +190,22 @@ struct Catalog * catalog_list (char * file,const char sep,int numline){
         printf("dl_plate_mjd mem err\n");
         exit(0);
        }
-      dl_fiber_id[i]=(char *)malloc(strlen(tokens[1])+1);
-      if(dl_fiber_id[i]==NULL){
-        printf("dl_fiber_id mem err\n");
-        exit(0);
-       }
-      dl_filepath[i]=(char *)malloc(strlen(tokens[2])+1);
+      
+     dl_filepath[i]=(char *)malloc(strlen(tokens[2])+1);
       if(dl_filepath[i]==NULL){
         printf("dl_filepath mem err\n");
         exit(0);
        }
-      dl_fiber_offset[i]=(char *)malloc(strlen(tokens[3])+1);
-      if(dl_fiber_offset[i]==NULL){
-        printf("dl_fiber_offset mem err\n");
-        exit(0);
-       }
-      strcpy(dl_plate_mjd[i],tokens[0]);
-      strcpy(dl_fiber_id[i],tokens[1]);
-      strcpy(dl_filepath[i],tokens[2]);
-      strcpy(dl_fiber_offset[i],tokens[3]);
+     strcpy(dl_plate_mjd[i],tokens[0]);
+     dl_fiber_id[i]=atoll(tokens[1]);
+     strcpy(dl_filepath[i],tokens[2]);
+     dl_fiber_offset[i]=atoll(tokens[3]);
     }
     if(lines!=NULL) free(lines);
     dl->plate_mjd=dl_plate_mjd;
-    dl->fiber_id=dl_fiber_id;
+    dl->fiber_loffset=dl_fiber_id;
     dl->filepath=dl_filepath;
-    dl->fiber_offset=dl_fiber_offset;
+    dl->fiber_goffset=dl_fiber_offset;
     bufi=0;
     return dl;
 }
