@@ -1,6 +1,6 @@
 #ifndef PARSE_NODES_H_
 #define PARSE_NODES_H_
-
+#include<hdf5.h>
 struct Fiber{
     int count;     // number of counts, e.g., 188000
     char ** keys;  // a list of fiber dataset name, e.g., 5732/56326/936/coadd

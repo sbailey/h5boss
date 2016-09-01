@@ -126,7 +126,7 @@ def parallel_select():
             sample_file=range_files[0] # get the catalog metadata
             catalog_types=get_catalogtypes(sample_file) # dict: meta, (type, shape)
             global_catalog=(catalog_number,catalog_types)
-            create_template(outfile,global_catalog,'catalog')
+            #create_template(outfile,global_catalog,'catalog')
            except Exception as e:
             traceback.print_exc()
         tcreated=MPI.Wtime()
@@ -182,7 +182,7 @@ def parallel_select():
            fiber_copyte=MPI.Wtime()
            #for each fiber, find the catalog, then copy it
            catalog_copyts=MPI.Wtime()
-           overwrite_template(hx,catalog_dict,'catalog')
+           #overwrite_template(hx,catalog_dict,'catalog')
            catalog_copyte=MPI.Wtime()
            hx.close()
            tclose=MPI.Wtime()

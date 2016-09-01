@@ -128,12 +128,12 @@ int main(int argc, char **argv){
   int i;
   double t0=MPI_Wtime();
   //read fiber
-  /*for(i=rank_start;i<rank_end;i++){
+  for(i=rank_start;i<rank_end;i++){
    //para:input file, output file, dataset(group/dataset), write, mpi rank
    compound_read(dl_fiber->values[i],file, dl_fiber->keys[i],1,mpi_rank);
    //compound_read_fiber(dl_fiber,file,i,1,mpi_rank);//rewirte into this interface
   }
-  */
+  
 
   //read catalog
   /*for(i=rank_start;i<rank_end;i++){

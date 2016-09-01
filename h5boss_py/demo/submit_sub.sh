@@ -1,11 +1,11 @@
 #!/bin/bash
-#SBATCH -p debug 
-#SBATCH -N 4
-#SBATCH -t 00:20:00
+#SBATCH -p regular 
+#SBATCH -N 1
+#SBATCH -t 01:00:00
 #SBATCH -J subset-mpi
-#SBATCH -e %j_10k.err
-#SBATCH -o %j_10k.out
+#SBATCH -e %j_100k.err
+#SBATCH -o %j_100k.out
 #SBATCH -L SCRATCH
 cd $SLURM_SUBMIT_DIR
-template=$SCRATCH/bosslover/scaling-test/ost72/10k_py_template128.h5 
-srun -n 128 python-mpi ../scripts/subset_mpi.py input-full-cori $template pmf-list/large-scale/pmf10k-shuffle.csv --mpi="yes" --template="all"
+template=$SCRATCH/bosslover/scaling-test/ost72/100k_py_template32.h5 
+srun -n 32 python-mpi ../scripts/subset_mpi.py input-full-cori $template pmf-list/large-scale/pmf100k-shuffle.csv --mpi="yes" --template="all"

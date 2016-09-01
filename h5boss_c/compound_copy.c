@@ -1,3 +1,4 @@
+#include<assert.h>
 #include"compound_copy.h"
 #include"parse_node.h"
 #include<stdio.h>
@@ -1143,7 +1144,7 @@ void compound_read_catalog(struct Catalog * cl, hid_t dst_file, int it, int writ
     }
     if(write){
       compound_write_catalog(dst_file,cl->plate_mjd[it],catalog_array[icat],
-          len_offset,cl->fiber_gstart[it], record_size, field_offsets, field_sizes,data_catalog);
+          len_offset,cl->fiber_gstart[it],record_size, field_offsets, field_sizes,data_catalog);
     }
   }
 
@@ -1168,7 +1169,7 @@ void compound_write_catalog(hid_t dst_file,char * grp, const char * table_name, 
   if(igroup>=0) H5Gclose(igroup);
   //if(ifile>=0)  H5Fclose(ifile);
 }
-void get_catalog_offset(hsize_t * offsetlist, hsize_t * len_offset, hsize_t fiberid, hsize_t nrecords, void * data_field){
+void get_catalog_offset(hsize_t * offsetlist, hsize_t * len_offset, hsize_t fiberid, hsize_t nrecords, hsize_t * data_field){
      int id=0;
      int jd=0;
      len_offset=0;
