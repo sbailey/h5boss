@@ -105,16 +105,16 @@ int main(int argc, char **argv){
     exit(0);
 
   }
-  dl_catalog=catalog_list(catalog_csvfile,sep,catalog_numline);
-  if(dl_catalog==NULL) {
+  //dl_catalog=catalog_list(catalog_csvfile,sep,catalog_numline);
+  /*if(dl_catalog==NULL) {
     printf("dl_catalog memorry allocation error, rank:%d\n",mpi_rank);
     exit(0);
   }
-  
+  */
   int total_nodes=dl_fiber->count;
   if(mpi_rank==0){
    printf("dl_fiber count:%d,pre-allocate:%d\n",dl_fiber->count,numline);
-   printf("dl_catalog count:%d,pre-allocate:%d\n",dl_catalog->count,catalog_numline);
+  // printf("dl_catalog count:%d,pre-allocate:%d\n",dl_catalog->count,catalog_numline);
   }
   int step = total_nodes /mpi_size +1;
   int rank_start=mpi_rank*step;
@@ -136,14 +136,14 @@ int main(int argc, char **argv){
   
 
   //read catalog
-  /*for(i=rank_start;i<rank_end;i++){
+ /* for(i=rank_start;i<rank_end;i++){
    //para:input file, output file, dataset(group/table_name), original offset, new offset,write, mpi rank
    compound_read_catalog(dl_catalog,file,i,1,mpi_rank);
   }
   */
   MPI_Barrier(comm);
   if(dl_fiber!=NULL) free(dl_fiber);
-  if(dl_catalog!=NULL) free(dl_catalog);
+  //if(dl_catalog!=NULL) free(dl_catalog);
   if(mpi_rank==0||mpi_rank==mpi_size-1) printf("rank:%d:%d\n",mpi_rank,rank_end-rank_start);
   double t1 = MPI_Wtime();
   if(mpi_rank==0){ 

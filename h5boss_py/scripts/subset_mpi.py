@@ -16,6 +16,7 @@ from h5boss.pmf import get_catalogtypes
 from h5boss.pmf import count_unique
 from h5boss.pmf import locate_fiber_in_catalog
 from h5boss.selectmpi import add_dic
+from h5boss.selectmpi import add_numpy
 from h5boss.selectmpi import create_template
 from h5boss.selectmpi import overwrite_template
 
@@ -46,11 +47,19 @@ def parallel_select():
     parser.add_argument("pmf",    help="Plate/mjd/fiber list")
     parser.add_argument("--template", help="Create template only,yes/no/all")
     parser.add_argument("--mpi", help="using mpi yes/no")
+    parser.add_argument("--fiber", help="specify fiber csv output")
+    parser.add_argument("--catalog", help="specify catalog csv output")
     opts=parser.parse_args()
 
     infiles = opts.input
     outfile = opts.output
     pmflist = opts.pmf
+    fiberout = "fibercsv"
+    catalogout = "catalogcsv"
+    if opts.fiber:
+     fiberout = opts.fiber
+    if opts.catalog:
+     catalogout = opts.catalog
     catalog_meta=['plugmap', 'zbest', 'zline',
                         'match', 'matchflux', 'matchpos']
     meta=['plugmap', 'zbest', 'zline',
@@ -80,7 +89,7 @@ def parallel_select():
            print ("parse csv time: %.2f"%(tstart-tstartcsv))
         total_files=len(hdfsource)
         #distribute the workload evenly to each process
-        step=int(total_files / nproc)+1
+        step=int(total_files / nproc)
         rank_start =int( rank * step)
         rank_end = int(rank_start + step)
         if(rank==nproc-1):
@@ -111,14 +120,39 @@ def parallel_select():
         fiber_item_length=len(fiber_dict)
         fiber_dict_tmp=fiber_dict
         global_fiber= comm.allreduce(fiber_dict_tmp, op=counterop)       
+        #global_fiber = comm.reduce(fiber_dict_tmp,op=counterop,root=0)
+        #fiber_dict_tmp_numpy=np.asarray(fiber_dict_tmp.items())
+        #counterop_numpy=MPI.Op.Create(add_numpy, commute=True)
+        #global_fiber=np.asarray(fiber_dict_tmp_numpy)
+        #global_fiber=np.zeros(1)
+        #if(fiber_dict_tmp_numpy.size==0):
+        #  fiber_dict_tmp_numpy=np.zeros(1)
+        #comm.Reduce(fiber_dict_tmp_numpy,global_fiber,op=counterop_numpy,root=0)
+        #comm.Gather(fiber_dict_tmp_numpy,global_fiber,root=0)
+        #for irank in range(0,nproc):
+        # if(rank==irank):
+        #   try:
+             ##can not parallel create metadata is really painful. 
+        #     create_template(outfile,fiber_dict_tmp,'fiber',rank)
+        #   except Exception as e:
+        #     traceback.print_exc()
+        # comm.Barrier()
+        #if(rank==1):
+        #   try:
+             ##can not parallel create metadata is really painful. 
+        #     create_template(outfile,fiber_dict_tmp,'fiber',rank)
+        #   except Exception as e:
+        #     traceback.print_exc() 
         treduce=MPI.Wtime()
+        #print ("rank: ",rank,fiber_dict_tmp_numpy)
         if rank==0:
          print ("Allreduce %d fiber meta:kv(dataset, type): %.2f"%(len(global_fiber),(treduce-tend)))
+        #sys.exit()  
         #Create the template using 1 process       
         if rank==0 and (template==1 or template==2):
            try:
             ##can not parallel create metadata is really painful. 
-            create_template(outfile,global_fiber,'fiber')
+            create_template(outfile,global_fiber,'fiber',rank)
             catalog_number=count_unique(global_fiber) #(plates/mjd, num_fibers)
             print ('number of unique fibers:%d '%len(catalog_number))           
             #for fk,vk in catalog_number.items():
@@ -126,13 +160,14 @@ def parallel_select():
             sample_file=range_files[0] # get the catalog metadata
             catalog_types=get_catalogtypes(sample_file) # dict: meta, (type, shape)
             global_catalog=(catalog_number,catalog_types)
-            #create_template(outfile,global_catalog,'catalog')
+            create_template(outfile,global_catalog,'catalog',rank)
            except Exception as e:
             traceback.print_exc()
         tcreated=MPI.Wtime()
+        #if rank==0:
         copy_global_catalog=global_fiber
         revised_dict=locate_fiber_in_catalog(copy_global_catalog)
-        #now revised_dict has: p/m, fiber_id, infile, global_offset
+         #now revised_dict has: p/m, fiber_id, infile, global_offset
         copy_revised_dict=revised_dict.items()
         total_unique_fiber=len(copy_revised_dict)
         #distribute the workload evenly to each process
@@ -147,10 +182,10 @@ def parallel_select():
         twritecsv_start=MPI.Wtime()
         if rank==0 and (template==1 or template==2):
          print ("Template creation time: %.2f"%(tcreated-treduce))
-         with open('nodes10k_fiber.txt', 'a') as f:
+         with open(fiberout, 'a') as f:
            f.writelines('{}:{}\n'.format(k,v[2]) for k, v in global_fiber.items())
            f.write('\n')
-         with open('nodes10k_catalog.txt', 'a') as f:
+         with open(catalogout, 'a') as f:
            for k,v in revised_dict.items():
             for iv in v:
              f.writelines('{}:{}:{}:{}\n'.format(k,iv[0],iv[1],iv[2]))
@@ -170,7 +205,7 @@ def parallel_select():
          except Exception as e:
           traceback.print_exc()        
         topen=MPI.Wtime()
-        tclose=0.0
+        tclose=MPI.Wtime()
         tcopy=0.0
         fiber_copyte=0.0
         fiber_copyts=0.0

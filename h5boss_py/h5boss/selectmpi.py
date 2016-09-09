@@ -30,17 +30,24 @@ def add_dic(dict1,dict2,datatype):
       if item not in dict1:
         dict1[item] = dict2[item]
     return dict1
-def create_template(outfile, global_dict,choice):
+def add_numpy(dict1, dict2, datatype):
+    if(dict2.size==0):
+       return dict1
+    if(dict1.size==0):
+       return dict2
+    dict1=np.append(dict1,dict2,axis=0)
+    return dict1
+def create_template(outfile, global_dict,choice,rank):
     if choice=='fiber':
-      create_fiber_template(outfile,global_dict)
+      create_fiber_template(outfile,global_dict,rank)
     elif choice=='catalog':
       create_catlog_template(outfile,global_dict)
-def create_fiber_template(outfile,global_dict):
+def create_fiber_template(outfile,global_dict,rank):
 #use one process to create the template
  try:
      hx = h5py.File(outfile,'a')
  except Exception as e:
-     print ("Output file creat error:%s"%outfile)
+     print ("rank:%d, Output file open error:%s"%(rank,outfile))
      traceback.print_exc()
  try:#Set the allocate time as early. --Quincey Koziol 
   for key,value in global_dict.items():
@@ -50,14 +57,14 @@ def create_fiber_template(outfile,global_dict):
 #     _catalog_template(hx,key,value)
  except Exception as e:
    traceback.print_exc()
-   pass
+   
  try:
   hx.flush()
   hx.close()
  except Exception as e:
-  print("hx close error in rank0")
+  print("hx close error in %d"%rank)
   traceback.print_exc()
-  pass
+  
 
 def create_catlog_template(outfile,global_dict):
 #use one process to create the template
