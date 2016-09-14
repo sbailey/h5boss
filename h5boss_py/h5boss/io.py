@@ -1,7 +1,9 @@
+import traceback
 import os.path
 import numpy as np
 from astropy.io import fits
 from astropy.table import Table
+import h5py
 expdat=("wave","flux","ivar","mask","wavedisp","sky","x","calib") #exposures
 dat=("wave","flux","ivar","and_mask","or_mask","wavedisp","sky","model") # wavelength
 def load_coadds(platefile, zbestfile=None, run1d=None):
@@ -149,19 +151,21 @@ def load_coadds_vstack(platefile,zbestfile=None, run1d=None):
     coadds=(wave,flux,ivar,and_mask,or_mask,wavedisp,sky,model,header)
     return coadds
 #copy each wavelength dataset into the hdf5 file
-def write_coadds_vstack(platefile, plate,mjd,hdf5output,zbestfile=None, run1d=None)
+def write_coadds_vstack(platefile, plate,mjd,hdf5output,zbestfile=None, run1d=None):
     coadds=load_coadds_vstack(platefile, zbestfile=None, run1d=None)
     global dat
-    outx=h5py.File(hdf5output,'w')
+    outx=h5py.File(hdf5output,'a')
     for i in range(0,8):
-        id = '{}/{}/{}'.format(plate, mjd, dat[i])
+        id = '{}/{}/coadds/{}'.format(plate, mjd, dat[i])
+        print(id)
         try:
             dx=outx.create_dataset(id,data=coadds[i])
         except Exception as e:
             pass
         #temptb.write(hdf5output,id,append=True) #TODO: add table.meta to hdf5 attributes
         #dx.attrs.__setitem__(dat[i], coadds[8])
-
+    print(outx['7094/56660'].keys())
+    outx.close()
 #sections in load exposures
 def load_frame_vstack(framefile,cframefile=None,flatfile=None):
     """
@@ -173,11 +177,13 @@ def load_frame_vstack(framefile,cframefile=None,flatfile=None):
             cframefile = cframefile[:-3]
     import os.path
     if os.path.exists(framefile)==False:
+        print ("%s not exist"%(framefile))
         exit()
     #- Load framefile and get original dimensions
     eflux = fits.getdata(framefile, 0)
     nfiber, npix = eflux.shape
     if os.path.exists(cframefile)==False:
+        print ("%s not exist"%(cframefile))
         exit()
     #- Load spCFrame file; trim arrays back to original size
     fx = fits.open(cframefile, memmap=False)
@@ -200,6 +206,7 @@ def load_frame_vstack(framefile,cframefile=None,flatfile=None):
         flatfile = os.path.join(filedir, flatfile)
 
     if os.path.exists(flatfile)==False:
+        print("%s not exist"%(flatfile))
         exit()
     fiberflat = fits.getdata(flatfile, 0)
 
@@ -216,52 +223,78 @@ def load_frame_vstack(framefile,cframefile=None,flatfile=None):
 def combine_write_frame(frame1,frame2,expid,plate,mjd,hdf5output,br):
     #print ('dump:',expid)
     global expdat
-
+    try: 
+        outx=h5py.File(hdf5output,'a')
+        #print(outx)
+    except Exception as e:
+        print ("file open error")
+        traceback.print_exc()
+        pass
+    #print("len expdat:%d"%(len(expdat)))
     for i in range(0,len(expdat)):
-        try:
-            outx=h5py.File(hdf5output,'w')
-        except Exception as e:
-            print ("file open error")
-            pass
         id = '{}/{}/exposures/{}/{}/{}'.format(plate, mjd, expid,br,expdat[i])
+        #print (id)
         try:
             dset=np.append(frame1[i],frame2[i])
-            print ("id:%s"%id)
-            print ("shape:",dset.shape)
+            #print ("id:%s"%id)
+            #print ("shape:",dset.shape)
         except Exception as e:
             print ("append error")
+            trackback.print_exc()
             pass
         try:
             dx=outx.create_dataset(id,data=dset)
+            #print(dx)
         except Exception as e:
             print ('error in frame dump')
+            trackback.print_exc()
             pass
         #outx.flush()
-        #outx.close()
+    try:
+        print("done writing exposure %d, br:%s"%(expid,br))
+        outx.close()
+    except Exception as e:
+        print ("file close error")
+        traceback.print_exc()
 def write_frame(frame1,expid,plate,mjd,hdf5output,br):
     #print ("single dump:",expid)
     global expdat
+    try:
+        outx=h5py.File(hdf5output,'a')
+        print (outx)
+    except Exception as e:
+        print ("file open error")
+        traceback.print_exc()
+        pass
+    print("len expdat:%d"%(len(expdat)))
     for i in range(0,len(expdat)):
-        try:
-            outx=h5py.File(hdf5output,'w')
-        except Exception as e:
-            print ("file open error")
-            pass
         id = '{}/{}/exposures/{}/{}/{}'.format(plate, mjd, expid,br,expdat[i])
+        #print(id)
         dset=frame1[i]
         try:
+            #print ("creating dataset in frames")
             dx=outx.create_dataset(id,data=dset)
+            #print(dx)
         except Exception as e:
             print ('error in frame dump')
+            trackback.print_exc()
             pass
-        #outx.close()
-
-def write_frame_vstack(filedir,framefile,plate,mjd,hdf5output, cframefile=None, flatfile=None):
+    try:
+       print("done writing exposure %d, br:%s"%(expid,br))
+       outx.close()
+    except Exception as e:
+       print ("file close error")
+       trackback.print_exc()
+def write_frame_vstack(filedir,framefiles,plate,mjd,hdf5output, cframefile=None, flatfile=None):
     frameb1=list()
     framer1=list()
     frameb2=list()
     framer2=list()
+    ii=0
+    #print("length of framefiles:%d"%(len(framefiles)))
     for filename in framefiles:
+        #print ("iteration:%d"%(ii))
+        ii=ii+1
         offset = 0  #fiber 0-499
         if ('spFrame-b1' in filename):
             try:
@@ -270,6 +303,7 @@ def write_frame_vstack(filedir,framefile,plate,mjd,hdf5output, cframefile=None, 
              #print (filename, frame[9])
             except Exception as e:
                 print ("File not found")
+                traceback.print_exc()
                 pass
         if ('spFrame-r1' in filename):
             try:
@@ -278,7 +312,9 @@ def write_frame_vstack(filedir,framefile,plate,mjd,hdf5output, cframefile=None, 
              #print (filename, frame[9])
             except Exception as e:
                 print ("File not found")
+                traceback.print_exc()
                 pass
+    print ("finish loading b1, r1")
     for filename in framefiles:
         offset = 500 #fiber 500-999
         if ('spFrame-b2' in filename):
@@ -297,26 +333,35 @@ def write_frame_vstack(filedir,framefile,plate,mjd,hdf5output, cframefile=None, 
             except Exception as e:
                 print ("File not found")
                 pass
-
+    print("finish loading b2,r2")
     #combine b1 and b2
+    print ("frameb1:%d"%(len(frameb1)))
     for i in range(0,len(frameb1)):
         expidb1=frameb1[i][9]
+        #print("expidb1:%d"%expidb1)
         hit=0
         for j in range(0,len(frameb2)):
             expidb2=frameb2[j][9]
+            #print("expidb2:%d"%expidb2)
             if expidb1==expidb2:
                 #combine frameb1 and frameb2
                 combine_write_frame(frameb1[i],frameb2[j],expidb1,plate,mjd,hdf5output,'b')
-                frameb2.remove(frameb2[j])
+                try:
+                 frameb2.remove(frameb2[j])
+                except Exception as e:
+                 traceback.print_exc()
                 hit=1
                 break
         if hit==0:
+            #print ("hit is 0")
             write_frame(frameb1[i],expidb1,plate,mjd,hdf5output,'b')
     for i in range(0,len(frameb2)):
+        #print("leftover frameb2:%d"%(frameb2))
         expidb2=frameb2[i][9]
         write_frame(frameb2[i],expidb2,plate,mjd,hdf5output,'b')
 
     #combine r1 and r2
+    print ("framer1:%d"%(len(framer1)))
     for i in range(0,len(framer1)):
         expidr1=framer1[i][9]
         hit=0
@@ -331,5 +376,6 @@ def write_frame_vstack(filedir,framefile,plate,mjd,hdf5output, cframefile=None, 
         if hit==0:
             write_frame(framer1[i],expidr1,plate,mjd,hdf5output,'r')
     for i in range(0,len(framer2)):
+        #print("leftover:%d"%(len(framer2)))
         expidr2=framer2[i][9]
         write_frame(framer2[i],expidr2,plate,mjd,hdf5output,'r')

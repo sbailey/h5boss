@@ -75,7 +75,7 @@ def serial_convert(platefile,hdf5output):
     #for i, cx in enumerate(coadds):
     #    dataname = '{}/{}/{}/coadd'.format(plate, mjd, i+1)
     #    cx.write(hdf5output, path=dataname, append=True)
-    write_coadds_vstack(platefile, plate,mjd,hdf5output)
+    h5boss.io.write_coadds_vstack(platefile, plate,mjd,hdf5output)
 
     #--- Individual exposures ---
     #- Parse spPlancomb to get exposures that were used
@@ -107,7 +107,7 @@ def serial_convert(platefile,hdf5output):
     #        dataname = '{}/{}/{}/exposures/{}/{}'.format(plate, mjd, fiber, expid, br)
     #        fx.write(hdf5output, path=dataname, append=True)
     print('writing exposures')
-    write_frame_vstack(filedir,framefile,plate,mjd,hdf5output)
+    h5boss.io.write_frame_vstack(filedir,framefile,plate,mjd,hdf5output)
 
     tend=time.time()-tstart
     print ('time',tend)
