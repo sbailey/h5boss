@@ -19,7 +19,8 @@ from h5boss.selectmpi import add_dic
 from h5boss.selectmpi import add_numpy
 from h5boss.selectmpi import create_template
 from h5boss.selectmpi import overwrite_template
-
+from time import gmtime, strftime
+import datetime
 import sys,os
 import time
 import optparse
@@ -97,7 +98,7 @@ def parallel_select():
             if rank_start>total_files:
              rank_start=total_files
         range_files=hdfsource[rank_start:rank_end]
-
+        print ("rank:%d,file:%d"%(rank,len(range_files)))
 
 ################################################################################################################
         #TODO: SCAN ALL FILES, GET THE (PMF, FILE) LIST, SAVE AS PICKLE, THEN EACH TIME, READIN THIS FILE. 
@@ -165,6 +166,7 @@ def parallel_select():
             traceback.print_exc()
         tcreated=MPI.Wtime()
         #if rank==0:
+        #TODO: rewrite this to get the catalog and fiber in one shot
         copy_global_catalog=global_fiber
         revised_dict=locate_fiber_in_catalog(copy_global_catalog)
          #now revised_dict has: p/m, fiber_id, infile, global_offset
@@ -205,15 +207,20 @@ def parallel_select():
          except Exception as e:
           traceback.print_exc()        
         topen=MPI.Wtime()
-        tclose=MPI.Wtime()
-        tcopy=0.0
-        fiber_copyte=0.0
-        fiber_copyts=0.0
-        catalog_copyte=0.0
-        catalog_copyts=0.0
+        tclose=topen
+        
+        fiber_copyte=topen
+        fiber_copyts=topen
+        catalog_copyts=topen
+        catalog_copyte=topen
         if template==0 or template==2:
            fiber_copyts=MPI.Wtime()
+           print ("rank:%d, fiber_dict length:%d"%(rank,fiber_item_length))
+           #print ("rank:%d, start time:%s"%(rank, datetime.datetime.time(datetime.datetime.now())))
+           fiber_copy_start=time.time()
            overwrite_template(hx,fiber_dict,'fiber')
+           fiber_copy_end=time.time()
+           print("rank:%d,fibercost:%.2f"%(rank,fiber_copy_end-fiber_copy_start))
            fiber_copyte=MPI.Wtime()
            #for each fiber, find the catalog, then copy it
            catalog_copyts=MPI.Wtime()
@@ -221,6 +228,7 @@ def parallel_select():
            catalog_copyte=MPI.Wtime()
            hx.close()
            tclose=MPI.Wtime()
+           #print("rank:%d,fiber cost:%.2f"%(rank,fiber_copyte-fiber_copyts))
         if rank==0:
            print ("File open: %.2f\nFiber copy: %.2f\nCatalog copy: %.2f\nFile close: %.2f\nTotal Cost: %.2f"%(topen-tcreated,fiber_copyte-fiber_copyts,catalog_copyte-catalog_copyts,tclose-catalog_copyte,tclose-tstart))
 if __name__=='__main__': 
