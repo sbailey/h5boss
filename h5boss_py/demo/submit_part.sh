@@ -10,4 +10,4 @@
 cd $SLURM_SUBMIT_DIR
 #module load python/2.7-anaconda
 #module list
-srun -n 4 python-mpi boss2hdf5-parallel.py --output ./
+srun -n 4 python-mpi boss2hdf5-parallel.py --output /global/cscratch1/sd/jialin/h5boss_v2/

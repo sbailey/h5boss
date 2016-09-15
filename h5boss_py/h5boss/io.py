@@ -164,7 +164,7 @@ def write_coadds_vstack(platefile, plate,mjd,hdf5output,zbestfile=None, run1d=No
             pass
         #temptb.write(hdf5output,id,append=True) #TODO: add table.meta to hdf5 attributes
         #dx.attrs.__setitem__(dat[i], coadds[8])
-    print(outx['7094/56660'].keys())
+    #print(outx['7094/56660'].keys())
     outx.close()
 #sections in load exposures
 def load_frame_vstack(framefile,cframefile=None,flatfile=None):
@@ -235,7 +235,7 @@ def combine_write_frame(frame1,frame2,expid,plate,mjd,hdf5output,br):
         id = '{}/{}/exposures/{}/{}/{}'.format(plate, mjd, expid,br,expdat[i])
         #print (id)
         try:
-            dset=np.append(frame1[i],frame2[i])
+            dset=np.append(frame1[i],frame2[i],axis=0)
             #print ("id:%s"%id)
             #print ("shape:",dset.shape)
         except Exception as e:

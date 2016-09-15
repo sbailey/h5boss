@@ -6,7 +6,7 @@ from mpi4py import MPI
 
 datapath = "/global/projecta/projectdirs/sdss/data/sdss/dr12/boss/spectro/redux/v5_7_0/"
 #outputpath= "/global/cscratch1/sd/jialin/h5boss-bp/"
-outputpath= "/scratch1/scratchdirs/jialin/h5boss-full/"
+outputpath= "/global/cscratch1/sd/jialin/h5boss_v2/"
 
 def listfiles():
      ldir=os.listdir(datapath)

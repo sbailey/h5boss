@@ -17,6 +17,7 @@ import time
 def serial_convert(platefile,hdf5output):
     platefile=platefile[0]
     hdf5output=str(hdf5output)
+    print ("output:%s"%hdf5output)
     filedir = os.path.split(os.path.abspath(platefile))[0]
     hdr = fits.getheader(platefile)
     plate = hdr['PLATEID']
@@ -107,7 +108,7 @@ def serial_convert(platefile,hdf5output):
     #        dataname = '{}/{}/{}/exposures/{}/{}'.format(plate, mjd, fiber, expid, br)
     #        fx.write(hdf5output, path=dataname, append=True)
     print('writing exposures')
-    h5boss.io.write_frame_vstack(filedir,framefile,plate,mjd,hdf5output)
+    h5boss.io.write_frame_vstack(filedir,framefiles,plate,mjd,hdf5output)
 
     tend=time.time()-tstart
     print ('time',tend)
