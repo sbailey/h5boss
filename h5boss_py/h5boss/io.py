@@ -64,12 +64,16 @@ def load_frame(framefile, cframefile=None, flatfile=None):
             cframefile = cframefile[:-3]
     import os.path
     if os.path.exists(framefile)==False:
+       print("v1,framefile:%s not exist"%framefile)
        exit()
     #- Load framefile and get original dimensions
     eflux = fits.getdata(framefile, 0)
     nfiber, npix = eflux.shape
     if os.path.exists(cframefile)==False:
-     exit()
+     print("v1,cframefile:%s not exist"%cframefile) 
+     #exit()
+     spectra=list()
+     return spectra
     #- Load spCFrame file; trim arrays back to original size
     fx = fits.open(cframefile, memmap=False)
     header = fx[0].header
@@ -90,7 +94,9 @@ def load_frame(framefile, cframefile=None, flatfile=None):
         flatfile = os.path.join(filedir, flatfile)
 
     if os.path.exists(flatfile)==False:
-      exit()
+      #exit()
+      spectra=list()
+      return spectra
     fiberflat = fits.getdata(flatfile, 0)
 
     #- Calculate calibration vector: flux = electrons * calib
@@ -177,14 +183,18 @@ def load_frame_vstack(framefile,cframefile=None,flatfile=None):
             cframefile = cframefile[:-3]
     import os.path
     if os.path.exists(framefile)==False:
-        print ("%s not exist"%(framefile))
-        exit()
+        print ("v2,framefile:%s not exist"%(framefile))
+        exposure=tuple()
+        return exposure
+        #exit()
     #- Load framefile and get original dimensions
     eflux = fits.getdata(framefile, 0)
     nfiber, npix = eflux.shape
     if os.path.exists(cframefile)==False:
-        print ("%s not exist"%(cframefile))
-        exit()
+        print ("v2,cframefile:%s not exist"%(cframefile))
+        exposure=tuple()
+        return exposure
+        #exit()
     #- Load spCFrame file; trim arrays back to original size
     fx = fits.open(cframefile, memmap=False)
     header = fx[0].header   # this means the exposureid is same for flux, ivar, etc
@@ -299,7 +309,8 @@ def write_frame_vstack(filedir,framefiles,plate,mjd,hdf5output, cframefile=None,
         if ('spFrame-b1' in filename):
             try:
              frame=load_frame_vstack(filedir+'/'+filename)
-             frameb1.append(frame)
+             if len(frame)!=0:
+              frameb1.append(frame)
              #print (filename, frame[9])
             except Exception as e:
                 print ("File not found")
@@ -308,7 +319,8 @@ def write_frame_vstack(filedir,framefiles,plate,mjd,hdf5output, cframefile=None,
         if ('spFrame-r1' in filename):
             try:
              frame=load_frame_vstack(filedir+'/'+filename)
-             framer1.append(frame)
+             if len(frame)!=0:
+              framer1.append(frame)
              #print (filename, frame[9])
             except Exception as e:
                 print ("File not found")
@@ -320,7 +332,8 @@ def write_frame_vstack(filedir,framefiles,plate,mjd,hdf5output, cframefile=None,
         if ('spFrame-b2' in filename):
             try:
              frame=load_frame_vstack(filedir+'/'+filename)
-             frameb2.append(frame)
+             if len(frame)!=0:
+              frameb2.append(frame)
              #print (filename, frame[9])
             except Exception as e:
                 print ("File not found")
@@ -328,7 +341,8 @@ def write_frame_vstack(filedir,framefiles,plate,mjd,hdf5output, cframefile=None,
         if ('spFrame-r2' in filename):
             try:
              frame=load_frame_vstack(filedir+'/'+filename)
-             framer2.append(frame)
+             if len(frame)!=0:
+              framer2.append(frame)
              #print (filename, frame[9])
             except Exception as e:
                 print ("File not found")
