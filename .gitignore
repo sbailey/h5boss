@@ -1,5 +1,18 @@
 *.err
 *.out
+h5boss_py/demo/*.txt
+h5boss_c/*.txt
+h5boss_c/checkendian
+h5boss_c/checkendian.c
+h5boss_c/iniaa
+h5boss_c/iniaa.c
+h5boss_c/str
+h5boss_c/strtoltest
+h5boss_c/strtoltest.c
+h5boss_py/demo/2979928_10k.out-rank
+h5boss_py/demo/2979975_10k.out-rank
+h5boss_py/demo/2979984_10k.out-rank
+h5boss_py/h5boss/boss2hdf5_v2.ipynb
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

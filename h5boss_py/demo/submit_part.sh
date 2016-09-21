@@ -2,7 +2,7 @@
 #SBATCH -p regular 
 #SBATCH -N 75
 #SBATCH -t 00:30:00
-#SBATCH -J boss2hdf_v2
+#SBATCH -J boss2hdf_v2_part
 #SBATCH -e %j_v2.err
 #SBATCH -o %j_v2.out
 #SBATCH --mail-user=jalnliu@lbl.gov
