@@ -168,7 +168,7 @@ def _traverse_fibernode(name):
      pass
 
 #node_type is used in ../script/subset_mpi.py, which is to create single shared file 
-def get_fiberlink(infile,plates,mjds,fibers):
+def get_fiberlink_v1(infile,plates,mjds,fibers):
         '''
            para  : filename, plate, mjd, fiber
            return: (key, value)->(plates/mjd/fiber/../dataset, (type,shape,filename))
@@ -198,6 +198,49 @@ def get_fiberlink(infile,plates,mjds,fibers):
          print (pid)
          traceback.print_exc()
          print (pid,infile)
+         pass
+        return (fiberdatalink)
+def get_fiberlink(infile,plates,mjds,fibers):
+        '''
+           para  : filename, plate, mjd, fiber
+           return: fiberdatalink:(key, value)->(plates/mjd/, (filename, fiberlist, fiberoffsetlist))
+
+        '''
+        #global pid,fiberdatalink, cataloglink, fx, inputfile
+        #inputfile=infile
+        fiberdatalink={}
+        try:
+         fx = h5py.File(infile, mode='r')
+         for plate in fx.keys():
+            for mjd in fx[plate].keys():
+                ii = (plates == plate) & (mjds == mjd)
+                spid= '{}/{}'.format(plate, mjd)
+                # get the fiber column
+                data_value=fx[spid+'/plugmap'].value['FIBERID'] 
+                xfibers = fibers[ii]
+                if np.any(ii): # plate and mjd are matching
+                   for fiber in xfibers:
+                    # return spid,
+                    fiber_list=data_value.tolist()
+                    try:  
+                     fiber_offset=fiber_list.index(fiber) # this may triger error if fiber not found
+                     #update k,v store
+                     if spid not in fiberdatalink:
+                        fiberlist=list()
+                        fiberlist.append(fiber)
+                        offsetlist=list()
+                        offsetlist.append(fiber_offset)
+                        fiberdatalink[spid]=(infile,fiberlist,offsetlist)
+                     else: 
+                        fiberdatalink[spid][1].append(fiber)  # update fiberlist
+                        fiberdatalink[spid][2].append(offset) # update offsetlist
+                    except Exception as e:
+                     pass # fiber not existin
+        fx.close()
+        except Exception as e:
+         print (spid)
+         traceback.print_exc()
+         print (spid,infile)
          pass
         return (fiberdatalink)
 def get_catalogtypes(infile):
@@ -241,7 +284,14 @@ def count_unique(global_dict):
           else: 
              count_fiber[temp_key]=int(1)
      return count_fiber
-
+def fiber_union(fiber_dict1, fiber_dict2,interkey_set):
+    if len(interkey_set)==0: 
+       return fiber_dict1
+    for ikey in interkey_set:
+       fiber_dict1[ikey][1]+=fiber_dict2[ikey][1]
+       fiber_dict1[ikey][2]+=fiber_dict2[ikey][2]
+       #TODO: need to remove duplication
+    return fiber_dict1
 def locate_fiber_in_catalog(global_dict):
     revised_dict={}# key: pm, value: (fiberid, global_offset, infile)
     for key,value in global_dict.items():

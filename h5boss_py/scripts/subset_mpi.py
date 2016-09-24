@@ -71,9 +71,6 @@ def parallel_select():
        template=1
     elif opts.template and opts.template=="all":
        template=2
-        #template=0 means template is already created, 
-        #template=2 means the code will first create template then write actual data, 
-        #template=1 means only create the template
     if opts.mpi is None or opts.mpi=="no": 
         #starts seirial processing
         print ("Try the subset.py or subset command")
@@ -100,18 +97,15 @@ def parallel_select():
         range_files=hdfsource[rank_start:rank_end]
         print ("rank:%d,file:%d"%(rank,len(range_files)))
 
-################################################################################################################
-        #TODO: SCAN ALL FILES, GET THE (PMF, FILE) LIST, SAVE AS PICKLE, THEN EACH TIME, READIN THIS FILE. 
-        #TODO: Given PMF Query, check the PICKLE, return (PMF, FILE)
-        #TODO: even though we can sort input query list, but for load balance, each rank probably still have overlapped access at file level
-        #TODO: after get the metadata, may need to allreduce and then convert the dictionary into ordered list, and sort again
-
-############# GET ALL METADATA OF FIBER/CATALOG DATASETS IN CREATING THE TEMPLATE ############################
         fiber_dict={}
         for i in range(0,len(range_files)):
             fiber_item = get_fiberlink(range_files[i],plates,mjds,fibers)
             if len(fiber_item)>0:
-             fiber_dict.update(fiber_item)      
+             inter_keys=fiber_dict.viewkeys() & fiber_item.viewkeys()
+             if len(inter_keys)==0: 
+                fiber_dict.update(fiber_item)
+             else: 
+                fiber_union(fiber_dict,fiber_item,inter_keys)
         tend=MPI.Wtime()
         if rank==0: 
          print ("Get metadata of fiber ojbect time: %.2f"%(tend-tstart))
@@ -121,29 +115,6 @@ def parallel_select():
         fiber_item_length=len(fiber_dict)
         fiber_dict_tmp=fiber_dict
         global_fiber= comm.allreduce(fiber_dict_tmp, op=counterop)       
-        #global_fiber = comm.reduce(fiber_dict_tmp,op=counterop,root=0)
-        #fiber_dict_tmp_numpy=np.asarray(fiber_dict_tmp.items())
-        #counterop_numpy=MPI.Op.Create(add_numpy, commute=True)
-        #global_fiber=np.asarray(fiber_dict_tmp_numpy)
-        #global_fiber=np.zeros(1)
-        #if(fiber_dict_tmp_numpy.size==0):
-        #  fiber_dict_tmp_numpy=np.zeros(1)
-        #comm.Reduce(fiber_dict_tmp_numpy,global_fiber,op=counterop_numpy,root=0)
-        #comm.Gather(fiber_dict_tmp_numpy,global_fiber,root=0)
-        #for irank in range(0,nproc):
-        # if(rank==irank):
-        #   try:
-             ##can not parallel create metadata is really painful. 
-        #     create_template(outfile,fiber_dict_tmp,'fiber',rank)
-        #   except Exception as e:
-        #     traceback.print_exc()
-        # comm.Barrier()
-        #if(rank==1):
-        #   try:
-             ##can not parallel create metadata is really painful. 
-        #     create_template(outfile,fiber_dict_tmp,'fiber',rank)
-        #   except Exception as e:
-        #     traceback.print_exc() 
         treduce=MPI.Wtime()
         #print ("rank: ",rank,fiber_dict_tmp_numpy)
         if rank==0:
@@ -198,9 +169,6 @@ def parallel_select():
          print ("write fiber/catalog csv time: %.2f"%(twritecsv_end-twritecsv_start))
 ############# OVERWRITE THE TEMPLATE WITH ACTUAL DATA ############
         if template ==0 or template==2: 
-        #template=0 means template is already created, 
-        #template=2 means the code will first create template then write actual data, 
-        #template=1 means only create the template
          try: 
           hx = h5py.File(outfile,'a',driver='mpio', comm=MPI.COMM_WORLD) ## collectively open file 
           hx.atomic=False 
