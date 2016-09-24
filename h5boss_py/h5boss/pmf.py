@@ -290,7 +290,7 @@ def fiber_union(fiber_dict1, fiber_dict2,interkey_set):
     for ikey in interkey_set:
        fiber_dict1[ikey][1]+=fiber_dict2[ikey][1]
        fiber_dict1[ikey][2]+=fiber_dict2[ikey][2]
-       #TODO: need to remove duplication
+       #TODO: need to remove duplication,Sep 23. 2016
     return fiber_dict1
 def locate_fiber_in_catalog(global_dict):
     revised_dict={}# key: pm, value: (fiberid, global_offset, infile)

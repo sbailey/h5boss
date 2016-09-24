@@ -119,7 +119,8 @@ def parallel_select():
         #print ("rank: ",rank,fiber_dict_tmp_numpy)
         if rank==0:
          print ("Allreduce %d fiber meta:kv(dataset, type): %.2f"%(len(global_fiber),(treduce-tend)))
-        #sys.exit()  
+        print (global_fiber) # expect: key(plate/mjd), value(filename, fiberlist, fiberoffsetlist)
+        sys.exit()  
         #Create the template using 1 process       
         if rank==0 and (template==1 or template==2):
            try:

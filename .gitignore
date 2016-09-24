@@ -13,6 +13,7 @@ h5boss_py/demo/2979928_10k.out-rank
 h5boss_py/demo/2979975_10k.out-rank
 h5boss_py/demo/2979984_10k.out-rank
 h5boss_py/h5boss/boss2hdf5_v2.ipynb
+h5boss_py/demo/log
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

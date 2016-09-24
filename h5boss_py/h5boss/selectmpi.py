@@ -25,10 +25,18 @@ def create_slavefile(infile,plates,mjds,fibers,masterfile,rank,id):
       print ("Error in slave file:%s")
       traceback.print_exc()
       pass 
+def add_dic_v1(dict1,dict2,datatype):
+    for item in dict2:
+      if item not in dict1:
+        dict1[item] = dict2[item]
+    return dict1
 def add_dic(dict1,dict2,datatype):
     for item in dict2:
       if item not in dict1:
         dict1[item] = dict2[item]
+      else: 
+        dict1[item][1]=dict1[item][1]+dict2[item][1]
+        dict1[item][2]=dict2[item][2]+dict2[item][2]
     return dict1
 def add_numpy(dict1, dict2, datatype):
     if(dict2.size==0):
