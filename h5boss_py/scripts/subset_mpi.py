@@ -126,6 +126,7 @@ def parallel_select():
         if rank==0:
          global_fiber=dedup(global_fiber)
         # get datamap,i.e., type and shape of each dataset in coadds and exposures. 
+        sys.exit()
         if rank==0:
          dmap1=datamap(sample_file)
          for imap in dmap1:

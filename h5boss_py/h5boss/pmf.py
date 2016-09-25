@@ -254,7 +254,7 @@ def get_fiberlink(infile,plates,mjds,fibers):
                     except Exception as e:
                      traceback.print_exc()
                      pass # fiber not existin
-        fx.close()
+         fx.close()
         except Exception as e:
          print (spid)
          traceback.print_exc()
