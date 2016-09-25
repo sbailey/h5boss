@@ -166,7 +166,9 @@ def _traverse_fibernode(name):
     except Exception as e:
      traceback.print_exc()
      pass
-
+def dedup(dict1):
+    #TODO deduplication, dict(plate/mjd/../coadds, ifile, fiberlists, fiberoffsetlists)
+    return dict1
 #node_type is used in ../script/subset_mpi.py, which is to create single shared file 
 def get_fiberlink_v1(infile,plates,mjds,fibers):
         '''
@@ -220,13 +222,18 @@ def get_fiberlink(infile,plates,mjds,fibers):
                 # get the fiber column
                 data_value=fx[spid+'/plugmap'].value['FIBERID'] 
                 xfibers = fibers[ii]
+                fiber_list=data_value.tolist()
                 if np.any(ii): # plate and mjd are matching
                    for fiber in xfibers:
                     # return spid,
-                    fiber_list=data_value.tolist()
-                    try:  
+                    fiber=int(fiber)
+                    if fiber not in fiber_list:
+                       #print("fiber not found,e..g, %s"%(fiber_list.dtype))
+                       continue
+                    try: 
                      fiber_offset=fiber_list.index(fiber) # this may triger error if fiber not found
-                     #update k,v store
+                      #update k,v store
+                     #print ("fiber_offset:%d"%(fiber_offset))
                      if spid not in fiberdatalink:
                         fiberlist=list()
                         fiberlist.append(fiber)
@@ -240,8 +247,10 @@ def get_fiberlink(infile,plates,mjds,fibers):
                             fiberdatalink[expid_name]=(infile,fiberlist,offsetlist)
                             expid_name=spid_expo+'/'+expid+'/r'
                             fiberdatalink[expid_name]=(infile,fiberlist,offsetlist)
-                     else: 
+                     else:
+                        print ("before:",fiberdatalink[spid_coad]) 
                         fiberdatalink[spid_coad][1].append(fiber)  # update fiberlist
+                        print ("after:",fiberdatalink[spid_coad])
                         fiberdatalink[spid_coad][2].append(offset) # update offsetlist
                         spid_expo=spid+'/exposures'
                         for expid in fx[spid_expo].keys():
@@ -252,8 +261,9 @@ def get_fiberlink(infile,plates,mjds,fibers):
                             fiberdatalink[expid_name][1].append(fiber)
                             fiberdatalink[expid_name][2].append(offset)
                     except Exception as e:
-                     traceback.print_exc()
-                     pass # fiber not existin
+                     #print("fiber kv update error:file:%s,spid:%s"%(infile,spid))
+                     #traceback.print_exc() 
+                     pass # fiber not existing
          fx.close()
         except Exception as e:
          print (spid)

@@ -15,6 +15,7 @@ from h5boss.pmf import get_fiberlink
 from h5boss.pmf import get_catalogtypes
 from h5boss.pmf import count_unique
 from h5boss.pmf import locate_fiber_in_catalog
+from h5boss.pmf import dedup
 from h5boss.selectmpi import add_dic
 from h5boss.selectmpi import add_numpy
 from h5boss.selectmpi import create_template
@@ -96,19 +97,22 @@ def parallel_select():
             if rank_start>total_files:
              rank_start=total_files
         range_files=hdfsource[rank_start:rank_end]
-        print ("rank:%d,file:%d"%(rank,len(range_files)))
+        #print ("rank:%d,file:%d"%(rank,len(range_files)))
         if rank==0:
           sample_file=range_files[0]
         fiber_dict={}
         for i in range(0,len(range_files)):
             fiber_item = get_fiberlink(range_files[i],plates,mjds,fibers)
+            #print ("p:%dm:%df:%d"%(len(plates),len(mjds),len(fibers)))
+            #print("len(fiber_item):%d"%(len(fiber_item)))
             if len(fiber_item)>0:
              inter_keys=fiber_dict.viewkeys() & fiber_item.viewkeys()
              if len(inter_keys)==0: 
                 fiber_dict.update(fiber_item)
              else: 
-                fiber_union(fiber_dict,fiber_item,inter_keys)
+                fiber_dict=fiber_union(fiber_dict,fiber_item,inter_keys)
         tend=MPI.Wtime()
+        #print ("rank:%d,fiber_dict:%d"%(rank,len(fiber_dict)))
         if rank==0: 
          print ("Get metadata of fiber ojbect time: %.2f"%(tend-tstart))
         #rank0 create all, then close an reopen.-Quincey Koziol 
@@ -121,6 +125,7 @@ def parallel_select():
         #print ("rank: ",rank,fiber_dict_tmp_numpy)
         if rank==0:
          print ("Allreduce %d fiber meta:kv(dataset, type): %.2f"%(len(global_fiber),(treduce-tend)))
+         print ("len(global_fiber):%d"%(len(global_fiber)))
          print (global_fiber) # expect: key(plate/mjd), value(filename, fiberlist, fiberoffsetlist)
         # remove duplication of fiberlist and fiberoffsetlist in global_fiber
         if rank==0:

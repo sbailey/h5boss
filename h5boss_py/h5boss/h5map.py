@@ -51,9 +51,9 @@ def map_fiber(infile):
             for mjd in fx[plate].keys():
                spid= '{}/{}'.format(plate, mjd)
                for fib in fx[spid].keys():
-                   if fib.isdigit()
-                   pid = '{}/{}/{}'.format(plate, mjd, fib)
-                   fx[pid].visit(_traverse_fibernode)
+                   if (fib.isdigit()):
+                    pid = '{}/{}/{}'.format(plate, mjd, fib)
+                    fx[pid].visit(_traverse_fibernode)
                 #for im in meta:
                 #  mnode=spid+'/'+im
                 #  mnode_t=fx[mnode].dtype
