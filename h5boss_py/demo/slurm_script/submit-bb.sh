@@ -17,5 +17,5 @@ export PATH=/global/homes/j/jialin/h5boss-util/h5boss_py/scripts:$PATH
 
 cd $SLURM_SUBMIT_DIR
 #ls $DW_JOB_STRIPED
-find $DW_JOB_STRIPED > input-full-bb
-subset input-full-bb /global/cscratch1/sd/jialin/bosslover/scaling-test/1k_bb.h5 pmf-list/pmf1k
+find $DW_JOB_STRIPED > input_csv/input-full-bb
+subset input_csv/input-full-bb /global/cscratch1/sd/jialin/bosslover/scaling-test/1k_bb.h5 pmf-list/pmf1k

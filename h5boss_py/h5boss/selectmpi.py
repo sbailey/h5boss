@@ -68,7 +68,7 @@ def create_fiber_template(outfile,global_dict,dmap,rank):
       fiberlength=len(value[1])
       if fiberlength>0:
         inter_grp=key
-        if inter_grp.split('/')[-1]=="coadds"
+        if (inter_grp.split('/')[-1]=="coadds"):
           d_info=dmap[0]
         else:
           d_info=dmap[1]
