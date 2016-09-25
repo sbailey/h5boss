@@ -19,6 +19,7 @@ from h5boss.selectmpi import add_dic
 from h5boss.selectmpi import add_numpy
 from h5boss.selectmpi import create_template
 from h5boss.selectmpi import overwrite_template
+from h5boss.h5map import datamap
 from time import gmtime, strftime
 import datetime
 import sys,os
@@ -96,7 +97,8 @@ def parallel_select():
              rank_start=total_files
         range_files=hdfsource[rank_start:rank_end]
         print ("rank:%d,file:%d"%(rank,len(range_files)))
-
+        if rank==0:
+          sample_file=range_files[0]
         fiber_dict={}
         for i in range(0,len(range_files)):
             fiber_item = get_fiberlink(range_files[i],plates,mjds,fibers)
@@ -119,18 +121,27 @@ def parallel_select():
         #print ("rank: ",rank,fiber_dict_tmp_numpy)
         if rank==0:
          print ("Allreduce %d fiber meta:kv(dataset, type): %.2f"%(len(global_fiber),(treduce-tend)))
-        print (global_fiber) # expect: key(plate/mjd), value(filename, fiberlist, fiberoffsetlist)
+         print (global_fiber) # expect: key(plate/mjd), value(filename, fiberlist, fiberoffsetlist)
+        # remove duplication of fiberlist and fiberoffsetlist in global_fiber
+        if rank==0:
+         global_fiber=dedup(global_fiber)
+        # get datamap,i.e., type and shape of each dataset in coadds and exposures. 
+        if rank==0:
+         dmap1=datamap(sample_file)
+         for imap in dmap1:
+           for ikey in imap:
+             print ("dataset:%s type:%s shape:%s"%(ikey,imap[ikey][0],imap[ikey][1])) 
         sys.exit()  
         #Create the template using 1 process       
         if rank==0 and (template==1 or template==2):
            try:
             ##can not parallel create metadata is really painful. 
-            create_template(outfile,global_fiber,'fiber',rank)
+            create_template(outfile,global_fiber,dmap1,'fiber',rank)
             catalog_number=count_unique(global_fiber) #(plates/mjd, num_fibers)
             print ('number of unique fibers:%d '%len(catalog_number))           
             #for fk,vk in catalog_number.items():
             #   print ("%s:%d"%(fk,vk))
-            sample_file=range_files[0] # get the catalog metadata
+            #sample_file=range_files[0] # get the catalog metadata
             catalog_types=get_catalogtypes(sample_file) # dict: meta, (type, shape)
             global_catalog=(catalog_number,catalog_types)
             create_template(outfile,global_catalog,'catalog',rank)

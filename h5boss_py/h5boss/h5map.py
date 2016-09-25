@@ -89,3 +89,40 @@ def map_pmf(infile):
          print (pid,infile)
          pass
         return (pmf)
+def datamap(infile):
+    '''
+       para  : filename
+       return: type and shape for each object, returned as tuple, dmap[0] is coadds, dmap[1] is exposure
+       plate/mjd/coadds: 8 datasets
+       plate/mjd/exposure/exposureid/b(r): 8 datasets
+       # (key, value)->(plates/mjd/, (filename, fiberlist, fiberoffsetlist))   
+    '''
+    coadds_map={}
+    exposures_map={}
+    with h5py.File(infile,'r') as fx:
+        try:
+            p=fx.keys()[0]
+            m=fx[p].keys()[0]
+            pm=p+'/'+m
+            coad_name=pm+'/coadds'
+            expo_name=pm+'/exposures'
+            coad=fx[coad_name].keys()
+            subexpo_name=expo_name+'/'+fx[expo_name].keys()[0]+'/b'
+            expo=fx[subexpo_name].keys()
+            for icoad in coad:
+                try:
+                    icoad_name=coad_name+'/'+icoad
+                    coadds_map[icoad]=(fx[icoad_name].dtype,fx[icoad_name].shape)
+                except Exception as e:
+                    print (icoad)
+            for iexpo in expo:
+                try:
+                    iexpo_name=subexpo_name+'/'+iexpo
+                    exposures_map[iexpo]=(fx[iexpo_name].dtype,fx[iexpo_name].shape)
+                except Exception as e:
+                    print (iexpo)
+        except Exception as e:
+            print (infile)
+            traceback.print_exc()
+    dmap=(coadds_map,exposures_map)
+    return dmap

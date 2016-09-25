@@ -45,12 +45,46 @@ def add_numpy(dict1, dict2, datatype):
        return dict2
     dict1=np.append(dict1,dict2,axis=0)
     return dict1
-def create_template(outfile, global_dict,choice,rank):
+def create_template_v1(outfile, global_dict,choice,rank):
     if choice=='fiber':
       create_fiber_template(outfile,global_dict,rank)
     elif choice=='catalog':
       create_catlog_template(outfile,global_dict)
-def create_fiber_template(outfile,global_dict,rank):
+def create_template(outfile, global_dict,dmap,choice,rank):
+    if choice=='fiber':
+      create_fiber_template(outfile,global_dict,dmap,rank)
+    elif choice=='catalog':
+      create_catlog_template(outfile,global_dict)
+
+def create_fiber_template(outfile,global_dict,dmap,rank):
+#use one process to create the template
+ try:
+     hx = h5py.File(outfile,'a')
+ except Exception as e:
+     print ("rank:%d, Output file open error:%s"%(rank,outfile))
+     traceback.print_exc()
+ try:#Set the allocate time as early. --Quincey Koziol 
+  for key,value in global_dict.items():
+      fiberlength=len(value[1])
+      if fiberlength>0:
+        inter_grp=key
+        if inter_grp.split('/')[-1]=="coadds"
+          d_info=dmap[0]
+        else:
+          d_info=dmap[1]
+        _fiber_template(hx,inter_grp,fiberlength,d_info)
+#    else:
+#     _catalog_template(hx,key,value)
+ except Exception as e:
+   traceback.print_exc()
+
+ try:
+  hx.flush()
+  hx.close()
+ except Exception as e:
+  print("hx close error in %d"%rank)
+  traceback.print_exc()
+def create_fiber_template_v1(outfile,global_dict,rank):
 #use one process to create the template
  try:
      hx = h5py.File(outfile,'a')
@@ -99,8 +133,34 @@ def create_catlog_template(outfile,global_dict):
   print("hx close error in rank0")
   traceback.print_exc()
   pass
-
-def _fiber_template(hx,key,value):
+def _fiber_template(hx,inter_grp,fiberlength,d_info):
+   for dset in d_info:
+     try:
+        cur_dset_name=inter_grp+'/'+dset
+        cur_dset_type=d_info[dset][0]
+        cur_dset_shape=d_info[dset][1]
+        space=(fiberlength,cur_dset_shape[1])
+        if cur_dset=='wave' and inter_grp.split('/')[2]=="coadds":
+          space=cur_dset_shape
+        spaceid=h5py.h5s.create_simple(space)
+        plist=h5py.h5p.create(h5py.h5p.DATASET_CREATE)
+        plist.set_alloc_time(h5py.h5d.ALLOC_TIME_EARLY)
+        tid=h5py.h5t.py_create(cur_dset_type, False)
+     except Exception as e:
+        traceback.print_exc()
+        print("error in fiber template create:",dset)
+        pass
+     try:#create intermediate groups
+        hx.create_group(inter_grp)
+     except Exception as e:
+        pass #groups existed, so pass it
+     try:
+        h5py.h5d.create(hx.id,cur_dset_name,tid,spaceid,plist)#create dataset with property list:early allocate
+     except Exception as e:
+        print("dataset create error: %s"%cur_dset_name)
+        traceback.print_exc()
+        pass
+def _fiber_template_v1(hx,key,value):
    space=h5py.h5s.create_simple(value[1])
    plist=h5py.h5p.create(h5py.h5p.DATASET_CREATE)
    plist.set_alloc_time(h5py.h5d.ALLOC_TIME_EARLY)

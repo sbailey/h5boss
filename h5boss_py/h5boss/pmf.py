@@ -203,7 +203,9 @@ def get_fiberlink_v1(infile,plates,mjds,fibers):
 def get_fiberlink(infile,plates,mjds,fibers):
         '''
            para  : filename, plate, mjd, fiber
-           return: fiberdatalink:(key, value)->(plates/mjd/, (filename, fiberlist, fiberoffsetlist))
+           return: fiberdatalink:
+                       (key, value)->(plates/mjd/coadds,  (filename, fiberlist, fiberoffsetlist))
+                       (key, value)->(plates/mjd/exposures/?id/b(r), (filename, fiberlist, fiberoffsetlist))
 
         '''
         #global pid,fiberdatalink, cataloglink, fx, inputfile
@@ -230,11 +232,27 @@ def get_fiberlink(infile,plates,mjds,fibers):
                         fiberlist.append(fiber)
                         offsetlist=list()
                         offsetlist.append(fiber_offset)
-                        fiberdatalink[spid]=(infile,fiberlist,offsetlist)
+                        spid_coad=spid+'/coadds'
+                        fiberdatalink[spid_coad]=(infile,fiberlist,offsetlist)
+                        spid_expo=spid+'/exposures'
+                        for expid in fx[spid_expo].keys():
+                            expid_name=spid_expo+'/'+expid+'/b'
+                            fiberdatalink[expid_name]=(infile,fiberlist,offsetlist)
+                            expid_name=spid_expo+'/'+expid+'/r'
+                            fiberdatalink[expid_name]=(infile,fiberlist,offsetlist)
                      else: 
-                        fiberdatalink[spid][1].append(fiber)  # update fiberlist
-                        fiberdatalink[spid][2].append(offset) # update offsetlist
+                        fiberdatalink[spid_coad][1].append(fiber)  # update fiberlist
+                        fiberdatalink[spid_coad][2].append(offset) # update offsetlist
+                        spid_expo=spid+'/exposures'
+                        for expid in fx[spid_expo].keys():
+                            expid_name=spid_expo+'/'+expid+'/b'
+                            fiberdatalink[expid_name][1].append(fiber)
+                            fiberdatalink[expid_name][2].append(offset)
+                            expid_name=spid_expo+'/'+expid+'/r'
+                            fiberdatalink[expid_name][1].append(fiber)
+                            fiberdatalink[expid_name][2].append(offset)
                     except Exception as e:
+                     traceback.print_exc()
                      pass # fiber not existin
         fx.close()
         except Exception as e:
