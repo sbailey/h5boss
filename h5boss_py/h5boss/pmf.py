@@ -166,8 +166,25 @@ def _traverse_fibernode(name):
     except Exception as e:
      traceback.print_exc()
      pass
-def dedup(dict1):
-    #TODO deduplication, dict(plate/mjd/../coadds, ifile, fiberlists, fiberoffsetlists)
+def dedup(dict1):# might be costly, as the python tuple is inmutable, 
+    #Deduplication, dict(plate/mjd/../coadds, ifile, fiberlists, fiberoffsetlists)
+    #TODO: Optimize this stupid: currently: pop out each key, dedup, sort, then re-insert it in the dictionary. 
+    for idict in dict1:
+       v1=dict1[idict][0]
+       v2=dict1[idict][1]
+       v3=dict1[idict][2]
+       v2_len=len(v2)
+       v3_len=len(v3)
+       v2=list(set(v2))
+       v2.sort()
+       v3=list(set(v3))
+       v3.sort()
+       dedup_v2_len=len(v2)
+       dedup_v3_len=len(v3)
+       dict1.pop(idict,None)
+       dict1[idict]=(v1,v2,v3)
+       if v2_len!=dedup_v2_len or v3_len!=dedup_v3_len:
+          print("key:%s, v2:%d,dv2:%d; v3:%d,dv3:%d"%(idict,v2_len,dedup_v2_len,v3_len,dedup_v3_len))
     return dict1
 #node_type is used in ../script/subset_mpi.py, which is to create single shared file 
 def get_fiberlink_v1(infile,plates,mjds,fibers):

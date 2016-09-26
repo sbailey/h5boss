@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH -p debug
 #SBATCH -N 1
-#SBATCH -t 00:03:00
+#SBATCH -t 00:13:00
 #SBATCH -J subset-mpi
 #SBATCH -e %j.err
 #SBATCH -o %j.out
@@ -15,7 +15,7 @@ pmfquery=" pmf-list/large-scale/pmf10k-shuffle.csv "
 fiber=$SLURM_JOB_ID"_nodes10k_fiber.txt "
 catalog=$SLURM_JOB_ID"_nodes10k_catalog.txt "
 opt1=" --mpi=yes"
-opt2=" --template=all" # other options are yes, no, all
+opt2=" --template=yes" # other options are yes, no, all
 opt3=" --fiber="
 opt4=" --catalog="
 run=$cmd$filepath$template$pmfquery$opt1$opt2$opt3$fiber$opt4$catalog

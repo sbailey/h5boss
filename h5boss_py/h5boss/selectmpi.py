@@ -205,7 +205,7 @@ def _catalog_template(hx,key,value,catalog_types):
      traceback.print_exc()
      pass
 
-def overwrite_template(hx, data_dict,choice):
+def overwrite_template_v1(hx, data_dict,choice):
  #Read/Write all dataset into final file, 
  #each rank handles one fiber_dict, which contains multiple fiber_item
  if choice=='fiber':    
@@ -229,8 +229,48 @@ def overwrite_template(hx, data_dict,choice):
    print ("Data read/write error key:%s file:%s"%(key,value[2]))
    traceback.print_exc()
    pass
-
+def overwrite_template(hx, data_dict,choice):
+ #Read/Write all dataset into final file, 
+ #each rank handles one fiber_dict, which contains multiple fiber_item
+ if choice=='fiber':
+  try:
+   for key, value in data_dict.items():
+      _copy_fiber(hx,key,value)
+  except Exception as e:
+   print ("Data read/write error key:%s file:%s"%(key,value[2]))
+   traceback.print_exc()
+   pass
+ elif choice=='catalog':
+  try:
+   for i in range(0,len(data_dict)):
+    pm=data_dict[i][0]
+    # key: pm, value: (fiberid, global_offset, infile)    
+    values_off=data_dict[i][1]
+    for i in range(0,len(values_off)):
+      _copy_catalog(hx,pm,values_off[i])
+  except Exception as e:
+   print ("Data read/write error key:%s file:%s"%(key,value[2]))
+   traceback.print_exc()
+   pass
 def _copy_fiber(hx,key,value):
+ try:
+  subfx=h5py.File(value[0],'r')
+  if key.split('/')[2]=="coadds":
+     #for ###TODO TODO TODO....Stopped here 9:22 pm, Moffet Library at UCB, Sep. 25, 2016. Going to have a good sleep for tomorrow's debate.
+   subdx=subfx[key].value
+   subfx.close()
+ except Exception as e:
+  traceback.print_exc()
+  print ("read subfile %s error"%value[2])
+  pass
+ try:
+  dx=hx[str(key)]
+  dx[:]=subdx   #overwrite the existing template data
+ except Exception as e:
+  traceback.print_exc()
+  print ("overwrite error")
+  pass
+def _copy_fiber_v1(hx,key,value):
  try:
   subfx=h5py.File(value[2],'r')
   subdx=subfx[key].value
@@ -246,7 +286,6 @@ def _copy_fiber(hx,key,value):
   traceback.print_exc()
   print ("overwrite error")
   pass
-
 def _copy_catalog(hx,key,values_off):
    try:
     fx=h5py.File(values_off[1],'r')

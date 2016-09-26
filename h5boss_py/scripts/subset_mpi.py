@@ -131,62 +131,36 @@ def parallel_select():
          #  print("key:%s,values:%s"%(igf,global_fiber[igf]))
         # remove duplication of fiberlist and fiberoffsetlist in global_fiber
         if rank==0:
+         import cPickle
+         dup_gf=cPickle.dumps(global_fiber) 
+         dup_size=sys.getsizeof(dup_gf)
+         dup_len=len(global_fiber)
          global_fiber=dedup(global_fiber)
+         dedup_gf=cPickle.dumps(global_fiber)
+         dedup_size=sys.getsizeof(dedup_gf)
+         dedup_len=len(global_fiber)
+         print("Before dedup: %d bytes. After dedup:%d bytes"%(dup_size,dedup_size))
+         print("Before dedup: %d pm. After dedup:%d pm"%(dup_len,dedup_len))
         # get datamap,i.e., type and shape of each dataset in coadds and exposures. 
-        sys.exit()
+        #sys.exit()
         if rank==0:
          dmap1=datamap(sample_file)
          for imap in dmap1:
            for ikey in imap:
              print ("dataset:%s type:%s shape:%s"%(ikey,imap[ikey][0],imap[ikey][1])) 
-        sys.exit()  
+        #sys.exit()  
         #Create the template using 1 process       
         if rank==0 and (template==1 or template==2):
            try:
-            ##can not parallel create metadata is really painful. 
             create_template(outfile,global_fiber,dmap1,'fiber',rank)
-            catalog_number=count_unique(global_fiber) #(plates/mjd, num_fibers)
-            print ('number of unique fibers:%d '%len(catalog_number))           
-            #for fk,vk in catalog_number.items():
-            #   print ("%s:%d"%(fk,vk))
-            #sample_file=range_files[0] # get the catalog metadata
-            catalog_types=get_catalogtypes(sample_file) # dict: meta, (type, shape)
-            global_catalog=(catalog_number,catalog_types)
-            create_template(outfile,global_catalog,'catalog',rank)
            except Exception as e:
             traceback.print_exc()
         tcreated=MPI.Wtime()
-        #if rank==0:
-        #TODO: rewrite this to get the catalog and fiber in one shot
-        copy_global_catalog=global_fiber
-        revised_dict=locate_fiber_in_catalog(copy_global_catalog)
-         #now revised_dict has: p/m, fiber_id, infile, global_offset
-        copy_revised_dict=revised_dict.items()
-        total_unique_fiber=len(copy_revised_dict)
-        #distribute the workload evenly to each process
-        step=int(total_unique_fiber / nproc)+1
-        rank_start =int( rank * step)
-        rank_end = int(rank_start + step)
-        if(rank==nproc-1):
-         rank_end=total_unique_fiber # adjust the last rank's range
-         if rank_start>total_unique_fiber:
-            rank_start=total_unique_fiber
-        catalog_dict=copy_revised_dict[rank_start:rank_end]
         twritecsv_start=MPI.Wtime()
         if rank==0 and (template==1 or template==2):
          print ("Template creation time: %.2f"%(tcreated-treduce))
-         with open(fiberout, 'a') as f:
-           f.writelines('{}:{}\n'.format(k,v[2]) for k, v in global_fiber.items())
-           f.write('\n')
-         with open(catalogout, 'a') as f:
-           for k,v in revised_dict.items():
-            for iv in v:
-             f.writelines('{}:{}:{}:{}\n'.format(k,iv[0],iv[1],iv[2]))
-             #f.write('\n')
-        twritecsv_end=MPI.Wtime()
+         twritecsv_end=MPI.Wtime()
         if rank==0:
-         print ("count unique fiber and global offset time:%.2f"%(twritecsv_start-tcreated))
-         print ("write fiber/catalog csv time: %.2f"%(twritecsv_end-twritecsv_start))
 ############# OVERWRITE THE TEMPLATE WITH ACTUAL DATA ############
         if template ==0 or template==2: 
          try: 
@@ -195,8 +169,7 @@ def parallel_select():
          except Exception as e:
           traceback.print_exc()        
         topen=MPI.Wtime()
-        tclose=topen
-        
+        tclose=topen        
         fiber_copyte=topen
         fiber_copyts=topen
         catalog_copyts=topen
@@ -204,7 +177,6 @@ def parallel_select():
         if template==0 or template==2:
            fiber_copyts=MPI.Wtime()
            print ("rank:%d, fiber_dict length:%d"%(rank,fiber_item_length))
-           #print ("rank:%d, start time:%s"%(rank, datetime.datetime.time(datetime.datetime.now())))
            fiber_copy_start=time.time()
            overwrite_template(hx,fiber_dict,'fiber')
            fiber_copy_end=time.time()
