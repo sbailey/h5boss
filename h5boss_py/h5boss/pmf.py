@@ -239,7 +239,7 @@ def get_fiberlink(infile,plates,mjds,fibers):
                      #print ("fiber_offset:%d"%(fiber_offset))
                      spid_coad=spid+'/coadds'
                      if spid_coad not in fiberdatalink: # when coadds is added, exposures will be also added
-                        print ("spid_coad:%s not in fiberdata, fiber now is %d"%(spid_coad,fiber))
+                        #print ("spid_coad:%s not in fiberdata, fiber now is %d"%(spid_coad,fiber))
                         fiberlist=list()
                         fiberlist.append(fiber)
                         offsetlist=list()
@@ -255,11 +255,20 @@ def get_fiberlink(infile,plates,mjds,fibers):
                         for expid in fx[spid_expo].keys():
                             expid_name=spid_expo+'/'+expid+'/b'
                             #print("expid:%s"%expid)
+                            fiberlist=list()
+                            fiberlist.append(fiber)
+                            offsetlist=list()
+                            offsetlist.append(fiber_offset)
                             fiberdatalink[expid_name]=(infile,fiberlist,offsetlist)
                             expid_name=spid_expo+'/'+expid+'/r'
+                            fiberlist=list()
+                            fiberlist.append(fiber)
+                            offsetlist=list()
+                            offsetlist.append(fiber_offset)
                             fiberdatalink[expid_name]=(infile,fiberlist,offsetlist)
+                            #print ("BEFORE0:fiberdatalink[%s][1]:%s"%(expid_name,fiberdatalink[expid_name][1]))
                      else:
-                        print ("spid_coad:%s in fiberdata, fiber now is %d"%(spid_coad,fiber))
+                        #print ("spid_coad:%s in fiberdata, fiber now is %d"%(spid_coad,fiber))
                         #print ("before:",fiberdatalink[spid_coad]) 
                         fiberdatalink[spid_coad][1].append(fiber)  # update fiberlist
                         #print ("after:",fiberdatalink[spid_coad])
@@ -267,11 +276,20 @@ def get_fiberlink(infile,plates,mjds,fibers):
                         spid_expo=spid+'/exposures'
                         for expid in fx[spid_expo].keys():
                             expid_name=spid_expo+'/'+expid+'/b'
+                            expid_name_r=spid_expo+'/'+expid+'/r'
+                            #print ("BEFORE1:fiberdatalink[%s][1]:%s"%(expid_name,fiberdatalink[expid_name][1]))
+                            #print ("BEFORE1:fiberdatalink[%s][1]:%s"%(expid_name_r,fiberdatalink[expid_name_r][1]))
                             fiberdatalink[expid_name][1].append(fiber)
                             fiberdatalink[expid_name][2].append(fiber_offset)
+                            #print ("AFTER1:fiberdatalink[%s][1]:%s"%(expid_name_r,fiberdatalink[expid_name_r][1]))
                             expid_name=spid_expo+'/'+expid+'/r'
+                            #print ("BEFORE2:fiberdatalink[%s][1]:%s"%(expid_name,fiberdatalink[expid_name][1]))
                             fiberdatalink[expid_name][1].append(fiber)
                             fiberdatalink[expid_name][2].append(fiber_offset)
+                            #print("expid_name:%s,fiber:%d"%(expid_name,fiber))
+                            #print("fiber",fiber)
+                            #print("fiber_offset",fiber_offset)
+                            #print ("AFTER2:fiberdatalink[%s][1]:%s"%(expid_name,fiberdatalink[expid_name][1]))
                     except Exception as e:
                      #print("fiber kv update error:file:%s,spid:%s"%(infile,spid))
                      #traceback.print_exc() 
