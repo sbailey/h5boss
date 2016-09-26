@@ -124,9 +124,11 @@ def parallel_select():
         treduce=MPI.Wtime()
         #print ("rank: ",rank,fiber_dict_tmp_numpy)
         if rank==0:
-         print ("Allreduce %d fiber meta:kv(dataset, type): %.2f"%(len(global_fiber),(treduce-tend)))
+         print ("Allreduce dics: %.2f"%((treduce-tend)))
          print ("len(global_fiber):%d"%(len(global_fiber)))
          print (global_fiber) # expect: key(plate/mjd), value(filename, fiberlist, fiberoffsetlist)
+         #for igf in global_fiber:
+         #  print("key:%s,values:%s"%(igf,global_fiber[igf]))
         # remove duplication of fiberlist and fiberoffsetlist in global_fiber
         if rank==0:
          global_fiber=dedup(global_fiber)

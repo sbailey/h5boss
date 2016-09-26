@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH -p debug
 #SBATCH -N 1
-#SBATCH -t 00:05:00
+#SBATCH -t 00:03:00
 #SBATCH -J subset-mpi
 #SBATCH -e %j.err
 #SBATCH -o %j.out

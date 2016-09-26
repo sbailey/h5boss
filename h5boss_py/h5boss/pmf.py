@@ -213,6 +213,9 @@ def get_fiberlink(infile,plates,mjds,fibers):
         #global pid,fiberdatalink, cataloglink, fx, inputfile
         #inputfile=infile
         fiberdatalink={}
+        import os.path
+        if not os.path.isfile(infile):
+           return fiberdatalink
         try:
          fx = h5py.File(infile, mode='r')
          for plate in fx.keys():
@@ -234,41 +237,50 @@ def get_fiberlink(infile,plates,mjds,fibers):
                      fiber_offset=fiber_list.index(fiber) # this may triger error if fiber not found
                       #update k,v store
                      #print ("fiber_offset:%d"%(fiber_offset))
-                     if spid not in fiberdatalink:
+                     spid_coad=spid+'/coadds'
+                     if spid_coad not in fiberdatalink: # when coadds is added, exposures will be also added
+                        print ("spid_coad:%s not in fiberdata, fiber now is %d"%(spid_coad,fiber))
                         fiberlist=list()
                         fiberlist.append(fiber)
                         offsetlist=list()
                         offsetlist.append(fiber_offset)
-                        spid_coad=spid+'/coadds'
+                        #spid_coad=spid+'/coadds'
                         fiberdatalink[spid_coad]=(infile,fiberlist,offsetlist)
                         spid_expo=spid+'/exposures'
+                        #try:
+                        #    print("fx[%s].keys:%s"%(spid_expo,fx[spid_expo].keys()))
+                        #except Exception as e:
+                        #    print("get key error in infile:%s, fx[%s]"%(infile,spid_expo))
+                        #    pass
                         for expid in fx[spid_expo].keys():
                             expid_name=spid_expo+'/'+expid+'/b'
+                            #print("expid:%s"%expid)
                             fiberdatalink[expid_name]=(infile,fiberlist,offsetlist)
                             expid_name=spid_expo+'/'+expid+'/r'
                             fiberdatalink[expid_name]=(infile,fiberlist,offsetlist)
                      else:
-                        print ("before:",fiberdatalink[spid_coad]) 
+                        print ("spid_coad:%s in fiberdata, fiber now is %d"%(spid_coad,fiber))
+                        #print ("before:",fiberdatalink[spid_coad]) 
                         fiberdatalink[spid_coad][1].append(fiber)  # update fiberlist
-                        print ("after:",fiberdatalink[spid_coad])
-                        fiberdatalink[spid_coad][2].append(offset) # update offsetlist
+                        #print ("after:",fiberdatalink[spid_coad])
+                        fiberdatalink[spid_coad][2].append(fiber_offset) # update offsetlist
                         spid_expo=spid+'/exposures'
                         for expid in fx[spid_expo].keys():
                             expid_name=spid_expo+'/'+expid+'/b'
                             fiberdatalink[expid_name][1].append(fiber)
-                            fiberdatalink[expid_name][2].append(offset)
+                            fiberdatalink[expid_name][2].append(fiber_offset)
                             expid_name=spid_expo+'/'+expid+'/r'
                             fiberdatalink[expid_name][1].append(fiber)
-                            fiberdatalink[expid_name][2].append(offset)
+                            fiberdatalink[expid_name][2].append(fiber_offset)
                     except Exception as e:
                      #print("fiber kv update error:file:%s,spid:%s"%(infile,spid))
                      #traceback.print_exc() 
                      pass # fiber not existing
          fx.close()
         except Exception as e:
-         print (spid)
+         #print (spid)
          traceback.print_exc()
-         print (spid,infile)
+         #print (spid,infile)
          pass
         return (fiberdatalink)
 def get_catalogtypes(infile):
