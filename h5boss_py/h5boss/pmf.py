@@ -240,6 +240,7 @@ def get_fiberlink(infile,plates,mjds,fibers):
                 ii = (plates == plate) & (mjds == mjd)
                 spid= '{}/{}'.format(plate, mjd)
                 # get the fiber column
+                #TODO: try the fx[spid+'/plugmap'][()]['FIBERID'] or fx[spid+'/plugmap'][:]['FIBERID']
                 data_value=fx[spid+'/plugmap'].value['FIBERID'] 
                 xfibers = fibers[ii]
                 fiber_list=data_value.tolist()

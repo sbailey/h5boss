@@ -89,7 +89,7 @@ def map_pmf(infile):
          print (pid,infile)
          pass
         return (pmf)
-def datamap(infile):
+def idatamap(infile):
     '''
        para  : filename
        return: type and shape for each object, returned as tuple, dmap[0] is coadds, dmap[1] is exposure
@@ -110,6 +110,7 @@ def datamap(infile):
             subexpo_name=expo_name+'/'+fx[expo_name].keys()[0]+'/b'
             expo=fx[subexpo_name].keys()
             for icoad in coad:
+                #TODO: tired, 9:41pm, Sep 26, 2016 at Moffet lib, ucb, Those young kids are just so f..king alive. 
                 try:
                     icoad_name=coad_name+'/'+icoad
                     coadds_map[icoad]=(fx[icoad_name].dtype,fx[icoad_name].shape)
@@ -126,3 +127,17 @@ def datamap(infile):
             traceback.print_exc()
     dmap=(coadds_map,exposures_map)
     return dmap
+def datamap(infiles,dmap):
+    bigdatamap_coadd={}
+    bigdatamap_exposure={}
+    for ifile in infiles:
+     try:
+        imap=idatamap(ifile)
+        if len(imap) !=0 and len(imap[0])!=0:
+           bigdatamap_coadd.update(imap[0])
+           bigdatamap_exposure.update(imap[1])
+     except Exception as e:
+        print("get datamap error in file:%s"%ifile)
+        pass
+    return (bigdatamap_coadd,bigdatamap_exposure)
+

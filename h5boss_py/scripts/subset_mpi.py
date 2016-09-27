@@ -144,11 +144,11 @@ def parallel_select():
         # get datamap,i.e., type and shape of each dataset in coadds and exposures. 
         #sys.exit()
         if rank==0:
-         dmap1=datamap(sample_file)
+         dmap1=datamap(hdfsource)
          print ("Datamap is:")
          for imap in dmap1:
            for ikey in imap:
-             print ("dataset:%s type:%s shape:%s"%(ikey,imap[ikey][0],imap[ikey][1])) 
+             print ("plate/mjd:%s type:%s shape:%s"%(ikey,imap[ikey][0],imap[ikey][1])) 
         #sys.exit()  
         #Create the template using 1 process       
         if rank==0 and (template==1 or template==2):
