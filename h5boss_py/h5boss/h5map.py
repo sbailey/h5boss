@@ -89,7 +89,7 @@ def map_pmf(infile):
          print (pid,infile)
          pass
         return (pmf)
-def idatamap(infile):
+def type_map(samplefile):
     '''
        para  : filename
        return: type and shape for each object, returned as tuple, dmap[0] is coadds, dmap[1] is exposure
@@ -110,7 +110,6 @@ def idatamap(infile):
             subexpo_name=expo_name+'/'+fx[expo_name].keys()[0]+'/b'
             expo=fx[subexpo_name].keys()
             for icoad in coad:
-                #TODO: tired, 9:41pm, Sep 26, 2016 at Moffet lib, ucb, Those young kids are just so f..king alive. 
                 try:
                     icoad_name=coad_name+'/'+icoad
                     coadds_map[icoad]=(fx[icoad_name].dtype,fx[icoad_name].shape)
@@ -127,17 +126,19 @@ def idatamap(infile):
             traceback.print_exc()
     dmap=(coadds_map,exposures_map)
     return dmap
-def datamap(infiles,dmap):
-    bigdatamap_coadd={}
-    bigdatamap_exposure={}
-    for ifile in infiles:
-     try:
-        imap=idatamap(ifile)
-        if len(imap) !=0 and len(imap[0])!=0:
-           bigdatamap_coadd.update(imap[0])
-           bigdatamap_exposure.update(imap[1])
-     except Exception as e:
-        print("get datamap error in file:%s"%ifile)
-        pass
-    return (bigdatamap_coadd,bigdatamap_exposure)
 
+def coadd_map(mypath, fname_list):
+    coadmap={}
+    for ifile in fname_list:
+     f=h5py.File(mypath+'/'+ifile,'r')
+     p=f.keys()[0]
+     m=f[p].keys()[0]
+     pm=p+'/'+m
+     pmc=pm+'/coadds'
+     dsets=f[pmc].keys()
+     if dsets[0]!='wave':
+      dsize=f[pmc+'/'+dsets[0]].shape[1]
+     else:
+      dsize=f[pmc+'/'+dsets[1]].shape[0]
+     coadmap[pm]=dsize
+    return coadmap 

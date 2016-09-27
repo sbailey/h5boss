@@ -65,16 +65,17 @@ def create_fiber_template(outfile,global_dict,dmap,rank):
  except Exception as e:
      print ("rank:%d, Output file open error:%s"%(rank,outfile))
      traceback.print_exc()
- try:#Set the allocate time as early. --Quincey Koziol 
+ try:#Set the allocate time as early. --Quincey Koziol
+  all_coadd_info=(dmap[0][0],dmap[1])#(type, size_dic)
+  all_exp_info=(dmap[0][1],dmap[2],dmap[3])#(type, sizeb,sizer)
   for key,value in global_dict.items():
       fiberlength=len(value[1])
       if fiberlength>0:
         inter_grp=key
         if (inter_grp.split('/')[-1]=="coadds"):
-          d_info=dmap[0]
-        else:
-          d_info=dmap[1]
-        _fiber_template(hx,inter_grp,fiberlength,d_info)
+           _fiber_template(hx,inter_grp,fiberlength,all_coadd_info)
+        else: 
+           _fiber_template(hx,inter_grp,fiberlength,all_exp_info)
 #    else:
 #     _catalog_template(hx,key,value)
  except Exception as e:
@@ -139,13 +140,22 @@ def _fiber_template(hx,inter_grp,fiberlength,d_info):
    for dset in d_info:
      try:
         cur_dset_name=inter_grp+'/'+dset
-        cur_dset_type=d_info[dset][0]
-        cur_dset_shape=d_info[dset][1]
+        cur_dset_type=d_info[0][dset][0]
+        pm=inter_grp.split('/')[0]+'/'+inter_grp.split('/')[1]
+        if inter_grp.split('/')[2]=="coadds":
+           dg="coadds"
+           cur_dset_shape=d_info[1][pm]
+        elif: inter_grp.split('/')[-1]=="b":
+           dg="b"
+           cur_dset_shape=d_info[1][0]
+        else:
+           dg="r"
+           cur_dset_shape=d_info[1][1]
+       
         #space=(fiberlength,cur_dset_shape[1])
-        if dset=='wave' and inter_grp.split('/')[2]=="coadds":
-          space=cur_dset_shape
-        else: 
-          space=(fiberlength,cur_dset_shape[1])
+        space=(fiberlength,cur_dset_shape)
+        if dset=='wave' and dg=="coadds":
+           space=(cur_dset_shape,)
         spaceid=h5py.h5s.create_simple(space)
         plist=h5py.h5p.create(h5py.h5p.DATASET_CREATE)
         plist.set_alloc_time(h5py.h5d.ALLOC_TIME_EARLY)

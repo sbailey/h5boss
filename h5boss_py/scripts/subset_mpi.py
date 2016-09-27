@@ -20,7 +20,8 @@ from h5boss.selectmpi import add_dic
 from h5boss.selectmpi import add_numpy
 from h5boss.selectmpi import create_template
 from h5boss.selectmpi import overwrite_template
-from h5boss.h5map import datamap
+from h5boss.h5map import type_map
+from h5boss.h5map import coadd_map
 from time import gmtime, strftime
 import datetime
 import sys,os
@@ -144,16 +145,16 @@ def parallel_select():
         # get datamap,i.e., type and shape of each dataset in coadds and exposures. 
         #sys.exit()
         if rank==0:
-         dmap1=datamap(hdfsource)
-         print ("Datamap is:")
-         for imap in dmap1:
-           for ikey in imap:
-             print ("plate/mjd:%s type:%s shape:%s"%(ikey,imap[ikey][0],imap[ikey][1])) 
+         coaddmap1=coadd_map(hdfsource)
+         typemap1=type_map(sample)
+         expb_size=4112
+         expr_size=4128
+         datamap1=(typemap1,coaddmap1,expb_size,expr_size)
         #sys.exit()  
         #Create the template using 1 process       
         if rank==0 and (template==1 or template==2):
            try:
-            create_template(outfile,global_fiber,dmap1,'fiber',rank)
+            create_template(outfile,global_fiber,datamap1,'fiber',rank)
            except Exception as e:
             traceback.print_exc()
         tcreated=MPI.Wtime()
