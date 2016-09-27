@@ -263,16 +263,19 @@ def _copy_fiber(hx,key,value):  # key is the inter_group, value has filename, fi
      for icoad in coadd_dat:
        idset=key+'/'+icoad
        dx=hx[idset]
-       if icoad!='wave': # wave dataset only has 1 dimensional, and all fiber should entirly copy it. 
+       try:
+        if icoad!='wave': # wave dataset only has 1 dimensional, and all fiber should entirly copy it. 
         # may replace this for loop with a signle I/O call: subdx=subfx[idset][value[2]] then dx=subdx
-        for ifiber in range(0,len(value[2])):
-         fiber_off=value[2][ifiber]
-         subdx=subfx[idset][fiber_off]
-         dx[ifiber]=subdx
-       else:
-         subdx=subfx[idset]
-         dx=subdx
-  else if key.split('/')[-1]=="b" or key.split('/')[-1]=="r": # copy datasets in exposures groups
+          for ifiber in range(0,len(value[2])):
+           fiber_off=value[2][ifiber]
+           subdx=subfx[idset][fiber_off]
+           dx[ifiber]=subdx
+        else:
+          subdx=subfx[idset]
+          dx=subdx
+       except Exception as e:
+          print ("infile:%s,group:%s,dataset:%s,shape:%s. outdt:%s,otshape:%s"%(value[0],key,icoad,subdx.shape,idset,dx.shape))
+  elif key.split('/')[-1]=="b" or key.split('/')[-1]=="r": # copy datasets in exposures groups
      for iexp in exposure_dat:
        idset=key+'/'+iexp
        dx=hx[idset]
@@ -280,13 +283,14 @@ def _copy_fiber(hx,key,value):  # key is the inter_group, value has filename, fi
        for ifiber in range(0,len(value[2])):
          fiber_off=value[2][ifiber]
          subdx=subfx[idset][fiber_off]
+         print ("group:%s dataset:%s ifiber:%d"%(key,iexp,ifiber))
          dx[ifiber]=subdx 
   else:
      print ("wrong inter group found%s"%key)
   subfx.close()
  except Exception as e:
   traceback.print_exc()
-  print ("read subfile %s error"%value[2])
+  print ("read subfile %s error at key:%s value:%s"%(value[0],key,value))
   pass
 
 def _copy_fiber_v1(hx,key,value):

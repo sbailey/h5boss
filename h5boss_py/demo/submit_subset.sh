@@ -12,10 +12,10 @@ template=$CSCRATCH/bosslover/scaling-test/ost72/$SLURM_JOB_ID.h5
 cmd="srun -n 32 python-mpi ../scripts/subset_mpi.py "
 filepath=" input_csv/input-full-cori "
 pmfquery=" pmf-list/large-scale/pmf1k-shuffle.csv "
-fiber=$SLURM_JOB_ID"_nodes10k_fiber.txt "
-catalog=$SLURM_JOB_ID"_nodes10k_catalog.txt "
+fiber=$SLURM_JOB_ID"_nodes1k_fiber.txt "
+catalog=$SLURM_JOB_ID"_nodes1k_catalog.txt "
 opt1=" --mpi=yes"
-opt2=" --template=yes" # other options are yes, no, all
+opt2=" --template=all" # other options are yes, no, all
 opt3=" --fiber="
 opt4=" --catalog="
 run=$cmd$filepath$template$pmfquery$opt1$opt2$opt3$fiber$opt4$catalog
