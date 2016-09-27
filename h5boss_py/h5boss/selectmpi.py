@@ -9,6 +9,8 @@ catalog_meta=['plugmap', 'zbest', 'zline',
 meta=['plugmap', 'zbest', 'zline',
                         'photo/match', 'photo/matchflux', 'photo/matchpos']
 kk=1
+exposure_dat=("wave","flux","ivar","mask","wavedisp","sky","x","calib") #exposures
+coadd_dat=("wave","flux","ivar","and_mask","or_mask","wavedisp","sky","model") # wavelength
 ## Global variables:
 ## Data structure of fiberdatalink: {key, value_pair()} --->  {path_dataset, (datatype,datashape,filename)}
 ## For example fiberdatalink['3665/52273/360/coadd']= (V32, $SCRATCH/h5boss/3665-52273.h5)
@@ -139,9 +141,11 @@ def _fiber_template(hx,inter_grp,fiberlength,d_info):
         cur_dset_name=inter_grp+'/'+dset
         cur_dset_type=d_info[dset][0]
         cur_dset_shape=d_info[dset][1]
-        space=(fiberlength,cur_dset_shape[1])
-        if cur_dset=='wave' and inter_grp.split('/')[2]=="coadds":
+        #space=(fiberlength,cur_dset_shape[1])
+        if dset=='wave' and inter_grp.split('/')[2]=="coadds":
           space=cur_dset_shape
+        else: 
+          space=(fiberlength,cur_dset_shape[1])
         spaceid=h5py.h5s.create_simple(space)
         plist=h5py.h5p.create(h5py.h5p.DATASET_CREATE)
         plist.set_alloc_time(h5py.h5d.ALLOC_TIME_EARLY)
@@ -252,24 +256,39 @@ def overwrite_template(hx, data_dict,choice):
    print ("Data read/write error key:%s file:%s"%(key,value[2]))
    traceback.print_exc()
    pass
-def _copy_fiber(hx,key,value):
+def _copy_fiber(hx,key,value):  # key is the inter_group, value has filename, fiberlist, fiberoffsetlist
  try:
   subfx=h5py.File(value[0],'r')
-  if key.split('/')[2]=="coadds":
-     #for ###TODO TODO TODO....Stopped here 9:22 pm, Moffet Library at UCB, Sep. 25, 2016. Going to have a good sleep for tomorrow's debate.
-   subdx=subfx[key].value
-   subfx.close()
+  if key.split('/')[2]=="coadds": # copy datasets in coadds group
+     for icoad in coadd_dat:
+       idset=key+'/'+icoad
+       dx=hx[idset]
+       if icoad!='wave': # wave dataset only has 1 dimensional, and all fiber should entirly copy it. 
+        # may replace this for loop with a signle I/O call: subdx=subfx[idset][value[2]] then dx=subdx
+        for ifiber in range(0,len(value[2])):
+         fiber_off=value[2][ifiber]
+         subdx=subfx[idset][fiber_off]
+         dx[ifiber]=subdx
+       else:
+         subdx=subfx[idset]
+         dx=subdx
+  else if key.split('/')[-1]=="b" or key.split('/')[-1]=="r": # copy datasets in exposures groups
+     for iexp in exposure_dat:
+       idset=key+'/'+iexp
+       dx=hx[idset]
+       # may replace this for loop with a signle I/O call: subdx=subfx[idset][value[2]] then dx=subdx
+       for ifiber in range(0,len(value[2])):
+         fiber_off=value[2][ifiber]
+         subdx=subfx[idset][fiber_off]
+         dx[ifiber]=subdx 
+  else:
+     print ("wrong inter group found%s"%key)
+  subfx.close()
  except Exception as e:
   traceback.print_exc()
   print ("read subfile %s error"%value[2])
   pass
- try:
-  dx=hx[str(key)]
-  dx[:]=subdx   #overwrite the existing template data
- except Exception as e:
-  traceback.print_exc()
-  print ("overwrite error")
-  pass
+
 def _copy_fiber_v1(hx,key,value):
  try:
   subfx=h5py.File(value[2],'r')

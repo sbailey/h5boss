@@ -145,6 +145,7 @@ def parallel_select():
         #sys.exit()
         if rank==0:
          dmap1=datamap(sample_file)
+         print ("Datamap is:")
          for imap in dmap1:
            for ikey in imap:
              print ("dataset:%s type:%s shape:%s"%(ikey,imap[ikey][0],imap[ikey][1])) 
@@ -160,7 +161,7 @@ def parallel_select():
         if rank==0 and (template==1 or template==2):
          print ("Template creation time: %.2f"%(tcreated-treduce))
          twritecsv_end=MPI.Wtime()
-        if rank==0:
+        #if rank==0:
 ############# OVERWRITE THE TEMPLATE WITH ACTUAL DATA ############
         if template ==0 or template==2: 
          try: 
