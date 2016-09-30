@@ -90,7 +90,7 @@ def parallel_select():
            print ("parse csv time: %.2f"%(tstart-tstartcsv))
         total_files=len(hdfsource)
         #distribute the workload evenly to each process
-        step=int(total_files / nproc)
+        step=int(total_files / nproc)+1
         rank_start =int( rank * step)
         rank_end = int(rank_start + step)
         if(rank==nproc-1):
@@ -114,8 +114,6 @@ def parallel_select():
                 fiber_dict=fiber_union(fiber_dict,fiber_item,inter_keys)
         tend=MPI.Wtime()
         #print ("rank:%d,fiber_dict:%d"%(rank,len(fiber_dict)))
-        if rank==0: 
-         print ("Get metadata of fiber ojbect time: %.2f"%(tend-tstart))
         #rank0 create all, then close an reopen.-Quincey Koziol 
         counterop = MPI.Op.Create(add_dic, commute=True) #define reduce operation
         global_fiber={}#(key, value)->(plates/mjd/fiber/../dataset, (type,shape,filename), unordered
@@ -125,13 +123,12 @@ def parallel_select():
         treduce=MPI.Wtime()
         #print ("rank: ",rank,fiber_dict_tmp_numpy)
         if rank==0:
-         print ("Allreduce dics: %.2f"%((treduce-tend)))
-         print ("len(global_fiber):%d"%(len(global_fiber)))
-         print (global_fiber) # expect: key(plate/mjd), value(filename, fiberlist, fiberoffsetlist)
-         #for igf in global_fiber:
-         #  print("key:%s,values:%s"%(igf,global_fiber[igf]))
+         print ("Get fiber metadata costs %.2f"%(tend-tstart))
+         print ("Allreduce dics costs %.2f"%((treduce-tend)))
+         print ("length of global_fiber: %d"%(len(global_fiber)))
         # remove duplication of fiberlist and fiberoffsetlist in global_fiber
         if rank==0:
+         tpickle_start=MPI.Wtime()
          import cPickle
          dup_gf=cPickle.dumps(global_fiber) 
          dup_size=sys.getsizeof(dup_gf)
@@ -140,29 +137,30 @@ def parallel_select():
          dedup_gf=cPickle.dumps(global_fiber)
          dedup_size=sys.getsizeof(dedup_gf)
          dedup_len=len(global_fiber)
+         tpickle_end=MPI.Wtime()
+         print("Pickling and dedup cost %.2f seconds"%(tpickle_end-tpickle_start))
          print("Before dedup: %d bytes. After dedup:%d bytes"%(dup_size,dedup_size))
          print("Before dedup: %d pm. After dedup:%d pm"%(dup_len,dedup_len))
         # get datamap,i.e., type and shape of each dataset in coadds and exposures. 
-        #sys.exit()
         if rank==0:
+         tdmap_start=MPI.Wtime()
          coaddmap1=coadd_map(hdfsource)
-         typemap1=type_map(sample)
+         typemap1=type_map(sample_file)
          expb_size=4112
          expr_size=4128
          datamap1=(typemap1,coaddmap1,expb_size,expr_size)
-        #sys.exit()  
+         tdmap_end=MPI.Wtime()
+         print("get datamap cost %.2f seconds"%(tdmap_end-tdmap_start))
         #Create the template using 1 process       
         if rank==0 and (template==1 or template==2):
+           temp_start=MPI.Wtime()
            try:
             create_template(outfile,global_fiber,datamap1,'fiber',rank)
            except Exception as e:
             traceback.print_exc()
+           temp_end=MPI.Wtime()
+           print("template creation cost %.2f"%(temp_end-temp_start))
         tcreated=MPI.Wtime()
-        twritecsv_start=MPI.Wtime()
-        if rank==0 and (template==1 or template==2):
-         print ("Template creation time: %.2f"%(tcreated-treduce))
-         twritecsv_end=MPI.Wtime()
-        #if rank==0:
 ############# OVERWRITE THE TEMPLATE WITH ACTUAL DATA ############
         if template ==0 or template==2: 
          try: 

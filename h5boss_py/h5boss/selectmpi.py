@@ -137,21 +137,26 @@ def create_catlog_template(outfile,global_dict):
   traceback.print_exc()
   pass
 def _fiber_template(hx,inter_grp,fiberlength,d_info):
-   for dset in d_info:
+   for dset in range(0,len(exposure_dat)):
      try:
-        cur_dset_name=inter_grp+'/'+dset
-        cur_dset_type=d_info[0][dset][0]
+        #cur_dset_name=inter_grp+'/'+dset
+        #cur_dset_type=d_info[0][dset][0]
         pm=inter_grp.split('/')[0]+'/'+inter_grp.split('/')[1]
         if inter_grp.split('/')[2]=="coadds":
            dg="coadds"
            cur_dset_shape=d_info[1][pm]
-        elif: inter_grp.split('/')[-1]=="b":
+           cur_dset_name=inter_grp+'/'+coadd_dat[dset]
+           cur_dset_type=d_info[0][coadd_dat[dset]][0]
+        elif inter_grp.split('/')[-1]=="b":
            dg="b"
-           cur_dset_shape=d_info[1][0]
+           cur_dset_shape=d_info[1]
+           cur_dset_name=inter_grp+'/'+exposure_dat[dset]
+           cur_dset_type=d_info[0][exposure_dat[dset]][0]
         else:
            dg="r"
-           cur_dset_shape=d_info[1][1]
-       
+           cur_dset_shape=d_info[2]
+           cur_dset_name=inter_grp+'/'+exposure_dat[dset]
+           cur_dset_type=d_info[0][exposure_dat[dset]][0]
         #space=(fiberlength,cur_dset_shape[1])
         space=(fiberlength,cur_dset_shape)
         if dset=='wave' and dg=="coadds":
@@ -278,7 +283,10 @@ def _copy_fiber(hx,key,value):  # key is the inter_group, value has filename, fi
         # may replace this for loop with a signle I/O call: subdx=subfx[idset][value[2]] then dx=subdx
           for ifiber in range(0,len(value[2])):
            fiber_off=value[2][ifiber]
-           subdx=subfx[idset][fiber_off]
+           if fiber_off < subfx[idset].shape[0]:
+            subdx=subfx[idset][fiber_off]
+           else:
+            subdx=[0]*subfx[idset].shape[1]
            dx[ifiber]=subdx
         else:
           subdx=subfx[idset]
@@ -292,8 +300,11 @@ def _copy_fiber(hx,key,value):  # key is the inter_group, value has filename, fi
        # may replace this for loop with a signle I/O call: subdx=subfx[idset][value[2]] then dx=subdx
        for ifiber in range(0,len(value[2])):
          fiber_off=value[2][ifiber]
-         subdx=subfx[idset][fiber_off]
-         print ("group:%s dataset:%s ifiber:%d"%(key,iexp,ifiber))
+         if fiber_off< subfx[idset].shape[0]:
+          subdx=subfx[idset][fiber_off]
+         else:
+          subdx=[0]*subfx[idset].shape[1]
+         #print ("group:%s dataset:%s ifiber:%d"%(key,iexp,ifiber))
          dx[ifiber]=subdx 
   else:
      print ("wrong inter group found%s"%key)

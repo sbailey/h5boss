@@ -89,7 +89,7 @@ def map_pmf(infile):
          print (pid,infile)
          pass
         return (pmf)
-def type_map(samplefile):
+def type_map(infile):
     '''
        para  : filename
        return: type and shape for each object, returned as tuple, dmap[0] is coadds, dmap[1] is exposure
@@ -127,18 +127,21 @@ def type_map(samplefile):
     dmap=(coadds_map,exposures_map)
     return dmap
 
-def coadd_map(mypath, fname_list):
+def coadd_map(fname_list):
     coadmap={}
     for ifile in fname_list:
-     f=h5py.File(mypath+'/'+ifile,'r')
-     p=f.keys()[0]
-     m=f[p].keys()[0]
-     pm=p+'/'+m
-     pmc=pm+'/coadds'
-     dsets=f[pmc].keys()
-     if dsets[0]!='wave':
-      dsize=f[pmc+'/'+dsets[0]].shape[1]
-     else:
-      dsize=f[pmc+'/'+dsets[1]].shape[0]
-     coadmap[pm]=dsize
+     try:
+      f=h5py.File(ifile,'r')
+      p=f.keys()[0]
+      m=f[p].keys()[0]
+      pm=p+'/'+m
+      pmc=pm+'/coadds'
+      dsets=f[pmc].keys()
+      if dsets[0]!='wave':
+       dsize=f[pmc+'/'+dsets[0]].shape[1]
+      else:
+       dsize=f[pmc+'/'+dsets[1]].shape[0]
+      coadmap[pm]=dsize
+     except Exception as e: 
+       pass
     return coadmap 
