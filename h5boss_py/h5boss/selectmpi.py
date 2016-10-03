@@ -281,13 +281,20 @@ def _copy_fiber(hx,key,value):  # key is the inter_group, value has filename, fi
        try:
         if icoad!='wave': # wave dataset only has 1 dimensional, and all fiber should entirly copy it. 
         # may replace this for loop with a signle I/O call: subdx=subfx[idset][value[2]] then dx=subdx
-          for ifiber in range(0,len(value[2])):
-           fiber_off=value[2][ifiber]
-           if fiber_off < subfx[idset].shape[0]:
-            subdx=subfx[idset][fiber_off]
-           else:
-            subdx=[0]*subfx[idset].shape[1]
-           dx[ifiber]=subdx
+#          for ifiber in range(0,len(value[2])):
+#           fiber_off=value[2][ifiber]
+#           if fiber_off < subfx[idset].shape[0]:
+#            subdx=subfx[idset][fiber_off]
+#           else:
+#            subdx=[0]*subfx[idset].shape[1]
+#           dx[ifiber]=subdx
+          vlist=value[2]
+          vlist.sort()
+          try:
+           dx=subfx[idset][vlist]
+          except Exception as e:
+           print ("vlist has %s,needs to be fixed"%vlist)
+           pass
         else:
           subdx=subfx[idset]
           dx=subdx
@@ -297,15 +304,22 @@ def _copy_fiber(hx,key,value):  # key is the inter_group, value has filename, fi
      for iexp in exposure_dat:
        idset=key+'/'+iexp
        dx=hx[idset]
+       vlist=value[2]
+       vlist.sort()
+       try:
+        dx=subfx[idset][vlist]
+       except Exception as e:
+        print("vlist has %s, needs to be fixed"%vlist)
+        pass
        # may replace this for loop with a signle I/O call: subdx=subfx[idset][value[2]] then dx=subdx
-       for ifiber in range(0,len(value[2])):
-         fiber_off=value[2][ifiber]
-         if fiber_off< subfx[idset].shape[0]:
-          subdx=subfx[idset][fiber_off]
-         else:
-          subdx=[0]*subfx[idset].shape[1]
+#       for ifiber in range(0,len(value[2])):
+#         fiber_off=value[2][ifiber]
+#         if fiber_off< subfx[idset].shape[0]:
+#          subdx=subfx[idset][fiber_off]
+#         else:
+#          subdx=[0]*subfx[idset].shape[1]
          #print ("group:%s dataset:%s ifiber:%d"%(key,iexp,ifiber))
-         dx[ifiber]=subdx 
+#         dx[ifiber]=subdx 
   else:
      print ("wrong inter group found%s"%key)
   subfx.close()

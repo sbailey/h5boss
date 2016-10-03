@@ -7,21 +7,39 @@
 #SBATCH -o %j.out
 #SBATCH -L SCRATCH
 cd $SLURM_SUBMIT_DIR
+
+# Control Arguments:
+version="_v1" # or "_v2"
+cmdscriptpt="../scripts/subset_mpi"$version".py "
+nproc="24"
+cmd="srun -n "$nproc" python-mpi "$cmdscript
+
+# Positional Arguments:
+srcfile=" input_csv/input-full-cori"$version" "
 template=$CSCRATCH/bosslover/scaling-test/ost2/$SLURM_JOB_ID.h5
-#cmd="srun -n 32 python-mpi ../scripts/subset_mpi_v1.py "
-cmd="srun -n 1 python-mpi ../scripts/subset_mpi.py "
-filepath=" input_csv/input-full-cori "
-pmfquery=" pmf-list/large-scale/pmf1k1f.csv "
-#pmfquery=" pmf-list/large-scale/pmf1k1f.csv "
-fiber=$SLURM_JOB_ID"_nodes1k_fiber.txt "
-catalog=$SLURM_JOB_ID"_nodes1k_catalog.txt "
-datamap="datamap1.pk"
-opt1=" --mpi=yes"
-opt2=" --template=all" # other options are yes, no, all
-opt3=" --fiber="
-opt4=" --catalog="
-opt5=" --datamap="
-run=$cmd$filepath$template$pmfquery$opt1$opt2$opt3$fiber$opt4$catalog$opt5$datamap
-#run=$cmd$filepath$template$pmfquery$opt1$opt2$opt3$fiber$opt4$catalog
+pmfquery=" pmf-list/large-scale/pmf1k-shuffle.csv "
+
+# Optional Arguments:
+k_opt1=" --mpi="         # 'yes' for parallel read/wirte 
+                         # 'no'  for serial read/write
+
+k_opt2=" --template="    # 'yes' for creating a template only 
+ 		         # 'no'  for using previous template and writing the actual data into it
+		         # 'all' for creating a template and writing the actual data into it
+
+k_opt3=" --fiber="       # specify a file that could store the accessed fiber information
+k_opt4=" --catalog="     # specify a file that could store the accssed catalog information
+k_opt5=" --datamap="     # specify a file that stored all fiber information of source files
+                         # if not specified, will scan all source files to create a new datamap
+
+v_opt1="yes "
+v_opt2="all "
+v_opt3=$SLURM_JOB_ID"_fiber.txt "
+v_opt4=$SLURM_JOB_ID"_catalog.txt "
+v_opt5="datamap1.pk"
+
+
+
+run=$cmd$srcfile$template$pmfquery$k_opt1$v_opt1$k_opt2$v_opt2$k_opt3$v_opt3$k_opt4$v_opt4$k_opt5$v_opt5
 echo $run
 $run

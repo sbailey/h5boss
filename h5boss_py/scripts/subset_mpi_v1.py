@@ -51,6 +51,7 @@ def parallel_select():
     parser.add_argument("--mpi", help="using mpi yes/no")
     parser.add_argument("--fiber", help="specify fiber csv output")
     parser.add_argument("--catalog", help="specify catalog csv output")
+    parser.add_argument("--datamap", help="specify datamap pickle file")
     opts=parser.parse_args()
 
     infiles = opts.input
@@ -117,21 +118,21 @@ def parallel_select():
         #print ("rank: ",rank,fiber_dict_tmp_numpy)
         if rank==0:
          print ("Allreduce %d fiber meta:kv(dataset, type): %.2f"%(len(global_fiber),(treduce-tend)))
-         print (global_fiber) # expect: key(plate/mjd), value(filename, fiberlist, fiberoffsetlist)
+         #print (global_fiber) # expect: key(plate/mjd), value(filename, fiberlist, fiberoffsetlist)
         # remove duplication of fiberlist and fiberoffsetlist in global_fiber
         #Create the template using 1 process       
         if rank==0 and (template==1 or template==2):
            try:
             ##can not parallel create metadata is really painful. 
             create_template_v1(outfile,global_fiber,'fiber',rank)
-            catalog_number=count_unique(global_fiber) #(plates/mjd, num_fibers)
+#            catalog_number=count_unique(global_fiber) #(plates/mjd, num_fibers)
             print ('number of unique fibers:%d '%len(catalog_number))           
             #for fk,vk in catalog_number.items():
             #   print ("%s:%d"%(fk,vk))
             #sample_file=range_files[0] # get the catalog metadata
-            catalog_types=get_catalogtypes(sample_file) # dict: meta, (type, shape)
-            global_catalog=(catalog_number,catalog_types)
-            create_template(outfile,global_catalog,'catalog',rank)
+#            catalog_types=get_catalogtypes(sample_file) # dict: meta, (type, shape)
+#            global_catalog=(catalog_number,catalog_types)
+#            create_template(outfile,global_catalog,'catalog',rank)
            except Exception as e:
             traceback.print_exc()
         tcreated=MPI.Wtime()
@@ -154,13 +155,13 @@ def parallel_select():
         twritecsv_start=MPI.Wtime()
         if rank==0 and (template==1 or template==2):
          print ("Template creation time: %.2f"%(tcreated-treduce))
-         with open(fiberout, 'a') as f:
-           f.writelines('{}:{}\n'.format(k,v[2]) for k, v in global_fiber.items())
-           f.write('\n')
-         with open(catalogout, 'a') as f:
-           for k,v in revised_dict.items():
-            for iv in v:
-             f.writelines('{}:{}:{}:{}\n'.format(k,iv[0],iv[1],iv[2]))
+#         with open(fiberout, 'a') as f:
+#           f.writelines('{}:{}\n'.format(k,v[2]) for k, v in global_fiber.items())
+#           f.write('\n')
+#         with open(catalogout, 'a') as f:
+#           for k,v in revised_dict.items():
+#            for iv in v:
+#             f.writelines('{}:{}:{}:{}\n'.format(k,iv[0],iv[1],iv[2]))
              #f.write('\n')
         twritecsv_end=MPI.Wtime()
         if rank==0:
@@ -193,10 +194,12 @@ def parallel_select():
            catalog_copyts=MPI.Wtime()
            #overwrite_template(hx,catalog_dict,'catalog')
            catalog_copyte=MPI.Wtime()
+           comm.Barrier()
+           tclose_s=MPI.Wtime()
            hx.close()
            tclose=MPI.Wtime()
            #print("rank:%d,fiber cost:%.2f"%(rank,fiber_copyte-fiber_copyts))
         if rank==0:
-           print ("File open: %.2f\nFiber copy: %.2f\nCatalog copy: %.2f\nFile close: %.2f\nTotal Cost: %.2f"%(topen-tcreated,fiber_copyte-fiber_copyts,catalog_copyte-catalog_copyts,tclose-catalog_copyte,tclose-tstart))
+           print ("File open: %.2f\nFiber copy: %.2f\nCatalog copy: %.2f\nFile close: %.2f\nTotal Cost: %.2f"%(topen-tcreated,fiber_copyte-fiber_copyts,catalog_copyte-catalog_copyts,tclose-tclose_s,tclose-tstart))
 if __name__=='__main__': 
     parallel_select()
