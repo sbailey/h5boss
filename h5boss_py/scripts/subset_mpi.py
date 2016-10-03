@@ -34,6 +34,7 @@ import numpy as np
 import optparse
 import argparse
 import datetime
+import cPickle as pickle
 from collections import defaultdict
 def parallel_select():
     '''
@@ -53,17 +54,24 @@ def parallel_select():
     parser.add_argument("--mpi", help="using mpi yes/no")
     parser.add_argument("--fiber", help="specify fiber csv output")
     parser.add_argument("--catalog", help="specify catalog csv output")
+    parser.add_argument("--datamap", help="specify datamap pickle file")
+
     opts=parser.parse_args()
 
     infiles = opts.input
     outfile = opts.output
     pmflist = opts.pmf
+    pkfile = "datamappk"
     fiberout = "fibercsv"
     catalogout = "catalogcsv"
+    pk_exist=0
     if opts.fiber:
      fiberout = opts.fiber
     if opts.catalog:
      catalogout = opts.catalog
+    if opts.datamap:
+     pkfile = opts.datamap
+     pk_exist=1
     catalog_meta=['plugmap', 'zbest', 'zline',
                         'match', 'matchflux', 'matchpos']
     meta=['plugmap', 'zbest', 'zline',
@@ -129,12 +137,11 @@ def parallel_select():
         # remove duplication of fiberlist and fiberoffsetlist in global_fiber
         if rank==0:
          tpickle_start=MPI.Wtime()
-         import cPickle
-         dup_gf=cPickle.dumps(global_fiber) 
+         dup_gf=pickle.dumps(global_fiber) 
          dup_size=sys.getsizeof(dup_gf)
          dup_len=len(global_fiber)
          global_fiber=dedup(global_fiber)
-         dedup_gf=cPickle.dumps(global_fiber)
+         dedup_gf=pickle.dumps(global_fiber)
          dedup_size=sys.getsizeof(dedup_gf)
          dedup_len=len(global_fiber)
          tpickle_end=MPI.Wtime()
@@ -144,13 +151,24 @@ def parallel_select():
         # get datamap,i.e., type and shape of each dataset in coadds and exposures. 
         if rank==0:
          tdmap_start=MPI.Wtime()
-         coaddmap1=coadd_map(hdfsource)
-         typemap1=type_map(sample_file)
-         expb_size=4112
-         expr_size=4128
-         datamap1=(typemap1,coaddmap1,expb_size,expr_size)
+         if (pk_exist==0):
+          coaddmap1=coadd_map(hdfsource)
+          typemap1=type_map(sample_file)
+          expb_size=4112
+          expr_size=4128
+          datamap1=(typemap1,coaddmap1,expb_size,expr_size)
+          pickle.dump(datamap1,open(pkfile,"wb"))
+         else: 
+          try:
+           datamap1=pickle.load(open(pkfile,"rb"))
+          except Exception as e:
+           print ("loading datamap pickle file:%s error"%pkfile)
+           sys.exit()
          tdmap_end=MPI.Wtime()
-         print("get datamap cost %.2f seconds"%(tdmap_end-tdmap_start))
+         if (pk_exist==0):
+          print("datamap not exists, scanning all files cost %.2f seconds"%(tdmap_end-tdmap_start))
+         else:
+          print("datamap exists, loading cost %.2f seconds"%(tdmap_end-tdmap_start))
         #Create the template using 1 process       
         if rank==0 and (template==1 or template==2):
            temp_start=MPI.Wtime()
@@ -176,20 +194,21 @@ def parallel_select():
         catalog_copyte=topen
         if template==0 or template==2:
            fiber_copyts=MPI.Wtime()
-           print ("rank:%d, fiber_dict length:%d"%(rank,fiber_item_length))
-           fiber_copy_start=time.time()
            overwrite_template(hx,fiber_dict,'fiber')
-           fiber_copy_end=time.time()
-           print("rank:%d,fibercost:%.2f"%(rank,fiber_copy_end-fiber_copy_start))
            fiber_copyte=MPI.Wtime()
+           print("rank:%d\tlength:%d\tcost:%.2f"%(rank,fiber_item_length,fiber_copyte-fiber_copyts))
            #for each fiber, find the catalog, then copy it
-           catalog_copyts=MPI.Wtime()
+           #catalog_copyts=MPI.Wtime()
            #overwrite_template(hx,catalog_dict,'catalog')
-           catalog_copyte=MPI.Wtime()
+           #catalog_copyte=MPI.Wtime()
+           catalog_copyts=0
+           catalog_copyte=0
+           comm.Barrier()
+           tclose_s=MPI.Wtime()
            hx.close()
            tclose=MPI.Wtime()
            #print("rank:%d,fiber cost:%.2f"%(rank,fiber_copyte-fiber_copyts))
         if rank==0:
-           print ("File open: %.2f\nFiber copy: %.2f\nCatalog copy: %.2f\nFile close: %.2f\nTotal Cost: %.2f"%(topen-tcreated,fiber_copyte-fiber_copyts,catalog_copyte-catalog_copyts,tclose-catalog_copyte,tclose-tstart))
+           print ("Overview after template creation:\n1.SSF File open: %.2f\nFiber copy total: %.2f\nCatalog copy total: %.2f\n SSF File close: %.2f\nTotal Cost(including everything): %.2f"%(topen-tcreated,fiber_copyte-fiber_copyts,catalog_copyte-catalog_copyts,tclose-tclose_s,tclose-tstart))
 if __name__=='__main__': 
     parallel_select()
