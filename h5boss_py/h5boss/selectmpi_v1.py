@@ -45,7 +45,9 @@ def create_template(outfile, global_dict,choice,rank):
 def create_fiber_template(outfile,global_dict,rank):
 #use one process to create the template
  try:
-     hx = h5py.File(outfile,'a')
+     #creating the file with 'latest' formating, rather than earliest, will utilize the most state-of-art optimizing, e.g., indexing, and optimal heap storage inside hdf5 file
+     hx = h5py.File(outfile,'a',libver="latest")
+     #hx = h5py.File(outfile,'a')
  except Exception as e:
      print ("rank:%d, Output file open error:%s"%(rank,outfile))
      traceback.print_exc()

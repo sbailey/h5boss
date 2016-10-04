@@ -27,11 +27,6 @@ def create_slavefile(infile,plates,mjds,fibers,masterfile,rank,id):
       print ("Error in slave file:%s")
       traceback.print_exc()
       pass 
-def add_dic_v1(dict1,dict2,datatype):
-    for item in dict2:
-      if item not in dict1:
-        dict1[item] = dict2[item]
-    return dict1
 def add_dic(dict1,dict2,datatype):
     for item in dict2:
       if item not in dict1:
@@ -47,11 +42,6 @@ def add_numpy(dict1, dict2, datatype):
        return dict2
     dict1=np.append(dict1,dict2,axis=0)
     return dict1
-def create_template_v1(outfile, global_dict,choice,rank):
-    if choice=='fiber':
-      create_fiber_template(outfile,global_dict,rank)
-    elif choice=='catalog':
-      create_catlog_template(outfile,global_dict)
 def create_template(outfile, global_dict,dmap,choice,rank):
     if choice=='fiber':
       create_fiber_template(outfile,global_dict,dmap,rank)
@@ -61,7 +51,7 @@ def create_template(outfile, global_dict,dmap,choice,rank):
 def create_fiber_template(outfile,global_dict,dmap,rank):
 #use one process to create the template
  try:
-     hx = h5py.File(outfile,'a')
+     hx = h5py.File(outfile,'a',libver='latest')
  except Exception as e:
      print ("rank:%d, Output file open error:%s"%(rank,outfile))
      traceback.print_exc()
@@ -87,34 +77,10 @@ def create_fiber_template(outfile,global_dict,dmap,rank):
  except Exception as e:
   print("hx close error in %d"%rank)
   traceback.print_exc()
-def create_fiber_template_v1(outfile,global_dict,rank):
-#use one process to create the template
- try:
-     hx = h5py.File(outfile,'a')
- except Exception as e:
-     print ("rank:%d, Output file open error:%s"%(rank,outfile))
-     traceback.print_exc()
- try:#Set the allocate time as early. --Quincey Koziol 
-  for key,value in global_dict.items():
-    if key.split('/')[-1] not in catalog_meta:
-     _fiber_template(hx,key,value)
-#    else:
-#     _catalog_template(hx,key,value)
- except Exception as e:
-   traceback.print_exc()
-   
- try:
-  hx.flush()
-  hx.close()
- except Exception as e:
-  print("hx close error in %d"%rank)
-  traceback.print_exc()
-  
-
 def create_catlog_template(outfile,global_dict):
 #use one process to create the template
  try:
-     hx = h5py.File(outfile,'a')
+     hx = h5py.File(outfile,'a',libver='latest')
  except Exception as e:
      print ("Output file creat error:%s"%outfile)
      traceback.print_exc()
@@ -179,21 +145,6 @@ def _fiber_template(hx,inter_grp,fiberlength,d_info):
         print("dataset create error: %s"%cur_dset_name)
         traceback.print_exc()
         pass
-def _fiber_template_v1(hx,key,value):
-   space=h5py.h5s.create_simple(value[1])
-   plist=h5py.h5p.create(h5py.h5p.DATASET_CREATE)
-   plist.set_alloc_time(h5py.h5d.ALLOC_TIME_EARLY)
-   tid=h5py.h5t.py_create(value[0], False)
-   try:#create intermediate groups
-      hx.create_group(os.path.dirname(key))
-   except Exception as e:
-      pass #groups existed, so pass it
-   try:
-    h5py.h5d.create(hx.id,key,tid,space,plist)#create dataset with property list:early allocate
-   except Exception as e:
-    #print("dataset create error: %s"%key)
-    #traceback.print_exc()
-    pass
 def _catalog_template(hx,key,value,catalog_types):
    value=int(value)
    item_shape=(value,1)
@@ -224,30 +175,6 @@ def _catalog_template(hx,key,value,catalog_types):
      traceback.print_exc()
      pass
 
-def overwrite_template_v1(hx, data_dict,choice):
- #Read/Write all dataset into final file, 
- #each rank handles one fiber_dict, which contains multiple fiber_item
- if choice=='fiber':    
-  try:
-   for key, value in data_dict.items():
-    if key.split('/')[-1] not in catalog_meta:
-      _copy_fiber(hx,key,value)
-  except Exception as e:
-   print ("Data read/write error key:%s file:%s"%(key,value[2]))
-   traceback.print_exc()
-   pass
- elif choice=='catalog':
-  try:
-   for i in range(0,len(data_dict)):
-    pm=data_dict[i][0]
-    # key: pm, value: (fiberid, global_offset, infile)    
-    values_off=data_dict[i][1]
-    for i in range(0,len(values_off)): 
-      _copy_catalog(hx,pm,values_off[i])
-  except Exception as e:
-   print ("Data read/write error key:%s file:%s"%(key,value[2]))
-   traceback.print_exc()
-   pass
 def overwrite_template(hx, data_dict,choice):
  #Read/Write all dataset into final file, 
  #each rank handles one fiber_dict, which contains multiple fiber_item
@@ -328,22 +255,6 @@ def _copy_fiber(hx,key,value):  # key is the inter_group, value has filename, fi
   print ("read subfile %s error at key:%s value:%s"%(value[0],key,value))
   pass
 
-def _copy_fiber_v1(hx,key,value):
- try:
-  subfx=h5py.File(value[2],'r')
-  subdx=subfx[key].value
-  subfx.close()
- except Exception as e:
-  traceback.print_exc()
-  print ("read subfile %s error"%value[2])
-  pass
- try:
-  dx=hx[str(key)]
-  dx[:]=subdx   #overwrite the existing template data
- except Exception as e:
-  traceback.print_exc()
-  print ("overwrite error")
-  pass
 def _copy_catalog(hx,key,values_off):
    try:
     fx=h5py.File(values_off[1],'r')

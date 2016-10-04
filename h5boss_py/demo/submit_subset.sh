@@ -10,7 +10,7 @@ cd $SLURM_SUBMIT_DIR
 
 # Control Arguments:
 version="_v1" # or "_v2"
-cmdscriptpt="../scripts/subset_mpi"$version".py "
+cmdscript="../scripts/subset_mpi"$version".py "
 nproc="24"
 cmd="srun -n "$nproc" python-mpi "$cmdscript
 
