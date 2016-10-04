@@ -17,6 +17,10 @@ h5boss_py/demo/log
 h5boss_py/demo/drop_cache/drop_file_from_page_cache
 h5boss_py/demo/drop_cache/is_file_in_page_cache
 h5boss_py/demo/drop_cache/pagesize
+h5boss_py/demo/datamap1.pk
+h5boss_py/demo/global_fiber1k
+h5boss_py/demo/global_fiber1k_1
+h5boss_py/demo/submit_template.sh
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
