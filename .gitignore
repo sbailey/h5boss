@@ -21,6 +21,7 @@ h5boss_py/demo/datamap1.pk
 h5boss_py/demo/global_fiber1k
 h5boss_py/demo/global_fiber1k_1
 h5boss_py/demo/submit_template.sh
+h5boss_c/log
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
