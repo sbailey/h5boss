@@ -14,12 +14,6 @@ parser.add_argument("number",type=int,  help="plates/mjds/fibers sample size")
 parser.add_argument("input",  help="text file that contains a list of HDF5 files or path to those HDF5 files")
 
 argvalue=parser.parse_args()
-#parser = optparse.OptionParser(usage = "%prog [options]")
-#parser.add_option("-n", "--number", type=str,  help="plates/mjds/fibers sample size: n")
-#parser.add_option("-i", "--input", type=str,  help="text file that contains a list of HDF5 files")
-#parser.add_option("-i", "--path", type=str,  help="path to HDF5 input files")
-#opts, args = parser.parse_args()
-
 tstart = time.time()
 
 testnumber=argvalue.number
@@ -41,8 +35,6 @@ def getname(x):
 if os.path.isfile(infiles):
  try:
   with open(infiles,'rb') as f:
-   #reader = csv.reader(f)
-   #infiles = list(reader)
    content = f.readlines()
    infiles = [x.strip('\n') for x in content]
  except Exception, e:
@@ -57,7 +49,6 @@ elif os.path.isdir(infiles):
    print ("couldn't find hdf5 files in %s"%e,infile_dir)
    traceback.print_exc()
 print ("Number of hdf5 files: %d"%len(infiles))
-#print ("Verify:",len(infile))
 infile=getname(infiles)
 def filter0(x):
     return str(x).split('.')[0]

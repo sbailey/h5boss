@@ -42,8 +42,6 @@ def getfibers(x):
 def mpigetfiber(inputlist):
     comm = MPI.COMM_WORLD
     rank = comm.Get_rank()
-    #print ('rank:%d'%rank)
-    #print ('len:%d'%len(inputlist))
     if (rank==0):
      print ('total ranks:%d'%rank)
      print ('total files:%d'%len(inputlist))
