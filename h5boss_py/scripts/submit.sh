@@ -8,5 +8,5 @@
 #SBATCH -V
 
 cd $SLURM_SUBMIT_DIR
-srun -n 600 python-mpi random-pmf.py input-full
+srun -n 600 python-mpi random-pmf.py ../demo/input_csv/input-full-cori_v1 
 
