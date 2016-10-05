@@ -219,7 +219,7 @@ def get_fiberlink_v1(infile,plates,mjds,fibers):
          print (pid,infile)
          pass
         return (fiberdatalink)
-def get_fiberlink(infile,plates,mjds,fibers):
+def get_fiberlink_v2(infile,plates,mjds,fibers):
         '''
            para  : filename, plate, mjd, fiber
            return: fiberdatalink:

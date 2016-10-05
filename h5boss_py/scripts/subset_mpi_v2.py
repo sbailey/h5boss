@@ -11,15 +11,15 @@ from __future__ import division, print_function
 from mpi4py import MPI
 import h5py
 from h5boss.pmf import parse_csv
-from h5boss.pmf import get_fiberlink
+from h5boss.pmf import get_fiberlink_v2
 from h5boss.pmf import get_catalogtypes
 from h5boss.pmf import count_unique
 from h5boss.pmf import locate_fiber_in_catalog
 from h5boss.pmf import dedup
-from h5boss.selectmpi import add_dic
-from h5boss.selectmpi import add_numpy
-from h5boss.selectmpi import create_template
-from h5boss.selectmpi import overwrite_template
+from h5boss.selectmpi_v2 import add_dic
+from h5boss.selectmpi_v2 import add_numpy
+from h5boss.selectmpi_v2 import create_template
+from h5boss.selectmpi_v2 import overwrite_template
 from h5boss.h5map import type_map
 from h5boss.h5map import coadd_map
 from time import gmtime, strftime
