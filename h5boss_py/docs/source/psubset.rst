@@ -7,6 +7,7 @@ Usage:
 .. highlight:: c 
 
 usage::
+
  subset_mpi [-h] [--template TEMPLATE] [--mpi MPI] [--fiber FIBER]
 
                   [--catalog CATALOG] [--datamap DATAMAP]
@@ -62,7 +63,7 @@ download: :download:`input <_static/input_sample.txt>`, :download:`pmf <_static/
 
 execute command::
 
- >subset input_sample.txt output.h5 pmf_sample.txt
+ >subset_mpi input_sample.txt output.h5 pmf_sample.txt
 
 
 
