@@ -1,12 +1,3 @@
-"""
-Create an HDF5 file from BOSS data
-
-TODO:
-  - include comments in meta/attrs
-  - platelist quantities
-"""
-
-from __future__ import division, print_function
 import sys, os
 import numpy as np
 from astropy.io import fits

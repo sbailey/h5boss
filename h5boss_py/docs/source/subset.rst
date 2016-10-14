@@ -49,5 +49,5 @@ download: :download:`input <_static/input_sample.txt>`, :download:`pmf <_static/
 
 execute command::
 
- >subset.py input_sample.txt output.h5 pmf_sample.txt
+ >subset input_sample.txt output.h5 pmf_sample.txt
 
