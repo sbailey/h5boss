@@ -1,6 +1,6 @@
-.. _subset:
-Subset
-========
+.. _csubset:
+Parallel Subset
+===============
 
 Usage:
 ------
@@ -9,7 +9,7 @@ Usage:
 
 usage:: 
 
- subset [-h] input output pmf
+ subset_mpi_v1 [-h] input output pmf
 
 positional arguments::
 
@@ -52,7 +52,3 @@ execute command::
  >subset input_sample.txt output.h5 pmf_sample.txt
 
 
-High Performance Version:
-------------------------
-* :ref:`mpi4py <psubset>`
-* :ref:`C-MPI <csubset>`
