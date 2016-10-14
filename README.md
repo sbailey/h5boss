@@ -12,7 +12,7 @@ Currently, h5boss is implemented in both python and c version, in which the pyth
 1. download repo
 2. cd h5boss_py/docs/
 3. make html
-4. open build/index.rst
+4. open build/html/index.html
 
 #Demo with h5boss_py
 1. cd h5boss_py/demo
