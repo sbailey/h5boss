@@ -3,8 +3,8 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to h5boss documentation!
-==================================
+Welcome!
+========
 
 H5Boss is an exploratory python tool for managing BOSS spectra data, SDSS-II. 
 
@@ -15,16 +15,19 @@ Boss is originally maintained as millions of fits file in thousands of different
 
 Currently, h5boss is implemented in both python and c version, in which the python version is actively maintained and supported. The c version is mainly for I/O sensitive users/applications. 
 
-Where to start:
+Quickstart:
+===========
 
 * :ref:`Installation <install>`
 
 Formats:
+========
   
 * :ref:`Fits->Hdf5 <fits2hdf>`
 * :ref:`Design <h5bossfmts>`
  
-Command Line:
+Commands:
+=============
 
 * :ref:`Convert <convert>`
 * :ref:`Subset <subset>`
@@ -33,11 +36,12 @@ Command Line:
 
 
 Modules:
+========
 
 * :ref:`H5boss <modules>`
 
-Indices and tables
-==================
+Indices:
+========
 
 * :ref:`genindex`
 * :ref:`modindex`
