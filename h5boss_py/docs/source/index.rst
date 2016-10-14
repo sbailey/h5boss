@@ -23,17 +23,18 @@ Formats:
   
 * :ref:`Fits->Hdf5 <fits2hdf>`
 * :ref:`Design <h5bossfmts>`
-
-Modules:
-
-* :ref:`H5boss <modules>`  
-  
-Practice:
+ 
+Command Line:
 
 * :ref:`Convert <convert>`
 * :ref:`Subset <subset>`
 * :ref:`Add <add>`
 * :ref:`Update <update>`
+
+
+Modules:
+
+* :ref:`H5boss <modules>`
 
 Indices and tables
 ==================
