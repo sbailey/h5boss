@@ -2,7 +2,6 @@ import numpy as np
 import h5py
 import time
 import sys,os
-from h5boss.pmf import pmf
 import commands
 from h5boss.select import select
 def remove(infile, plates, mjds, fibers,repack=None):

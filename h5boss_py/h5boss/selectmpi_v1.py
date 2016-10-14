@@ -2,7 +2,6 @@ import numpy as np
 import h5py
 import time,os
 import traceback 
-from h5boss.pmf import pmf 
 from h5boss.select import select
 catalog_meta=['plugmap', 'zbest', 'zline',
                         'match', 'matchflux', 'matchpos']

@@ -1,7 +1,7 @@
 import numpy as np
 import h5py
 import time
-from h5boss.pmf import pmf
+from h5boss.sql import sql
 from h5boss.select import select
 def select_add(infiles, infile, plates, mjds, fibers):
     '''
@@ -15,7 +15,7 @@ def select_add(infiles, infile, plates, mjds, fibers):
         fibers : list of fibers        
     '''
 
-    miss, left = pmf(infile,plates,mjds,fibers)
+    miss, left = sql(infile,plates,mjds,fibers)
     miss_array=[]
     try: 
      miss_array=miss.view(miss.dtype[0]).reshape(miss.shape+(-1,))[:,0]

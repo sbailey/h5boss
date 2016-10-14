@@ -2,7 +2,7 @@ import numpy as np
 import h5py
 import time
 import traceback
-from h5boss.pmf import pmf
+from h5boss.sql import sql 
 from h5boss.select import select
 from h5boss.remove import remove
 def select_update(infiles, infile, plates, mjds, fibers):
@@ -21,7 +21,7 @@ def select_update(infiles, infile, plates, mjds, fibers):
     miss=[]
     left=[]
     try:
-     miss, left = pmf(infile,plates,mjds,fibers)
+     miss, left = sql(infile,plates,mjds,fibers)
     except Exception, e:
      print ('Metadata checking error')
      traceback.print_exc()
