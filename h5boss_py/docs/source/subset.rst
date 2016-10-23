@@ -51,6 +51,7 @@ execute command::
 
  >subset input_sample.txt output.h5 pmf_sample.txt
 
+cost 755 seconds per 1000 fibers
 
 High Performance Version:
 ------------------------

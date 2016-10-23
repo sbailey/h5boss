@@ -1,0 +1,22 @@
+To build the documentation for your python code, e.g., h5boss:
+
+1. Install python packages: Sphinx, numpydoc
+
+2. Follow Sphinx's tutorial and run a quickstart
+
+To edit and publish your website locally
+
+1. Edit web page file in source/
+   e.g., install.rst
+
+2. Export Sphinx's binary to $PATH
+   e.g., export PATH=$PATH:/somepath/Sphinx/bin
+ 
+3. Export sphinx and numpydoc's libraries in $PYTHONPATH
+   e.g., export PYTHONPATH=$PYTHONPATH:/somepath/Sphinx/lib64/python2.6/site-packages/:/somepath/numpydoc/lib/python2.7/site-packages/
+
+4. run `make html` at the same level of source/
+
+5. launch website locally: open build/index.rst in any browser
+
+For anyother questions, email jalnliu@lbl.gov

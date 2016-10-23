@@ -66,7 +66,8 @@ print ("Output: ", outfile)
 print ("Running selection...")
 tstart=time.time()
 try:
- select(infile, outfile, plates, mjds, fibers)
+ pmflist=df.values.tolist()
+ select(infile, outfile, pmflist)
 except Exception as e:
  print ("Error in select:")
  traceback.print_exc()

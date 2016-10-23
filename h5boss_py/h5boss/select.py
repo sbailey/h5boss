@@ -117,7 +117,8 @@ def catalog_copy(xfibers,fx,hx,plate,mjd):
    traceback.print_exc()
    pass
 
-def select(infiles, outfile, plates, mjds,fibers):
+#def select(infiles, outfile, plates, mjds,fibers):
+def select(infiles, outfile, pmflist)
     '''
     Select a set of (plates,mjds,fibers) from a set of input files
     
