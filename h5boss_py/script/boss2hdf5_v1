@@ -30,4 +30,4 @@ if len(sys.argv)<=1:
 platefile = opts.input
 filedir = os.path.split(os.path.abspath(platefile))[0]
 hdf5output = opts.output
-boss2hdf5_v1.serial_convert(platefile,hdf5output)
+h5boss.boss2hdf5_v1.serial_convert(platefile,hdf5output)

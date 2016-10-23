@@ -8,11 +8,13 @@ Convert boss data from fits to hdf5 format
 
 .. highlight:: c
 
-At NERSC, BOSS data is stored at:: 
+At NERSC, BOSS data are maintained in `Fits <http://fits.gsfc.nasa.gov/fits_documentation.html>`_ format and are stored on global project:: 
 
 /global/projecta/projectdirs/sdss/data/sdss/dr12/boss/spectro/redux/v5_7_0/
 
-There are two alternative hdf5 formats, v1 and v2. Their difference can be seen at :ref:`Design <h5bossfmts>`
+H5Boss offeres two alternative hdf5 formats, v1 and v2. The two formats are essentially designed to ease the file management and speedup the I/O. The two formats differ in the way how the fiber is organized, etc. More details can be found at :ref:`Design <h5bossfmts>`
+
+We have converted all Fits files into HDF5, which has largely reduced the file number from ~1 million to 2500. Follow the steps below to convert 1 Fits file into HDF5 file. 
 
 Usage::
 
@@ -34,4 +36,7 @@ Example:
 
 execute command::
 
- >boss2hdf5_v1 spPlate-4444-55538.fits 4444-55538_v1.h5
+ >export BOSS_DIR=/global/projecta/projectdirs/sdss/data/sdss/dr12/boss/spectro/redux/v5_7_0/
+ >boss2hdf5_v1 -i $BOSS_DIR/4444/spPlate-4444-55538.fits -o 4444-55538_v1.h5
+
+

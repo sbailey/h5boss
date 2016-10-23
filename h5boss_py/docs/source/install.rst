@@ -5,7 +5,7 @@ Installation
 
 Download::
 
-    git clone https://github.com:valiantljk/h5boss.git
+    git clone https://github.com/valiantljk/h5boss.git
 
 Configure::
 
