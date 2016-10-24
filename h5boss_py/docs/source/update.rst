@@ -2,6 +2,13 @@
 Update
 ========
 
+Given a plate/mjd/fiber query list. This `update` command will update the base hdf5 accordingly. Basically, update will
+  * Compare the existing plate/mjd/fibers in the base hdf5 file with this query, 
+  * Search the new plate/mjd/fiber, which are not existed in the base hdf5 file, from the input hdf5 files
+  * Add the founded plate/mjd/fiber into the base file
+  * Remove the existing plate/mjd/fiber from the base file, which are not found in the query list.
+  * [optional] Repacking the final output to make the file contiguous on storage
+
 Usage:
 ------
 .. highlight:: c 
@@ -23,12 +30,12 @@ positional arguments::
 optional arguments::
 
   -h, --help  show this help message and exit
-
+  --repack, REPACK  repack after changing the file, yes or no
 Example:
 --------
 .. highlight:: c
 
-prepare input::
+Prepare input::
 
  >cat input_sample.txt
 
@@ -40,17 +47,19 @@ prepare input::
 
   plates mjds fibers
 
-  3665 55247 65
+  6697 56419 796
 
-  3665 55247 390
+  4697 55660 190
 
+  4191 55444 636
+  
   ...
 
-download: :download:`input <_static/input_sample.txt>`, :download:`pmf <_static/pmf_ssample.txt>`, :download:`base.h5 <_static/base.h5>`
+Download: :download:`input_sample.txt <_static/input_sample.txt>`, :download:`pmf_ssample.txt <_static/pmf_ssample.txt>`, :download:`base.h5 <_static/base.h5>`
 
 Execute command::
 
- >update base.h5 input_sample.txt pmf_sample.txt
+ >update base.h5 input_sample.txt pmf_sample.txt  --repack=yes
 
 Output::
 

@@ -1,7 +1,7 @@
 .. _subset:
 Subset
 ========
-The `subset` function can read the specified fiber object and copy into a single shared file. The input files are the BOSS data in HDF5 format. The user needs to specify the query as `plate mjd fiber`. The output file has same structure with the source files. 
+The `subset` function will find the specified plates/mjds/fibers from source files and copy into a single shared output. The source files are the BOSS data in HDF5 format. The user needs to specify the query as `plate mjd fiber`. The output file has a same structure with the source files. 
  
 Usage:
 ------
@@ -28,7 +28,7 @@ Example:
 --------
 .. highlight:: c
 
-prepare input::
+Prepare input::
 
  >cat input_sample.txt
 
@@ -40,13 +40,15 @@ prepare input::
 
  plates mjds fibers
 
- 3665 55247 65
+ 4562 55570 622
 
- 3665 55247 390
+ 4479 55592 543
+
+ 7294 56739 242
 
  ...
 
-download: :download:`input_sample.txt <_static/input_sample.txt>`, :download:`pmf_sample.txt <_static/pmf_sample.txt>`
+Download: :download:`input_sample.txt <_static/input_sample.txt>`, :download:`pmf_sample.txt <_static/pmf_sample.txt>`
 
 Execute command::
 

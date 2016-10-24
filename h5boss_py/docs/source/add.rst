@@ -4,7 +4,10 @@ Add
 
 Usage:
 ------
-Given a plate/mjd/fiber query list. This `add` command will compare the existing plate/mjd/fibers in the base hdf5 file with this query, then search the new plate/mjd/fiber (which are not existed in the base hdf5 file) from the input hdf5 files, and then add the founded plate/mjd/fiber into the base file.
+Given a plate/mjd/fiber query list. This `add` command will update the base hdf5 accordingly. Basically, update will
+  * Compare the existing plate/mjd/fibers in the base hdf5 file with this query,
+  * Search the new plate/mjd/fiber, which are not existed in the base hdf5 file, from the input hdf5 files
+  * Add the founded plate/mjd/fiber into the base file
 
 The base file is supposed to be augmented with a few new plate/mjd/fibers. 
 
@@ -32,7 +35,7 @@ Example:
 --------
 .. highlight:: c
 
-prepare input::
+Prepare input::
 
  >cat input_sample.txt
 
@@ -50,9 +53,13 @@ prepare input::
 
   ...
 
-download: :download:`input <_static/input_sample.txt>`, :download:`pmf <_static/pmf_ssample.txt>`, :download:`base.h5 <_static/base.h5>`
+Download: :download:`input <_static/input_sample.txt>`, :download:`pmf <_static/pmf_ssample.txt>`, :download:`base.h5 <_static/base.h5>`
 
-execute command::
+Execute command::
 
  >add base.h5 input_sample.txt pmf_sample.txt
+
+Output::
+
+
 
