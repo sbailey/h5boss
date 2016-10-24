@@ -19,10 +19,12 @@ def select_add(infiles, infile, pmflist):
     if len(to_add)==0: 
       print ("nothing to be added")
       sys.exit()
+    print "TO_ADD (Fibers are listed in the query, and not found in the pre-existing file: %d\n"%len(to_add)
+    print (to_add)
     #split the `to_add` set into `plate` `mjd` `fiber` lists
     plates=[i.split(' ')[0] for i in to_add]
     mjds=[i.split(' ')[1] for i in to_add]
     fibers=[i.split(' ')[2] for i in to_add]
-    print ("len of plates:%d"%(len(plates)))
-    print ("plates:",plates)
+    #print ("len of plates:%d"%(len(plates)))
+    #print ("plates:",plates)
     select(infiles,infile,plates,mjds,fibers)
