@@ -56,14 +56,14 @@ Output::
 
  Output:  output.h5
  Running selection...
- Source parse: 60.04
+ Source file open: 60.04
  Fiber copy: 1179.16
  Catalog copy: 382.07
  Total: 1653.67
  Done selection
  Total selection Cost 1653.67 seconds
 
-For detailed performance test, please read our Techincal Report(To be released by Nov.1 2016).
+For detailed performance evaluation, please read our Techincal Report(To be released by Nov.1 2016).
 
 High Performance Parallel Version:
 ------------------------
