@@ -4,6 +4,7 @@ import time
 from h5boss.sql import sql
 from h5boss.select import select
 import traceback
+import os,sys
 def select_add(infiles, infile, pmflist):
     '''
     add the missing (plates,mjds,fibers) from a set of input files
