@@ -146,12 +146,13 @@ def select(infiles, outfile, plates, mjds,fibers):
     fopentime=0.0
     data_copy=0.0
     group_create=0.0
+    query_time=0.0
     tstart=time.time()
     try:
       hx = h5py.File(outfile,'a')
     except:
       pass
-
+    file_open=time.time()-tstart
     for infile in infiles:
         fopen_start=time.time()
         try: 
@@ -162,15 +163,19 @@ def select(infiles, outfile, plates, mjds,fibers):
         ttopen=time.time()-fopen_start
         fopentime+=ttopen
         for plate in fx.keys():
+            tquery=time.time()
             iplate = (plates == plate)
             if not np.any(iplate):
               continue
+            query_time+=time.time()-tquery
             for mjd in fx[plate].keys():
+                tquery=time.time()
                 ii = (plates == plate) & (mjds == mjd)
                 xfibers = fibers[ii]
                 parent_id='{}/{}'.format(plate, mjd)
                 if not np.any(ii):
                    continue
+                query_time+=time.time()-tquery
                 else:
                   #create new group in output file
                    group_start=time.time() 
@@ -205,11 +210,12 @@ def select(infiles, outfile, plates, mjds,fibers):
     #print ('Verify: 3.1, 3.2, 3.3 vs Catalog table copy time: %.2f vs %.2f'%((get_cata+cata_create),cata_copy))
 
     #in case of parallel output
-    print ('-Source file open: %.2f'%(fopentime))
-    print ('-Fiber copy: %.2f'%(data_copy))
-    print ('-Catalog copy: %.2f'%(cata_copy))
-    print ('-Group create: %.2f'%(group_create))
-    print ('-File close: %.2f'%(file_close))
+    print ('-Source file open: %.2f'%(file_open+fopentime))
+    print ('-Fiber query time: %.2f'%query_time)
+    print ('-Fiber copy time: %.2f'%(data_copy))
+    print ('-Catalog copy time: %.2f'%(cata_copy))
+    print ('-Group create time: %.2f'%(group_create))
+    print ('-File close time: %.2f'%(file_close))
     #print ('column: %.2f'%(src_cata_read))
     #print ('entries: %.2f'%((get_cata-src_cata_read)))
     #print ('row: %.2f'%(cata_create))

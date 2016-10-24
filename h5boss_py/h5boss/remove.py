@@ -51,4 +51,4 @@ def remove(infile, plates, mjds, fibers,repack=None):
       except Exception,e:
         print ('Repack error')
       repack_end=time.time()-repack_start
-      print ("Repack time:%.2f"%repack_end)
+      print ("Repacking time:%.2f"%repack_end)

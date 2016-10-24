@@ -30,6 +30,7 @@ opts=parser.parse_args()
 pmflist = opts.pmf
 infiles = opts.input
 outfile = opts.base
+repack="no"
 if opts.repack=="yes":
    print ("Will repack the file for better storage layout afterwards.")
    repack="yes"
