@@ -19,4 +19,8 @@ def select_add(infiles, infile, pmflist):
     if len(to_add)==0: 
       print ("nothing to be added")
       sys.exit()
-    select(infiles,infile,to_add)
+    #split the `to_add` set into `plate` `mjd` `fiber` lists
+    plates=[i.split(' ')[0] for i in to_add]
+    mjds=[i.split(' ')[0] for i in to_add]
+    fibers=[i.split(' ')[0] for i in to_add]
+    select(infiles,infile,plates,mjds,fibers)
