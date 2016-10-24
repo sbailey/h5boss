@@ -137,11 +137,7 @@ def select(infiles, outfile, plates, mjds,fibers):
     plates = np.asarray(plates)
     mjds = np.asarray(mjds)
     fibers = np.asarray(fibers)
-    #print ("PLATES:",plates)
-    #print ("MJDS:",mjds)
-    #print ("FIBERS:",fibers) 
     global meta, cata_create, dest_cata_read, cata_resize, get_cata,src_cata_read
-    #print ("len infiles:%d"%len(infiles)) 
     cata_copy=0.0 
     fopentime=0.0
     data_copy=0.0
@@ -173,11 +169,11 @@ def select(infiles, outfile, plates, mjds,fibers):
                 ii = (plates == plate) & (mjds == mjd)
                 xfibers = fibers[ii]
                 parent_id='{}/{}'.format(plate, mjd)
+                query_time+=time.time()-tquery
                 if not np.any(ii):
                    continue
-                query_time+=time.time()-tquery
                 else:
-                  #create new group in output file
+                   #create new group in output file
                    group_start=time.time() 
                    if parent_id not in hx:
                     hx.create_group(parent_id)
@@ -187,7 +183,6 @@ def select(infiles, outfile, plates, mjds,fibers):
                    fiber_copy(xfibers,fx,hx,parent_id, plate, mjd)
                    data_copy+=time.time()-data_copy_start                  
                    #Step 2: copy a catalog row from catalog table, 
-                    #report the time: cata_copy:read catalog fiber column, search entry in that column, copy catalog row
                    catalog_start=time.time()
                    catalog_copy(xfibers,fx,hx,plate,mjd)
                    cata_copy+=time.time()-catalog_start
@@ -199,16 +194,6 @@ def select(infiles, outfile, plates, mjds,fibers):
      pass
     file_close=time.time()-close_start
     tend=time.time()-tstart
-    #print ('1. Source file open time: %.2f seconds, %.2f of total cost'%(fopentime,fopentime/tend))
-    #print ('2. Fiber object copy time: %.2f seconds,%.2f of total cost'%(data_copy,data_copy/tend))
-    #print ('3. Catalog table copy time: %.2f seconds,%.2f of total cost'%(cata_copy,cata_copy/tend))
-    #print ('3.1: Read the fiber column in catalog table: %.2f, %.2f of cata copy cost'%(src_cata_read,src_cata_read/cata_copy))
-    #print ('3.2: Search the fiber entries in fiber column: %.2f, %.2f of cata copy cost'%((get_cata-src_cata_read),(get_cata-src_cata_read)/cata_copy))
-    #print ('3.3: catalog row(s) copy time: %.2f, %.2f of cata copy cost'%(cata_create,cata_create/cata_copy))
-    #print ('1+2+3:Total time: %.2f'%tend)
-    #print ('Verify: 1,2,3 vs Total time: %.2f vs %.2f'%((fopentime+data_copy+cata_copy),tend))
-    #print ('Verify: 3.1, 3.2, 3.3 vs Catalog table copy time: %.2f vs %.2f'%((get_cata+cata_create),cata_copy))
-
     #in case of parallel output
     print ('-Source file open: %.2f'%(file_open+fopentime))
     print ('-Fiber query time: %.2f'%query_time)
@@ -216,12 +201,7 @@ def select(infiles, outfile, plates, mjds,fibers):
     print ('-Catalog copy time: %.2f'%(cata_copy))
     print ('-Group create time: %.2f'%(group_create))
     print ('-File close time: %.2f'%(file_close))
-    #print ('column: %.2f'%(src_cata_read))
-    #print ('entries: %.2f'%((get_cata-src_cata_read)))
-    #print ('row: %.2f'%(cata_create))
     print ('Total cost in fiber/catalog selection: %.2f seconds'%tend)
-    #print ('Verify: 1,2,3 vs Total time: %.2f vs %.2f'%((fopentime+data_copy+cata_copy),tend))
-    #print ('Verify: 3.1, 3.2, 3.3 vs Catalog table copy time: %.2f vs %.2f'%((get_cata+cata_create),cata_copy))
 
 if __name__ == '__main__':
     select(infiles, outfile, plates, mjds,fibers)
