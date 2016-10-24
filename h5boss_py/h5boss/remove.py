@@ -37,11 +37,12 @@ def remove(infile, plates, mjds, fibers,repack=None):
       # meta=['plugmap', 'zbest', 'zline',
       #                  'photo/match', 'photo/matchflux', 'photo/matchpos']
       #TODO:remove entries in photo, plugmap, etc
-     print ('Removed %d pmf,Skipped %d'%k%j)
+     print ('Removed %d pmf,Skipped %d'%(k,j))
      fx.close()
     except Exception, e:
+     traceback.print_exc()     
      print ('Error in removing')
-    if repack!=None: 
+    if repack!=None:
       #run hdf5 repack utility from 
       cmd_moduleload = "module load cray-hdf5 >/dev/null"
       oufile=infile.split('.')[0]+"_repack"+".h5"
