@@ -43,7 +43,12 @@ def sql(infile, pmflist):
 			    todel_pmf.append(a)	
     except Exception as e:
      pass
-    toadd_pmf=list(set(pmflist)-set(in_pmf))
+    toadd_pmf=[]
+    try:
+     toadd_pmf=list(set(pmflist)-set(in_pmf))
+    except Exception as e:
+     print ("set operation error")
+     print (pmflist, in_pmf)
     tend=time.time()-tstart
     print "Fibers found in pmf list, but not in the pre-existing file: %d"%len(toadd_pmf)
     print "Fibers found in the pre-existing file, but not in the pmf list: %d"%len(todel_pmf)
