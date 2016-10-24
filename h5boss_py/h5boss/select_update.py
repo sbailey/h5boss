@@ -36,6 +36,7 @@ def select_update(infiles, infile, pmflist,repack=None):
     try:
      print ('plates/mjds/fibers to be added: %d'%len(add_plates))
      if len(add_plates)>0:
+      print ("Running selection:")
       select(infiles,infile,add_plates,add_mjds,add_fibers)
     except Exception, e:
       print ('Error in adding new pmf to the file:%s'%infile)
@@ -43,6 +44,7 @@ def select_update(infiles, infile, pmflist,repack=None):
     try:
       print ('plates/mjds/fibers to be removed: %d'%len(del_plates))
       if len(del_plates)>0:
+       print ("Running removing:")
        remove(infile, del_plates,del_mjds,del_fibers,repack) 
     except Exception, e:
       print ('Error in removing pmf in the file:%s'%infile)

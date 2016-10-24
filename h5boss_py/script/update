@@ -55,11 +55,11 @@ infile = [x for sublist in infile for x in sublist]
 if(len(infile)==0):
   print("source files list is empty")
   sys.exit(0)
-print ("PMF: Plates/Mjds/Fibers: %d"%len(dflist.index))
+print ("Query: Plates/Mjds/Fibers: %d"%len(dflist.index))
 #print ("Input: %d files:"%len(infile),infile[0],"...",infile[-1])
-print ("Input: %d files"%len(infile))
+print ("Input: %d hdf5 files"%len(infile))
 print ("Output: %s "%outfile)
-print ("Running selection:")
+print ("Running Updating:")
 
 try:
  listdf=list(dflist.values.flatten())
@@ -68,4 +68,4 @@ except Exception, e:
  print ("Error in select:")
  traceback.print_exc()
 tend=time.time()-tstart
-print ("Done selection: %.2f seconds totally"%tend)
+print ("Updating complete: %.2f seconds"%tend)

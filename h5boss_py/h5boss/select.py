@@ -201,7 +201,7 @@ def select(infiles, outfile, plates, mjds,fibers):
     print ('-Catalog copy time: %.2f'%(cata_copy))
     print ('-Group create time: %.2f'%(group_create))
     print ('-File close time: %.2f'%(file_close))
-    print ('Total cost in fiber/catalog selection: %.2f seconds'%tend)
+    print ('Selection Time: %.2f seconds'%tend)
 
 if __name__ == '__main__':
     select(infiles, outfile, plates, mjds,fibers)

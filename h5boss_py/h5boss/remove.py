@@ -32,14 +32,15 @@ def remove(infile, plates, mjds, fibers,repack=None):
       else:
        j+=1
       #TODO:remove entries in photo, plugmap, etc
-     print ('Removed %d pmf,Skipped %d'%(k,j))
+     print ('Removed %d plates/mjds/fibers,Skipped %d'%(k,j))
      fx.close()
     except Exception, e:
      traceback.print_exc()     
      print ('Error in removing')
     tend=time.time()-tstart
-    print ("Remvoing time:%.2f"%tend)
+    print ("Remvoing Time: %.2f seconds"%tend)
     if repack=="yes":
+      print ("Running repacking:")
       repack_start=time.time()
       #run hdf5 repack utility from 
       cmd_moduleload = "module load cray-hdf5 >/dev/null"
@@ -51,4 +52,4 @@ def remove(infile, plates, mjds, fibers,repack=None):
       except Exception,e:
         print ('Repack error')
       repack_end=time.time()-repack_start
-      print ("Repacking time:%.2f"%repack_end)
+      print ("Repacking Time: %.2f seconds"%repack_end)
