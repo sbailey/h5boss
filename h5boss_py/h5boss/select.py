@@ -137,7 +137,9 @@ def select(infiles, outfile, plates, mjds,fibers):
     plates = np.asarray(plates)
     mjds = np.asarray(mjds)
     fibers = np.asarray(fibers)
-    print ("PLATES:",plates) 
+    print ("PLATES:",plates)
+    print ("MJDS:",mjds)
+    print ("FIBERS:",fibers) 
     global meta, cata_create, dest_cata_read, cata_resize, get_cata,src_cata_read
     print ("len infiles:%d"%len(infiles)) 
     cata_copy=0.0 
