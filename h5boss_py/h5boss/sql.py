@@ -37,6 +37,7 @@ def sql(infile, pmflist):
 		for fid in inx[pid+'/'+mid].keys():
 			if fid.isdigit():
                          a=[pid, mid, fid]
+                         print (a)
 		         if a in pmflist:
 			    in_pmf.append(a)
 			 else:
