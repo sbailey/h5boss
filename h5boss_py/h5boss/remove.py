@@ -39,7 +39,7 @@ def remove(infile, plates, mjds, fibers,repack=None):
      print ('Error in removing')
     tend=time.time()-tstart
     print ("Remvoing time:%.2f"%tend)
-    if repack!=None:
+    if repack=="yes":
       repack_start=time.time()
       #run hdf5 repack utility from 
       cmd_moduleload = "module load cray-hdf5 >/dev/null"

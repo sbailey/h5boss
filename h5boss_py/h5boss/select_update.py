@@ -5,7 +5,7 @@ import traceback
 from h5boss.sql import sql 
 from h5boss.select import select
 from h5boss.remove import remove
-def select_update(infiles, infile, pmflist):
+def select_update(infiles, infile, pmflist,repack=None):
     '''
     add the missing (plates,mjds,fibers) from a set of input files
     to the pre-existing subset file
@@ -41,7 +41,7 @@ def select_update(infiles, infile, pmflist):
 
     try:
       print ('plates/mjds/fibers to be removed: %d'%len(del_plates))
-      remove(infile, del_plates,del_mjds,del_fibers) 
+      remove(infile, del_plates,del_mjds,del_fibers,repack) 
     except Exception, e:
       print ('Error in removing pmf in the file:%s'%infile)
 
