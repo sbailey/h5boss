@@ -195,13 +195,13 @@ def select(infiles, outfile, plates, mjds,fibers):
     #print ('Verify: 3.1, 3.2, 3.3 vs Catalog table copy time: %.2f vs %.2f'%((get_cata+cata_create),cata_copy))
 
     #in case of parallel output
-    print ('Source: %.2f'%(fopentime))
-    print ('Fiber: %.2f'%(data_copy))
-    print ('Catalog: %.2f'%(cata_copy))
-    print ('column: %.2f'%(src_cata_read))
-    print ('entries: %.2f'%((get_cata-src_cata_read)))
-    print ('row: %.2f'%(cata_create))
-    print ('Total: %.2f'%tend)
+    print ('Source file open: %.2f'%(fopentime))
+    print ('Fiber copy: %.2f'%(data_copy))
+    print ('Catalog copy: %.2f'%(cata_copy))
+    #print ('column: %.2f'%(src_cata_read))
+    #print ('entries: %.2f'%((get_cata-src_cata_read)))
+    #print ('row: %.2f'%(cata_create))
+    print ('Total: %.2f seconds'%tend)
     #print ('Verify: 1,2,3 vs Total time: %.2f vs %.2f'%((fopentime+data_copy+cata_copy),tend))
     #print ('Verify: 3.1, 3.2, 3.3 vs Catalog table copy time: %.2f vs %.2f'%((get_cata+cata_create),cata_copy))
 

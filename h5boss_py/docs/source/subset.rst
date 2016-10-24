@@ -1,7 +1,7 @@
 .. _subset:
 Subset
 ========
-The `subset` function can read the specified fiber object and copy into a single shared file. The input files are the HDF5 BOSS data. The user needs to specify the query as `plate mjd fiber`. The output file has same structure with the source files. 
+The `subset` function can read the specified fiber object and copy into a single shared file. The input files are the BOSS data in HDF5 format. The user needs to specify the query as `plate mjd fiber`. The output file has same structure with the source files. 
  
 Usage:
 ------
@@ -56,15 +56,12 @@ Output::
 
  Output:  output.h5
  Running selection...
- Source: 60.04
- Fiber: 1179.16
- Catalog: 382.07
- column: 173.61
- entries: 125.84
- row: 79.86
+ Source parse: 60.04
+ Fiber copy: 1179.16
+ Catalog copy: 382.07
  Total: 1653.67
  Done selection
- Total selection Cost 1653.67
+ Total selection Cost 1653.67 seconds
 
 For detailed performance test, please read our Techincal Report(To be released by Nov.1 2016).
 
