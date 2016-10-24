@@ -131,7 +131,7 @@ def select(infiles, outfile, plates, mjds,fibers):
     '''
     if not isinstance(infiles, (list, tuple)):
         infiles = [infiles,]
-    assert (len(plates)==0)
+    assert (len(plates)!=0)
     assert (len(plates)==len(mjds))
     assert (len(plates)==len(fibers))
     plates = np.asarray(plates)
