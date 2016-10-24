@@ -34,13 +34,13 @@ def select_update(infiles, infile, pmflist):
     del_fibers=[i.split(' ')[2] for i in to_del]
 
     try:
-     print ('plates/mjds/fibers to be added in %d'%len(add_plates))
+     print ('plates/mjds/fibers to be added: %d'%len(add_plates))
      select(infiles,infile,add_plates,add_mjds,add_fibers)
     except Exception, e:
       print ('Error in adding new pmf to the file:%s'%infile)
 
     try:
-      print ('plates/mjds/fibers to be removed in %d'%len(del_plates))
+      print ('plates/mjds/fibers to be removed: %d'%len(del_plates))
       remove(infile, del_plates,del_mjds,del_fibers) 
     except Exception, e:
       print ('Error in removing pmf in the file:%s'%infile)
