@@ -1,7 +1,8 @@
 .. _subset:
 Subset
 ========
-
+The `subset` function can read the specified fiber object and copy into a single shared file. The input files are the HDF5 BOSS data. The user needs to specify the query as `plate mjd fiber`. The output file has same structure with the source files. 
+ 
 Usage:
 ------
 .. highlight:: c 
@@ -45,15 +46,29 @@ prepare input::
 
  ...
 
-download: :download:`input <_static/input_sample.txt>`, :download:`pmf <_static/pmf_sample.txt>`
+download: :download:`input_sample.txt <_static/input_sample.txt>`, :download:`pmf_sample.txt <_static/pmf_sample.txt>`
 
-execute command::
+Execute command::
 
  >subset input_sample.txt output.h5 pmf_sample.txt
 
-cost 755 seconds per 1000 fibers
+Output::
 
-High Performance Version:
+ Output:  output.h5
+ Running selection...
+ Source: 60.04
+ Fiber: 1179.16
+ Catalog: 382.07
+ column: 173.61
+ entries: 125.84
+ row: 79.86
+ Total: 1653.67
+ Done selection
+ Total selection Cost 1653.67
+
+For detailed performance test, please read our Techincal Report(To be released by Nov.1 2016).
+
+High Performance Parallel Version:
 ------------------------
 * :ref:`mpi4py <psubset>`
 * :ref:`C-MPI <csubset>`
