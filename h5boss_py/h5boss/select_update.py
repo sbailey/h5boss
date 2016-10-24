@@ -5,7 +5,7 @@ import traceback
 from h5boss.sql import sql 
 from h5boss.select import select
 from h5boss.remove import remove
-def select_update(infiles, infile, plates, mjds, fibers):
+def select_update(infiles, infile, pmflist):
     '''
     add the missing (plates,mjds,fibers) from a set of input files
     to the pre-existing subset file
@@ -18,42 +18,30 @@ def select_update(infiles, infile, plates, mjds, fibers):
         mjds : list of plates
         fibers : list of fibers        
     '''
-    miss=[]
-    left=[]
+    to_add=[]
+    to_del=[]
     try:
-     miss, left = sql(infile,plates,mjds,fibers)
+     to_add, to_del = sql(infile,pmflist)
     except Exception, e:
-     print ('Metadata checking error')
+     print ('Metadata query error')
      traceback.print_exc()
-    miss2=[]
-    left2=[]
-    if(len(miss)>0):
-     print ("%d to be added"%len(miss))
-     miss2=miss.view(miss.dtype[0]).reshape(miss.shape+(-1,))[:,0]
-     try:
-      plate = miss2[:,0]
-      mjd = miss2[:,1]
-      fiber = miss2[:,2]
-      print ('plates/mjds/fibers to be added in %s'%infile)
-      print plate
-      print mjd
-      print fiber
-      select(infiles,infile,plate,mjd,fiber)
-     except Exception, e:
-      print ('Error in adding new pmf to the file')
-    else: 
-     print ("Nothing to be added")
 
-    if(len(left)>0):
-     print ("%d to be removed"%len(left)) 
-     left2=left.view(left.dtype[0]).reshape(left.shape+(-1,))
-     try:
-      print ('plates/mjds/fibers to be removed in %s'%infile)
-      dplate = left2[:,0]
-      dmjd = left2[:,1]
-      dfiber = left2[:,2]
-      remove(infile, dplate,dmjd,dfiber) 
-     except Exception, e:
-      print ('Error in removing pmf in the file')
-    else: 
-      print ("Nothing to be removed")
+    add_plates=[i.split(' ')[0] for i in to_add]
+    add_mjds=[i.split(' ')[1] for i in to_add]
+    add_fibers=[i.split(' ')[2] for i in to_add]
+    del_plates=[i.split(' ')[0] for i in to_del]
+    del_mjds=[i.split(' ')[1] for i in to_del]
+    del_fibers=[i.split(' ')[2] for i in to_del]
+
+    try:
+     print ('plates/mjds/fibers to be added in %d'%len(add_plates))
+     select(infiles,infile,add_plates,add_mjds,add_fibers)
+    except Exception, e:
+      print ('Error in adding new pmf to the file:%s'%infile)
+
+    try:
+      print ('plates/mjds/fibers to be removed in %d'%len(del_plates))
+      remove(infile, del_plates,del_mjds,del_fibers) 
+    except Exception, e:
+      print ('Error in removing pmf in the file:%s'%infile)
+

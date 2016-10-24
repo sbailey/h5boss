@@ -35,44 +35,35 @@ if opts.repack:
 tstart=time.time()
 import pandas as pd
 try: 
- df = pd.read_csv(pmflist,delimiter=' ',names=["plates","mjds","fibers"],index_col=None,dtype=str)
- plates = map(str,df['plates'].values.tolist())
- mjds = map(str,df['mjds'].values.tolist())
- fibers = map(str,df['fibers'].values.tolist())
+ dflist=pd.read_csv(pmflist,delimiter='\n',index_col=None,dtype=str)
 except Exception, e:
  print("pmf csv read error or not exist:%s"%e,pmflist)
- print("e.g., 1st row of csv should be 'plates mjds fibers'")
+ print("Note that the 1st row of csv should be 'plates mjds fibers'")
  sys.exit(0)
 try:
  with open(infiles,'rb') as f:
   reader = csv.reader(f)
   infile = list(reader)
-
 except Exception, e:
  print ("CSV file open error or not exist: %s"%e,infiles)
  sys.exit(0)
- #traceback.print_exc()
 
 infile = [x for sublist in infile for x in sublist]
-#print ("Plates: ",plates)
-#print ("MJDs: ",mjds)
-#print ("Fibers: ", fibers)
-if(len(plates)==0 or len(infile)==0):
-  print("pmf or input is empty")
-  sys.exit(0)
 
-print ("Plates/Mjds/Fibers: %d tuples"%len(plates))
+if(len(infile)==0):
+  print("source files list is empty")
+  sys.exit(0)
+print ("PMF: Plates/Mjds/Fibers: %d"%len(listdf.index))
 #print ("Input: %d files:"%len(infile),infile[0],"...",infile[-1])
 print ("Input: %d files"%len(infile))
-print ("Output: ", outfile)
+print ("Output: %s "%outfile)
 print ("Running selection:")
 
 try:
- select_update(infile, outfile, plates, mjds, fibers)
-#add to the pre-existing outfile
+ listdf=list(dflist.values.flatten())
+ select_update(infile, outfile, listdf)
 except Exception, e:
  print ("Error in select:")
  traceback.print_exc()
-
-
-print ("Done selection")
+tend=time.time()-tstart
+print ("Done selection: %.2f seconds totally"%tend)
