@@ -54,9 +54,9 @@ def sql(infile, pmflist):
      print ("in_pmf:",in_pmf)
      print ("set of in_pmf:",set(in_pmf))
     tend=time.time()-tstart
-    print "Fibers found in pmf list, but not in the pre-existing file: %d"%len(toadd_pmf)
-    print "Fibers found in the pre-existing file, but not in the pmf list: %d"%len(todel_pmf)
-    print ('Metadata query time: %.2f seconds'%tend)
+    print "TO_ADD(Fibers are listed in the query, and not found in the pre-existing file: %d"%len(toadd_pmf)
+    print "TO_DELETE(Fibers are found in the pre-existing file, but not listed in the query: %d"%len(todel_pmf)
+    print ('Query time: %.2f seconds'%tend)
     return (toadd_pmf, todel_pmf)
 
 def parse_csv(input,output,pmflist,rank):
