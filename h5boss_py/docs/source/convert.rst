@@ -34,9 +34,41 @@ Example:
 --------
 .. highlight:: c
 
-execute command::
+Execute command::
 
  >export BOSS_DIR=/global/projecta/projectdirs/sdss/data/sdss/dr12/boss/spectro/redux/v5_7_0/
- >boss2hdf5_v1 -i $BOSS_DIR/4444/spPlate-4444-55538.fits -o 4444-55538_v1.h5
+ >boss2hdf5_v1 -i $BOSS_DIR/4444/spPlate-4444-55538.fits -o $SCRATCH/4444-55538_v1.h5
 
+This command not only converts the specified fits file, i.e., spPlate-4444-55538.fits, but also scan other related fits file in the same directory, $BOSS_DIR/4444. The detailed conversion can be found at :ref:`Design Fits2hdf <fits2hdf>`
 
+Output::
+
+ plugmap
+ zbest
+ zline
+ photo
+ loading coadds
+ writing coadds
+ parsing planfile
+ individual exposures
+ spFrame-b1-00123585.fits.gz
+ spFrame-b2-00123585.fits.gz
+ spFrame-r1-00123585.fits.gz
+ spFrame-r2-00123585.fits.gz
+ spFrame-b1-00123586.fits.gz
+ spFrame-b2-00123586.fits.gz
+ spFrame-r1-00123586.fits.gz
+ spFrame-r2-00123586.fits.gz
+ spFrame-b1-00123587.fits.gz
+ spFrame-b2-00123587.fits.gz
+ spFrame-r1-00123587.fits.gz
+ spFrame-r2-00123587.fits.gz
+ spFrame-b1-00123588.fits.gz
+ spFrame-b2-00123588.fits.gz
+ spFrame-r1-00123588.fits.gz
+ spFrame-r2-00123588.fits.gz
+ spFrame-b1-00123589.fits.gz
+ spFrame-b2-00123589.fits.gz
+ spFrame-r1-00123589.fits.gz
+ spFrame-r2-00123589.fits.gz
+ ('time', 1521.8593430519104)
