@@ -31,7 +31,8 @@ def sql(infile, pmflist):
     inx=h5py.File(infile,'r')
     in_pmf=[]
     todel_pmf=[]
-    for pid in inx.keys():
+    try:
+     for pid in inx.keys():
 	for mid in inx[pid].keys():
 		for fid in inx[pid+'/'+mid].keys():
 			if fid.isdigit():
@@ -40,9 +41,12 @@ def sql(infile, pmflist):
 			    in_pmf.append(a)
 			 else:
 			    todel_pmf.append(a)	
-    toadd_pmf=list(set(pmf)-set(in_pmf))
-    print "Fibers found in pmf list, but not in the pre-existing file: %d"%len(missing_pmf)
-    print "Fibers found in the pre-existing file, but not in the pmf list: %d"%len(notin_pmf)
+    except Exception as e:
+     pass
+    toadd_pmf=list(set(pmflist)-set(in_pmf))
+    tend=time.time()-tstart
+    print "Fibers found in pmf list, but not in the pre-existing file: %d"%len(toadd_pmf)
+    print "Fibers found in the pre-existing file, but not in the pmf list: %d"%len(todel_pmf)
     print ('Metadata query time: %.2f seconds'%tend)
     return (toadd_pmf, todel_pmf)
 
