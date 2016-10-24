@@ -15,7 +15,7 @@ def select_add(infiles, infile, pmflist):
     '''
 
     to_add, to_del = sql(infile,pmflist)
-    if len(miss)==0: 
-      print ("empty list detected in miss_pmf")
+    if len(to_add)==0: 
+      print ("nothing to be added")
       sys.exit()
     select(infiles,infile,to_add)
