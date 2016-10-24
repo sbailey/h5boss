@@ -54,22 +54,24 @@ Execute command::
 
 Output::
 
- Will repack the file for better storage layout afterwards.
- PMF: Plates/Mjds/Fibers: 10
- Input: 2393 files
+ Query: Plates/Mjds/Fibers: 10
+ Input: 2393 hdf5 files
  Output: base.h5 
- Running selection:
+ Running Updating:
  Query time: 0.00 seconds
  plates/mjds/fibers to be added: 10
- -Source file open: 2.06
- -Fiber copy: 0.21
- -Catalog copy: 0.85
- -Group create: 0.00
- -File close: 0.04
- Total cost in fiber/catalog selection: 7.12 seconds
+ Running selection:
+ -Source file open: 8.36
+ -Fiber query time: 0.00
+ -Fiber copy time: 0.25
+ -Catalog copy time: 1.05
+ -Group create time: 0.00
+ -File close time: 0.04
+ Selection Time: 12.74 seconds
  plates/mjds/fibers to be removed: 7
- Removed 7 pmf,Skipped 0
- Remvoing time:0.02
- Repack time:2.39
- Done selection: 10.46 seconds totally
-
+ Running removing:
+ Removed 7 plates/mjds/fibers,Skipped 0
+ Remvoing Time: 0.02 seconds
+ Running repacking:
+ Repacking Time: 2.75 seconds
+ Updating complete: 16.58 seconds
