@@ -53,7 +53,7 @@ infile = [x for sublist in infile for x in sublist]
 if(len(infile)==0):
   print("source files list is empty")
   sys.exit(0)
-print ("PMF: Plates/Mjds/Fibers: %d"%len(listdf.index))
+print ("PMF: Plates/Mjds/Fibers: %d"%len(dflist.index))
 #print ("Input: %d files:"%len(infile),infile[0],"...",infile[-1])
 print ("Input: %d files"%len(infile))
 print ("Output: %s "%outfile)
