@@ -36,7 +36,7 @@ def sql(infile, pmflist):
 	for mid in inx[pid].keys():
 		for fid in inx[pid+'/'+mid].keys():
 			if fid.isdigit():
-                         a=[pid, mid, fid]
+                         a='{} {} {}'.format(pid, mid, fid)
                          print (a)
 		         if a in pmflist:
 			    in_pmf.append(a)
@@ -50,7 +50,9 @@ def sql(infile, pmflist):
     except Exception as e:
      print ("set operation error")
      print ("pmflist:",pmflist)
+     print ("set of pmflist:",set(pmflist))
      print ("in_pmf:",in_pmf)
+     print ("set of in_pmf:",set(in_pmf))
     tend=time.time()-tstart
     print "Fibers found in pmf list, but not in the pre-existing file: %d"%len(toadd_pmf)
     print "Fibers found in the pre-existing file, but not in the pmf list: %d"%len(todel_pmf)
