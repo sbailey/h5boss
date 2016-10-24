@@ -16,6 +16,7 @@ def remove(infile, plates, mjds, fibers,repack=None):
     '''
     meta=['plugmap', 'zbest', 'zline',
                         'photo/match', 'photo/matchflux', 'photo/matchpos']
+    tstart=time.time()
     try: 
       fx=h5py.File(infile,'a')
     except Exception, e:
@@ -36,6 +37,8 @@ def remove(infile, plates, mjds, fibers,repack=None):
     except Exception, e:
      traceback.print_exc()     
      print ('Error in removing')
+    tend=time.time()-tstart
+    print ("Remvoing time:%.2f"%tend)
     if repack!=None:
       #run hdf5 repack utility from 
       cmd_moduleload = "module load cray-hdf5 >/dev/null"

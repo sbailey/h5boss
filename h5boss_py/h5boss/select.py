@@ -145,8 +145,13 @@ def select(infiles, outfile, plates, mjds,fibers):
     cata_copy=0.0 
     fopentime=0.0
     data_copy=0.0
-
+    group_create=0.0
     tstart=time.time()
+    try:
+      hx = h5py.File(outfile,'a')
+    except:
+      pass
+
     for infile in infiles:
         fopen_start=time.time()
         try: 
@@ -167,28 +172,27 @@ def select(infiles, outfile, plates, mjds,fibers):
                 if not np.any(ii):
                    continue
                 else:
-                   #open single shared output file
-                   try:
-                    hx = h5py.File(outfile,'a')
-                   except:
-                    pass
-                   #create new group in output file
+                  #create new group in output file
+                   group_start=time.time() 
                    if parent_id not in hx:
                     hx.create_group(parent_id)
+                   group_create+=time.time()-group_start
                    #Step 1: copy a fiber object, count the time: data_copy
-                   actual_copy_time_start=time.time()                  
+                   data_copy_start=time.time()                  
                    fiber_copy(xfibers,fx,hx,parent_id, plate, mjd)
-                   data_copy+=time.time()-actual_copy_time_start                  
+                   data_copy+=time.time()-data_copy_start                  
                    #Step 2: copy a catalog row from catalog table, 
                     #report the time: cata_copy:read catalog fiber column, search entry in that column, copy catalog row
-                   cataw_start=time.time()
+                   catalog_start=time.time()
                    catalog_copy(xfibers,fx,hx,plate,mjd)
-                   cata_copy+=time.time()-cataw_start
+                   cata_copy+=time.time()-catalog_start
         fx.close()           
+    close_start=time.time()
     try:
      hx.close()
     except:
      pass
+    file_close=time.time()-close_start
     tend=time.time()-tstart
     #print ('1. Source file open time: %.2f seconds, %.2f of total cost'%(fopentime,fopentime/tend))
     #print ('2. Fiber object copy time: %.2f seconds,%.2f of total cost'%(data_copy,data_copy/tend))
@@ -201,13 +205,15 @@ def select(infiles, outfile, plates, mjds,fibers):
     #print ('Verify: 3.1, 3.2, 3.3 vs Catalog table copy time: %.2f vs %.2f'%((get_cata+cata_create),cata_copy))
 
     #in case of parallel output
-    print ('Source file open: %.2f'%(fopentime))
-    print ('Fiber copy: %.2f'%(data_copy))
-    print ('Catalog copy: %.2f'%(cata_copy))
+    print ('-Source file open: %.2f'%(fopentime))
+    print ('-Fiber copy: %.2f'%(data_copy))
+    print ('-Catalog copy: %.2f'%(cata_copy))
+    print ('-Group create: %.2f'%(group_create))
+    print ('-File close: %.2f'%(file_close))
     #print ('column: %.2f'%(src_cata_read))
     #print ('entries: %.2f'%((get_cata-src_cata_read)))
     #print ('row: %.2f'%(cata_create))
-    print ('Total: %.2f seconds'%tend)
+    print ('Total cost in fiber/catalog selection: %.2f seconds'%tend)
     #print ('Verify: 1,2,3 vs Total time: %.2f vs %.2f'%((fopentime+data_copy+cata_copy),tend))
     #print ('Verify: 3.1, 3.2, 3.3 vs Catalog table copy time: %.2f vs %.2f'%((get_cata+cata_create),cata_copy))
 
