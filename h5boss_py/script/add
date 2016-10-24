@@ -65,8 +65,9 @@ print ("Output: ", outfile)
 print ("Running selection...")
 
 try:
- dflist=df.values.tolist()
- select_add(infile, outfile, dflist)
+ dflist=pd.read_csv(pmflist,delimiter='\n',index_col=None,dtype=str)
+ listdf=list(dflist.values.flatten())
+ select_add(infile, outfile, listdf)
 
 except Exception, e:
  print ("Error in select:")
