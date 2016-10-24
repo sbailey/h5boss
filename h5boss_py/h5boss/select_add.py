@@ -21,8 +21,8 @@ def select_add(infiles, infile, pmflist):
       sys.exit()
     #split the `to_add` set into `plate` `mjd` `fiber` lists
     plates=[i.split(' ')[0] for i in to_add]
-    mjds=[i.split(' ')[0] for i in to_add]
-    fibers=[i.split(' ')[0] for i in to_add]
+    mjds=[i.split(' ')[1] for i in to_add]
+    fibers=[i.split(' ')[2] for i in to_add]
     print ("len of plates:%d"%(len(plates)))
     print ("plates:",plates)
     select(infiles,infile,plates,mjds,fibers)
