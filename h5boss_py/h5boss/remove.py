@@ -23,19 +23,13 @@ def remove(infile, plates, mjds, fibers,repack=None):
     try:
      k=0
      j=0
-     #print (len(plates))
-     #plates=plates.reshape(plates.shape+(-1,))
-     #print plates[0]
      for i in range(0,len(plates)):
       a=str(plates[i])+'/'+str(mjds[i])+'/'+str(fibers[i])
-      #print a
       if a in fx:
         fx.__delitem__(a)
         k+=1
       else:
        j+=1
-      # meta=['plugmap', 'zbest', 'zline',
-      #                  'photo/match', 'photo/matchflux', 'photo/matchpos']
       #TODO:remove entries in photo, plugmap, etc
      print ('Removed %d pmf,Skipped %d'%(k,j))
      fx.close()
