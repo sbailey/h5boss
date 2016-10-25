@@ -37,13 +37,13 @@ Example:
 
 Prepare input::
 
- >cat input_sample.txt
+ cat input_sample.txt
 
   /global/cscratch1/sd/jialin/h5boss/3665-55247.hdf5
 
   ...
 
- >cat pmf_ssample.txt
+ cat pmf_add.txt
 
   plates mjds fibers
 
@@ -53,11 +53,11 @@ Prepare input::
 
   ...
 
-Download: :download:`input <_static/input_sample.txt>`, :download:`pmf <_static/pmf_ssample.txt>`, :download:`base.h5 <_static/base.h5>`
+Download: :download:`input_sample.txt <_static/input_sample.txt>`, :download:`pmf_add.txt <_static/pmf_add.txt>`, :download:`base.h5 <_static/base.h5>`
 
 Execute command::
 
- >add base.h5 input_sample.txt pmf_sample.txt
+ add base.h5 input_sample.txt pmf_add.txt
 
 Output::
 

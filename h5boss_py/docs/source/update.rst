@@ -54,7 +54,7 @@ Prepare input::
   
   ...
 
-Download: :download:`input_sample.txt <_static/input_sample.txt>`, :download:`pmf_ssample.txt <_static/pmf_ssample.txt>`, :download:`base.h5 <_static/base.h5>`
+Download: :download:`input_sample.txt <_static/input_sample.txt>`, :download:`pmf_update.txt <_static/pmf_update.txt>`, :download:`base.h5 <_static/base.h5>`
 
 Execute command::
 
