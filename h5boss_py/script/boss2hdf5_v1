@@ -29,4 +29,6 @@ if len(sys.argv)<=1:
 
 platefile = opts.input
 hdf5output = opts.output
-h5boss.boss2hdf5_v1.serial_convert(list(platefile),hdf5output)
+platefiles=list()
+platefiles.append(platefile)
+h5boss.boss2hdf5_v1.serial_convert(platefiles,hdf5output)
