@@ -6,10 +6,13 @@ import h5boss.io
 import time
 
 def serial_convert(platefile,hdf5output):
-
     platefile=platefile[0]
+    if not os.path.isfile(platefile):
+     print("%s not existing"%platefile)
+     sys.exit(0)
     hdf5output=str(hdf5output)
-    print ("output:%s"%hdf5output)
+    print ("Output: %s"%hdf5output)
+    print ("Running Conversion:")
     filedir = os.path.split(os.path.abspath(platefile))[0]
     hdr = fits.getheader(platefile)
     plate = hdr['PLATEID']
@@ -77,9 +80,8 @@ def serial_convert(platefile,hdf5output):
             tmp = [x+'.gz' for x in tmp[7:-1]]
             framefiles.extend(tmp)
 
-    print('individual exposures')
-    print('writing exposures')
+    print('copying individual exposure')
     h5boss.io.write_frame_vstack(filedir,framefiles,plate,mjd,hdf5output)
 
     tend=time.time()-tstart
-    print ('time',tend)
+    print ('Conversion time: %.2f seconds'%tend)
