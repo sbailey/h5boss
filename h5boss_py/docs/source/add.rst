@@ -1,15 +1,15 @@
 .. _add:
 Add
 ========
-
-Usage:
-------
 Given a plate/mjd/fiber query list. This `add` command will update the base hdf5 accordingly. Basically, update will
   * Compare the existing plate/mjd/fibers in the base hdf5 file with this query,
   * Search the new plate/mjd/fiber, which are not existed in the base hdf5 file, from the input hdf5 files
   * Add the founded plate/mjd/fiber into the base file
 
-The base file is supposed to be augmented with a few new plate/mjd/fibers. 
+The base file is supposed to be augmented with a few new plate/mjd/fibers.
+
+Usage:
+------
 
 .. highlight:: c 
 

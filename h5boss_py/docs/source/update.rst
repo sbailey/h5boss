@@ -1,8 +1,7 @@
 .. _update:
 Update
 ========
-
-Given a plate/mjd/fiber query list. This `update` command will update the base hdf5 accordingly. Basically, update will
+Given a plate/mjd/fiber query list. This `update` command will update the base hdf5 accordingly. Basically, `update` will
   * Compare the existing plate/mjd/fibers in the base hdf5 file with this query, 
   * Search the new plate/mjd/fiber, which are not existed in the base hdf5 file, from the input hdf5 files
   * Add the founded plate/mjd/fiber into the base file
