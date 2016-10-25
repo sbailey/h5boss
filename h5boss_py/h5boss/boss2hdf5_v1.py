@@ -6,7 +6,9 @@ import h5boss.io
 import time
 
 def serial_convert(platefile,hdf5output):
+    print (platefile)
     platefile=platefile[0]
+    print (platefile)
     hdf5output=str(hdf5output)
     print ("output:%s"%hdf5output)
     filedir = os.path.split(os.path.abspath(platefile))[0]
