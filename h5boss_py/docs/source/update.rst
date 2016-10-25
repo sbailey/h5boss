@@ -42,7 +42,7 @@ Prepare input::
 
   ...
 
- cat pmf_ssample.txt
+ cat pmf_update.txt
 
   plates mjds fibers
 
