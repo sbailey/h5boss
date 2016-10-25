@@ -146,8 +146,10 @@ def select(infiles, outfile, plates, mjds,fibers):
     tstart=time.time()
     try:
       hx = h5py.File(outfile,'a')
-    except:
-      pass
+    except Exception as e:
+      print ("output file open error")
+      traceback.print_exc()
+      sys.exit(0)
     file_open=time.time()-tstart
     for infile in infiles:
         fopen_start=time.time()

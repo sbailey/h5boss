@@ -30,13 +30,13 @@ Example:
 
 Prepare input::
 
- >cat input_sample.txt
+ cat input_sample.txt
 
  /global/cscratch1/sd/jialin/h5boss/3665-55247.hdf5
 
  ...
 
- >cat pmf_sample.txt
+ cat pmf_sample.txt
 
  plates mjds fibers
 
@@ -52,7 +52,7 @@ Download: :download:`input_sample.txt <_static/input_sample.txt>`, :download:`pm
 
 Execute command::
 
- >subset input_sample.txt output.h5 pmf_sample.txt
+ subset input_sample.txt output.h5 pmf_sample.txt
 
 Output::
 
