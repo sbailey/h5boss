@@ -36,13 +36,13 @@ Example:
 
 Prepare input::
 
- >cat input_sample.txt
+ cat input_sample.txt
 
   /global/cscratch1/sd/jialin/h5boss/3665-55247.hdf5
 
   ...
 
- >cat pmf_ssample.txt
+ cat pmf_ssample.txt
 
   plates mjds fibers
 
@@ -58,28 +58,29 @@ Download: :download:`input_sample.txt <_static/input_sample.txt>`, :download:`pm
 
 Execute command::
 
- >update base.h5 input_sample.txt pmf_sample.txt  --repack=yes
+ update base.h5 input_sample.txt pmf_update.txt  --repack=yes
 
 Output::
 
- Query: Plates/Mjds/Fibers: 10
+ Will repack the file for better storage layout afterwards.
+ Query: Plates/Mjds/Fibers: 11
  Input: 2393 hdf5 files
  Output: base.h5 
  Running Updating:
  Query time: 0.00 seconds
  plates/mjds/fibers to be added: 10
  Running selection:
- -Source file open: 8.36
+ -Source file open: 1.93
  -Fiber query time: 0.00
- -Fiber copy time: 0.25
- -Catalog copy time: 1.05
+ -Fiber copy time: 0.20
+ -Catalog copy time: 0.83
  -Group create time: 0.00
  -File close time: 0.04
- Selection Time: 12.74 seconds
- plates/mjds/fibers to be removed: 7
+ Selection Time: 5.15 seconds
+ plates/mjds/fibers to be removed: 6
  Running removing:
- Removed 7 plates/mjds/fibers,Skipped 0
+ Removed 6 plates/mjds/fibers,Skipped 0
  Remvoing Time: 0.02 seconds
  Running repacking:
- Repacking Time: 2.75 seconds
- Updating complete: 16.58 seconds
+ Repacking Time: 2.33 seconds
+ Updating complete: 8.40 seconds

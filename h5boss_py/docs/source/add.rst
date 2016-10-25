@@ -61,5 +61,13 @@ Execute command::
 
 Output::
 
+ -Source file open: 2.28
+ -Fiber query time: 0.00
+ -Fiber copy time: 0.21
+ -Catalog copy time: 0.84
+ -Group create time: 0.00
+ -File close time: 0.04
+ Selection Time: 7.43 seconds
+ Done selection
 
 
