@@ -58,12 +58,16 @@ Output::
 
  Output:  output.h5
  Running selection...
- Source file open: 60.04
- Fiber copy: 1179.16
- Catalog copy: 382.07
- Total: 1653.67
+ -Source file open: 2.04
+ -Fiber query time: 0.00
+ -Fiber copy time: 11.35
+ -Catalog copy time: 6.70
+ -Group create time: 0.01
+ -File close time: 0.04
+ Selection Time: 22.34 seconds
  Done selection
- Total selection Cost 1653.67 seconds
+ Total selection Cost 22.34
+
 
 For detailed performance evaluation, please read our Techincal Report(To be released by Nov.1 2016).
 
