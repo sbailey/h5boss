@@ -6,12 +6,13 @@ Two H5Boss HDF5 Formats
 
 :ref:`myfigure-v2`
 
+[:ref:`Fits to Format v1 <fits2hdf>`]
+
 .. _myfigure-v1:
 
 .. figure:: images/fmt1.png
    :alt: H5Boss format 1
    :align: left
-   :target: h5bv1
 
    Format v1
 
@@ -20,6 +21,5 @@ Two H5Boss HDF5 Formats
 .. figure:: images/fmt2.png
    :alt: H5Boss format 2
    :align: left
-   :target: h5bv2
 
    Format v2
