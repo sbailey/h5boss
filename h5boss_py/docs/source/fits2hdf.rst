@@ -4,14 +4,19 @@ Convertion
 ==========
 This section shows the mapping between Fits and HDF5 formats, and following with the design of two H5Boss :ref:`Formats, <h5bossfmts>`
 
-* The **Mapping Diagram** helps to visualize the mapping between Fits and HDF5. 
-* The **Mapping Table** contains more detailed information of the relationship between the Boss-Fits structure and the Boss-HDF5 hierarchy. 
-* The **Example Codes** helps to understand 'what is the difference in reading a'Flux' dataset in the two formats', etc. 
+* The :ref:`mappingdiag` helps to visualize the mapping between Fits and HDF5. 
+* The :ref:`mappingtab` contains more detailed information of the relationship between the Boss-Fits structure and the Boss-HDF5 hierarchy. 
+* The :ref:`examplecode` helps to understand 'what is the difference in reading a'Flux' dataset in the two formats', etc. 
+
+.. _mappingdiag:
 
 Mapping Diagram
 ===============
 
 .. figure:: images/fits2fmt1.png
+
+
+.. _mappingtab:
 
 Mapping Table
 =============
@@ -126,17 +131,24 @@ line 16 and 17, the 'CLIB' is calculated with the following python code::
  
 .. highlight:: c
 
+.. _examplecode:
 
 Example Codes 
 =============
 
 The sample codes for reading same data from Fits versus from the converted HDF5 file:
 
+**Read plate: 4857, mjd: 55711, fiber: 4, FLUX**
+
 Read Flux from Fits::
 
+     dfits = fitsio.FITS('spPlate-4857-55711.fits')
+     dflux = dfits[0][3:4,:]
  
 Read Flux from HDF5::
 
+     dh5   = h5py.File('4857-55711.h5')
+     dflux = dh5['4857/55711/4/coadd']['FLUX']
 
 Read Fiber 1 from Fits::
 
