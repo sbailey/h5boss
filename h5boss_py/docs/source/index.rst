@@ -43,7 +43,7 @@ Modules:
 Missing Features:
 =================
 
-* :ref: `H5bossdev <h5bossdev>`
+* :ref:`H5bossdev <h5bossdev>`
 
 Indices:
 ========
