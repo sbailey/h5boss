@@ -40,6 +40,11 @@ Modules:
 
 * :ref:`H5boss <modules>`
 
+Missing Features:
+=================
+
+* :ref: `H5bossdev <h5bossdev>`
+
 Indices:
 ========
 
