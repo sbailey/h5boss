@@ -25,7 +25,7 @@ The conversion :ref:`code, <convert>` took all files in a PLATE folder and conve
 
 __ highlight:: c
 
-**Top level**::
+**Fits Folder Top Level**::
 
  user@edison12: pwd
  /global/projecta/projectdirs/sdss/data/sdss/dr12/boss/spectro/redux/v5_7_0
@@ -42,7 +42,7 @@ __ highlight:: c
 
 Then inside one folder, which is named afte the **PLATE** number, e.g., plate 4857:
 
-**Second level**::
+**Fits Folder Second Level**::
  
  4857/
 	photoMatchPlate-4857-55711.fits  spFluxcalib-r2-00131416.fits.gz
@@ -66,6 +66,20 @@ Then inside one folder, which is named afte the **PLATE** number, e.g., plate 48
 	spFluxcalib-r2-00131415.fits.gz  v5_7_0
 
 After the conversion, the whole folder 4857 becomes a **single** HDF5 file, in which, there are 1000 fiber groups and a few catalog datasets. 
+**HDF5 Folder Top Level**::
+
+ user@edison12: pwd
+ $SCRATCH/h5boss/v5_7_0
+ user@edison12: ls
+ 3520.h5  4032.h5  4458.h5  4848.h5  5338.h5  5897.h5  6375.h5  6758.h5
+ 3523.h5  4033.h5  4459.h5  4849.h5  5339.h5  5898.h5  6376.h5  6759.h5
+ 3536.h5  4034.h5  4460.h5  4850.h5  5340.h5  5899.h5  6377.h5  6760.h5
+ 3537.h5  4035.h5  4461.h5  4851.h5  5341.h5  5900.h5  6378.h5  6780.h5
+ 3538.h5  4036.h5  4462.h5  4852.h5  5342.h5  5901.h5  6379.h5  6781.h5
+ 3540.h5  4037.h5  4463.h5  4853.h5  5343.h5  5902.h5  6380.h5  6782.h5
+ 3548.h5  4038.h5  4464.h5  4854.h5  5344.h5  5903.h5  6381.h5  6783.h5
+ ...
+ ...
 For the catalog, the conversion simply reads one HDU in a fits file and writes into a table dataset in HDF5. For example, as shown in the following catalog mapping table, the HDU1 in 'photoMatchPlate-pppp-mmmmm.fits' becomes a HDF5 dataset within the 'photo' group, where the higher level groups are 'plate' and 'mjd'. 
 
 
