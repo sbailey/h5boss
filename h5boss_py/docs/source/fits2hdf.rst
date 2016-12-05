@@ -66,6 +66,7 @@ Then inside one folder, which is named afte the **PLATE** number, e.g., plate 48
 	spFluxcalib-r2-00131415.fits.gz  v5_7_0
 
 After the conversion, the whole folder 4857 becomes a **single** HDF5 file, in which, there are 1000 fiber groups and a few catalog datasets. 
+
 **HDF5 Folder Top Level**::
 
  user@edison12: pwd
@@ -164,6 +165,22 @@ Read Flux from HDF5::
      dh5   = h5py.File('4857-55711.h5')
      dflux = dh5['4857/55711/4/coadd']['FLUX']
 
-Read Fiber 1 from Fits::
+Read Multiple HDUs from Fits::
 
-Read Fiber 1 from HDF5::
+     dfits = fitsio.FITS('spPlate-4857-55711.fits')
+     dflux = dfits[0][3:4,:]
+     dwave = dfits[1][3:4,:]
+
+Read Multiple HDUs from HDF5::
+
+     dh5   = h5py.File('4857-55711.h5')
+     dflux_wave = dh5['4857/55711/4/coadd'][('FLUX','IVAR')]
+
+Read All HDUs from Fits::
+
+     for i in range(0,6):
+      dall[i] = dfits[i][3:4,:]
+
+Read All HDUs from HDF5::
+
+     dall = dh5['4857/55711/4/coadd'][()]
