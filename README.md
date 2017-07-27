@@ -8,6 +8,9 @@ Boss is originally maintained as millions of fits file in thousands of different
 
 Currently, h5boss is implemented in both python and c version, in which the python version is actively maintained and supported. The c version is mainly for I/O sensitive users/applications.
 
+# Document
+http://portal.nersc.gov/project/das/jialin/h5boss/h5boss/h5boss_py/docs/build/html/index.html
+
 # Tutorial
 1. download repo
 2. cd h5boss_py/docs/
