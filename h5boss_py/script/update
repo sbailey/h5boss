@@ -1,0 +1,74 @@
+#!/usr/bin/env python
+"""
+Create an HDF5 file from BOSS data
+
+TODO:
+  - include comments in meta/attrs
+  - platelist quantities
+"""
+from __future__ import division, print_function
+#from __future__ import absolute_import
+from h5boss.select import select
+from h5boss.select_add import select_add
+from h5boss.select_update import select_update
+import sys,os
+import time
+import optparse
+import csv
+import traceback
+
+
+import argparse
+
+parser = argparse.ArgumentParser(prog='update',description='Compare base with pmf, add the new plates/mjds/fibers founded in both (pmf,input) into the pre-selected HDF5 base file, then remove the plates/mjds/fibers in pre-selected HDF5 base file that are not found in pmf')
+parser.add_argument("base", help="Pre-selected HDF5 file")
+parser.add_argument("input",  help="HDF5 input list")
+parser.add_argument("pmf",    help="Plate/mjd/fiber list in csv")
+parser.add_argument("--repack",	help="repack after changing the file, yes or no")
+opts=parser.parse_args()
+
+pmflist = opts.pmf
+infiles = opts.input
+outfile = opts.base
+repack="no"
+if opts.repack=="yes":
+   print ("Will repack the file for better storage layout afterwards.")
+   repack="yes"
+tstart=time.time()
+import pandas as pd
+try: 
+ dflist=pd.read_csv(pmflist,delimiter='\n',index_col=None,dtype=str)
+except Exception, e:
+ print("pmf csv read error or not exist:%s"%e,pmflist)
+ print("Note that the 1st row of csv should be 'plates mjds fibers'")
+ sys.exit(0)
+try:
+ with open(infiles,'rb') as f:
+  reader = csv.reader(f)
+  infile = list(reader)
+except Exception, e:
+ print ("CSV file open error or not exist: %s"%e,infiles)
+ sys.exit(0)
+
+infile = [x for sublist in infile for x in sublist]
+
+if(len(infile)==0):
+  print("source files list is empty")
+  sys.exit(0)
+if not os.path.isfile(outfile):
+  print("base file not exists")
+  sys.exit(0) 
+print ("Query: Plates/Mjds/Fibers: %d"%len(dflist.index))
+#print ("Input: %d files:"%len(infile),infile[0],"...",infile[-1])
+print ("Input: %d hdf5 files"%len(infile))
+print ("Output: %s "%outfile)
+print ("Running Updating:")
+
+try:
+ listdf=list(dflist.values.flatten())
+ select_update(infile, outfile, listdf,repack)
+except Exception, e:
+ print ("Error in select:")
+ traceback.print_exc()
+tend=time.time()-tstart
+print ("Updating complete: %.2f seconds"%tend)

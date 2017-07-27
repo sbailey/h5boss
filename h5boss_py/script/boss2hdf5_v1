@@ -1,0 +1,34 @@
+#!/usr/bin/env python
+
+"""
+Create an HDF5 file from BOSS data
+
+TODO:
+  - include comments in meta/attrs
+  - platelist quantities
+"""
+
+from __future__ import division, print_function
+
+import sys, os
+import numpy as np
+from astropy.io import fits
+from astropy.table import Table
+import h5boss.boss2hdf5_v1
+import time
+import optparse
+import h5py
+parser = optparse.OptionParser(usage = "%prog [options]")
+parser.add_option("-i", "--input", type=str,  help="input spPlate file")
+parser.add_option("-o", "--output", type=str,  help="output hdf5 file")
+
+opts, args = parser.parse_args()
+if len(sys.argv)<=1:
+   print ("boss2hdf5 -help")
+   exit(1)
+
+platefile = opts.input
+hdf5output = opts.output
+platefiles=list()
+platefiles.append(platefile)
+h5boss.boss2hdf5_v1.serial_convert(platefiles,hdf5output)
